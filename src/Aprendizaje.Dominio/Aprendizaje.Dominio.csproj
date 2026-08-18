@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Aprendizaje.Dominio</RootNamespace>
+  </PropertyGroup>
+
+  <!-- Intencionalmente sin ningún PackageReference: el dominio no conoce EF Core, ASP.NET
+       ni ninguna infraestructura (convención 1). Esta ausencia es verificable con solo
+       abrir este archivo, no depende de disciplina de código. -->
+
+</Project>

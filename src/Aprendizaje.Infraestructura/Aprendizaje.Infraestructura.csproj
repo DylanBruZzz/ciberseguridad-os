@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Aprendizaje.Infraestructura</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Aprendizaje.Dominio\Aprendizaje.Dominio.csproj" />
+    <ProjectReference Include="..\Aprendizaje.Aplicacion\Aprendizaje.Aplicacion.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Único paquete necesario para compilar hoy: DbContext/DbSet/interceptores viven en el
+         núcleo de EF Core, y las extensiones relacionales que ya usan las 17 configuraciones
+         (HasCheckConstraint, HasColumnType, IsRowVersion, HasDefaultValueSql, ToTable con
+         schema) requieren el paquete de proveedor relacional — SqlServer, el motor ya elegido
+         para todo el proyecto. No se referencia Microsoft.EntityFrameworkCore por separado:
+         llega transitivamente en la misma versión, evitando el riesgo de versiones desalineadas
+         entre paquetes Microsoft.EntityFrameworkCore.* que Microsoft advierte explícitamente
+         evitar. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.9" />
+  </ItemGroup>
+
+</Project>

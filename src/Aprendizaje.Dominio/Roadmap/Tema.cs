@@ -15,14 +15,14 @@ public sealed class Tema : AggregateRoot, IEliminableLogicamente
     private const int MaximoCriteriosRelevantes = 5;
 
     private readonly List<CriterioTema> _criterios = new();
-    private readonly List<string> _objetivos = new();
+    private List<string> _objetivos = new();
 
     public Guid UsuarioId { get; private set; }
     public Guid? FaseId { get; private set; }
     public Guid? TemaPadreId { get; private set; }
     public string Nombre { get; private set; } = null!;
     public string? Descripcion { get; private set; }
-    public IReadOnlyList<string> Objetivos => _objetivos.AsReadOnly();
+    public IReadOnlyList<string> Objetivos => ObtenerObjetivosInternos().AsReadOnly();
     public TipoConocimiento TipoConocimiento { get; private set; }
     public DateOnly? FechaInicio { get; private set; }
     public DateOnly? FechaFin { get; private set; }
@@ -76,8 +76,18 @@ public sealed class Tema : AggregateRoot, IEliminableLogicamente
     /// </summary>
     public void EstablecerObjetivos(IEnumerable<string> objetivos)
     {
-        _objetivos.Clear();
-        _objetivos.AddRange(objetivos.Where(o => !string.IsNullOrWhiteSpace(o)).Select(o => o.Trim()));
+        var objetivosInternos = ObtenerObjetivosInternos();
+
+        objetivosInternos.Clear();
+        objetivosInternos.AddRange(objetivos.Where(o => !string.IsNullOrWhiteSpace(o)).Select(o => o.Trim()));
+    }
+
+    private List<string> ObtenerObjetivosInternos()
+    {
+        if (_objetivos is null)
+            _objetivos = new List<string>();
+
+        return _objetivos;
     }
 
     // ---------- Ubicación en el roadmap ----------

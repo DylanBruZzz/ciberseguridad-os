@@ -1,4 +1,5 @@
 using Aprendizaje.Aplicacion.Comun;
+using Aprendizaje.Dominio.Nucleo.Repositorios;
 using Aprendizaje.Dominio.Roadmap.Repositorios;
 using Aprendizaje.Infraestructura.Persistencia;
 using Aprendizaje.Infraestructura.Persistencia.Interceptores;
@@ -17,6 +18,7 @@ public static class InyeccionDependencias
         // ciclo de vida de la aplicación.
         services.AddSingleton<AuditoriaInterceptor>();
 
+        services.AddScoped<IUsuarioRepository, UsuarioRepository>();
         services.AddScoped<ITemaRepository, TemaRepository>();
         services.AddScoped<IFaseRepository, FaseRepository>();
         services.AddScoped<ICompetenciaRepository, CompetenciaRepository>();

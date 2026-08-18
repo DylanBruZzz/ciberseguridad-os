@@ -57,6 +57,7 @@ public sealed class TemaConfiguration : IEntityTypeConfiguration<Tema>
         // se configura sobre el campo directamente, convertido a una columna de texto delimitado.
         builder.Property<List<string>>("_objetivos")
             .HasColumnName("Objetivos")
+            .IsRequired(false)
             .HasConversion(
                 objetivos => objetivos.Count == 0 ? null : string.Join('\n', objetivos),
                 texto => string.IsNullOrWhiteSpace(texto)

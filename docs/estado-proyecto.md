@@ -7,12 +7,13 @@ Branch: main
 Ultimo checkpoint:
 
 ```text
-1f7dcb7 feat: validate first end-to-end roadmap flow
+8bfdcb8 docs: add Codex operating context
 ```
 
 Checkpoint anterior:
 
 ```text
+1f7dcb7 feat: validate first end-to-end roadmap flow
 caf832a feat: establish validated initial persistence
 ```
 
@@ -20,6 +21,7 @@ caf832a feat: establish validated initial persistence
 
 - PERSISTENCIA INICIAL VALIDADA
 - PRIMER FLUJO FUNCIONAL END-TO-END VALIDADO
+- ESTABLECER OBJETIVOS DE TEMA VALIDADO END-TO-END
 
 ## Migraciones Aplicadas
 
@@ -49,6 +51,9 @@ Tema E2E:
 - Id: 01A01604-8436-742A-A59B-B756B8FF07B3
 - Nombre: Fundamentos de redes
 - TipoConocimiento: Conceptual
+- Objetivos:
+  - Comprender el modelo OSI
+  - Diferenciar TCP y UDP
 
 ## Flujos Funcionales Actuales
 
@@ -56,6 +61,8 @@ Tema E2E:
 - POST /api/temas -> 201
 - GET /api/temas/{id} -> 200
 - GET Tema inexistente -> 404
+- PUT /api/temas/{id}/objetivos -> 204
+- PUT objetivos Tema inexistente -> 404
 
 ## Build
 

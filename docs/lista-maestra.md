@@ -65,6 +65,7 @@
 - [x] CrearUsuario implementado.
 - [x] CrearTema implementado.
 - [x] ObtenerTemaPorId implementado.
+- [x] EstablecerObjetivosTema implementado.
 - [ ] Nuevos casos de uso por necesidad real.
 - [ ] Manejo de errores transversal evaluado.
 
@@ -75,6 +76,7 @@
 - [x] POST /api/usuarios.
 - [x] POST /api/temas.
 - [x] GET /api/temas/{id}.
+- [x] PUT /api/temas/{id}/objetivos.
 - [ ] Endpoints adicionales por caso de uso real.
 - [ ] Auth.
 
@@ -85,6 +87,8 @@
 - [x] POST /api/temas -> 201.
 - [x] GET /api/temas/{id} -> 200.
 - [x] GET Tema inexistente -> 404.
+- [x] Establecer objetivos de Tema -> 204.
+- [x] Establecer objetivos de Tema inexistente -> 404.
 - [ ] Nuevos flujos E2E por vertical slice.
 
 ## 10. Tests

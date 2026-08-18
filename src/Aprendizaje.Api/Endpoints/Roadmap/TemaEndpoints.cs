@@ -1,4 +1,5 @@
 using Aprendizaje.Aplicacion.Roadmap.Temas.CrearTema;
+using Aprendizaje.Aplicacion.Roadmap.Temas.EstablecerObjetivos;
 using Aprendizaje.Aplicacion.Roadmap.Temas.ObtenerTemaPorId;
 using Aprendizaje.Dominio.Roadmap;
 
@@ -12,6 +13,7 @@ public static class TemaEndpoints
 
         grupo.MapPost("/", CrearTemaAsync);
         grupo.MapGet("/{id:guid}", ObtenerTemaPorIdAsync);
+        grupo.MapPut("/{id:guid}/objetivos", EstablecerObjetivosAsync);
 
         return app;
     }
@@ -47,8 +49,36 @@ public static class TemaEndpoints
             : Results.NotFound();
     }
 
+    private static async Task<IResult> EstablecerObjetivosAsync(
+        Guid id,
+        EstablecerObjetivosTemaHttpRequest request,
+        EstablecerObjetivosTemaCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        if (request.Objetivos is null)
+            return Results.BadRequest(new { error = "La lista de objetivos no puede ser null." });
+
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new EstablecerObjetivosTemaSolicitud(id, request.Objetivos),
+                cancellationToken);
+
+            return resultado.Encontrado
+                ? Results.NoContent()
+                : Results.NotFound();
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
     private sealed record CrearTemaHttpRequest(
         Guid UsuarioId,
         string Nombre,
         TipoConocimiento TipoConocimiento);
+
+    private sealed record EstablecerObjetivosTemaHttpRequest(
+        IReadOnlyCollection<string>? Objetivos);
 }

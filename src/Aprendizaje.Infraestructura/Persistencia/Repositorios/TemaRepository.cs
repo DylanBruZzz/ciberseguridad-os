@@ -18,5 +18,15 @@ public sealed class TemaRepository : ITemaRepository
             .Include(t => t.Criterios)
             .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
+    public async Task<IReadOnlyCollection<Tema>> ListarPorUsuarioAsync(
+        Guid usuarioId,
+        CancellationToken cancellationToken = default) =>
+        await _context.Temas
+            .AsNoTracking()
+            .Where(t => t.UsuarioId == usuarioId)
+            .OrderBy(t => t.Nombre)
+            .ThenBy(t => t.Id)
+            .ToListAsync(cancellationToken);
+
     public void Agregar(Tema tema) => _context.Temas.Add(tema);
 }

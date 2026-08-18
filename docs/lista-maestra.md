@@ -66,6 +66,7 @@
 - [x] CrearTema implementado.
 - [x] ObtenerTemaPorId implementado.
 - [x] EstablecerObjetivosTema implementado.
+- [x] ListarTemas implementado.
 - [ ] Nuevos casos de uso por necesidad real.
 - [ ] Manejo de errores transversal evaluado.
 
@@ -77,6 +78,7 @@
 - [x] POST /api/temas.
 - [x] GET /api/temas/{id}.
 - [x] PUT /api/temas/{id}/objetivos.
+- [x] GET /api/temas?usuarioId={id}.
 - [ ] Endpoints adicionales por caso de uso real.
 - [ ] Auth.
 
@@ -89,6 +91,9 @@
 - [x] GET Tema inexistente -> 404.
 - [x] Establecer objetivos de Tema -> 204.
 - [x] Establecer objetivos de Tema inexistente -> 404.
+- [x] Listar temas por Usuario -> 200.
+- [x] Listar temas para Usuario sin temas -> 200 con [].
+- [x] Listar temas con Guid.Empty -> 400.
 - [ ] Nuevos flujos E2E por vertical slice.
 
 ## 10. Tests

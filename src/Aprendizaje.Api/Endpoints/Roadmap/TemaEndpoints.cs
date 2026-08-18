@@ -1,5 +1,6 @@
 using Aprendizaje.Aplicacion.Roadmap.Temas.CrearTema;
 using Aprendizaje.Aplicacion.Roadmap.Temas.EstablecerObjetivos;
+using Aprendizaje.Aplicacion.Roadmap.Temas.ListarTemas;
 using Aprendizaje.Aplicacion.Roadmap.Temas.ObtenerTemaPorId;
 using Aprendizaje.Dominio.Roadmap;
 
@@ -12,6 +13,7 @@ public static class TemaEndpoints
         var grupo = app.MapGroup("/api/temas");
 
         grupo.MapPost("/", CrearTemaAsync);
+        grupo.MapGet("/", ListarTemasAsync);
         grupo.MapGet("/{id:guid}", ObtenerTemaPorIdAsync);
         grupo.MapPut("/{id:guid}/objetivos", EstablecerObjetivosAsync);
 
@@ -30,6 +32,25 @@ public static class TemaEndpoints
                 cancellationToken);
 
             return Results.Created($"/api/temas/{resultado.Id}", resultado);
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> ListarTemasAsync(
+        Guid usuarioId,
+        ListarTemasCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new ListarTemasSolicitud(usuarioId),
+                cancellationToken);
+
+            return Results.Ok(resultado.Temas);
         }
         catch (ArgumentException ex)
         {

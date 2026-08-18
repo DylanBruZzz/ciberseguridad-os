@@ -7,12 +7,13 @@ Branch: main
 Ultimo checkpoint:
 
 ```text
-8bfdcb8 docs: add Codex operating context
+7e9c808 feat: establish topic objectives flow
 ```
 
 Checkpoint anterior:
 
 ```text
+8bfdcb8 docs: add Codex operating context
 1f7dcb7 feat: validate first end-to-end roadmap flow
 caf832a feat: establish validated initial persistence
 ```
@@ -22,6 +23,7 @@ caf832a feat: establish validated initial persistence
 - PERSISTENCIA INICIAL VALIDADA
 - PRIMER FLUJO FUNCIONAL END-TO-END VALIDADO
 - ESTABLECER OBJETIVOS DE TEMA VALIDADO END-TO-END
+- LISTAR TEMAS VALIDADO END-TO-END
 
 ## Migraciones Aplicadas
 
@@ -63,6 +65,9 @@ Tema E2E:
 - GET Tema inexistente -> 404
 - PUT /api/temas/{id}/objetivos -> 204
 - PUT objetivos Tema inexistente -> 404
+- GET /api/temas?usuarioId={id} -> 200
+- GET /api/temas?usuarioId={id-sin-temas} -> 200 con []
+- GET /api/temas?usuarioId={Guid.Empty} -> 400
 
 ## Build
 

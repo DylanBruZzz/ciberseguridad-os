@@ -7,12 +7,13 @@ Branch: main
 Ultimo checkpoint:
 
 ```text
-7e9c808 feat: establish topic objectives flow
+3e6043d feat: add topic listing flow
 ```
 
 Checkpoint anterior:
 
 ```text
+7e9c808 feat: establish topic objectives flow
 8bfdcb8 docs: add Codex operating context
 1f7dcb7 feat: validate first end-to-end roadmap flow
 caf832a feat: establish validated initial persistence
@@ -24,6 +25,7 @@ caf832a feat: establish validated initial persistence
 - PRIMER FLUJO FUNCIONAL END-TO-END VALIDADO
 - ESTABLECER OBJETIVOS DE TEMA VALIDADO END-TO-END
 - LISTAR TEMAS VALIDADO END-TO-END
+- CREAR FASE VALIDADO END-TO-END
 
 ## Migraciones Aplicadas
 
@@ -41,6 +43,7 @@ caf832a feat: establish validated initial persistence
 
 - Usuario: 1
 - Tema: 1
+- Fase: 1
 
 Usuario E2E:
 
@@ -57,6 +60,12 @@ Tema E2E:
   - Comprender el modelo OSI
   - Diferenciar TCP y UDP
 
+Fase E2E:
+
+- Id: 01A016CB-92F1-75B0-B5F6-803F92691273
+- Nombre: Fundamentos
+- Orden: 1
+
 ## Flujos Funcionales Actuales
 
 - POST /api/usuarios -> 201
@@ -68,6 +77,7 @@ Tema E2E:
 - GET /api/temas?usuarioId={id} -> 200
 - GET /api/temas?usuarioId={id-sin-temas} -> 200 con []
 - GET /api/temas?usuarioId={Guid.Empty} -> 400
+- POST /api/fases -> 201
 
 ## Build
 

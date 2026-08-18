@@ -1,3 +1,4 @@
+using Aprendizaje.Aplicacion.Roadmap.Temas.AsignarTemaAFase;
 using Aprendizaje.Aplicacion.Roadmap.Temas.CrearTema;
 using Aprendizaje.Aplicacion.Roadmap.Temas.EstablecerObjetivos;
 using Aprendizaje.Aplicacion.Roadmap.Temas.ListarTemas;
@@ -16,6 +17,7 @@ public static class TemaEndpoints
         grupo.MapGet("/", ListarTemasAsync);
         grupo.MapGet("/{id:guid}", ObtenerTemaPorIdAsync);
         grupo.MapPut("/{id:guid}/objetivos", EstablecerObjetivosAsync);
+        grupo.MapPut("/{temaId:guid}/fase", AsignarFaseAsync);
 
         return app;
     }
@@ -95,6 +97,36 @@ public static class TemaEndpoints
         }
     }
 
+    private static async Task<IResult> AsignarFaseAsync(
+        Guid temaId,
+        AsignarTemaAFaseHttpRequest request,
+        AsignarTemaAFaseCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new AsignarTemaAFaseSolicitud(temaId, request.FaseId),
+                cancellationToken);
+
+            return resultado.Estado switch
+            {
+                AsignarTemaAFaseEstado.Actualizado => Results.NoContent(),
+                AsignarTemaAFaseEstado.TemaNoEncontrado => Results.NotFound(),
+                AsignarTemaAFaseEstado.FaseNoEncontrada => Results.NotFound(),
+                AsignarTemaAFaseEstado.UsuarioNoCoincide => Results.Conflict(new
+                {
+                    error = "El Tema y la Fase deben pertenecer al mismo Usuario."
+                }),
+                _ => Results.Problem("Estado de asignación de Fase no reconocido.")
+            };
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
     private sealed record CrearTemaHttpRequest(
         Guid UsuarioId,
         string Nombre,
@@ -102,4 +134,6 @@ public static class TemaEndpoints
 
     private sealed record EstablecerObjetivosTemaHttpRequest(
         IReadOnlyCollection<string>? Objetivos);
+
+    private sealed record AsignarTemaAFaseHttpRequest(Guid FaseId);
 }

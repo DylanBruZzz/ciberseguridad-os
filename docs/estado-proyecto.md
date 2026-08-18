@@ -7,12 +7,13 @@ Branch: main
 Ultimo checkpoint:
 
 ```text
-754bbaa feat: establish phase creation flow
+2250c9a feat: add phase listing flow
 ```
 
 Checkpoint anterior:
 
 ```text
+754bbaa feat: establish phase creation flow
 3e6043d feat: add topic listing flow
 7e9c808 feat: establish topic objectives flow
 8bfdcb8 docs: add Codex operating context
@@ -28,6 +29,7 @@ caf832a feat: establish validated initial persistence
 - LISTAR TEMAS VALIDADO END-TO-END
 - CREAR FASE VALIDADO END-TO-END
 - LISTAR FASES VALIDADO END-TO-END
+- ASIGNAR TEMA A FASE VALIDADO END-TO-END
 
 ## Migraciones Aplicadas
 
@@ -58,6 +60,7 @@ Tema E2E:
 - Id: 01A01604-8436-742A-A59B-B756B8FF07B3
 - Nombre: Fundamentos de redes
 - TipoConocimiento: Conceptual
+- FaseId: 01A016CB-92F1-75B0-B5F6-803F92691273
 - Objetivos:
   - Comprender el modelo OSI
   - Diferenciar TCP y UDP
@@ -83,6 +86,10 @@ Fase E2E:
 - GET /api/fases?usuarioId={id} -> 200
 - GET /api/fases?usuarioId={id-sin-fases} -> 200 con []
 - GET /api/fases?usuarioId={Guid.Empty} -> 400
+- PUT /api/temas/{id}/fase -> 204
+- PUT fase Tema inexistente -> 404
+- PUT fase Fase inexistente -> 404
+- PUT fase con Guid.Empty -> 400
 
 ## Build
 

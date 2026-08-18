@@ -66,6 +66,7 @@
 - [x] CrearTema implementado.
 - [x] ObtenerTemaPorId implementado.
 - [x] EstablecerObjetivosTema implementado.
+- [x] AsignarTemaAFase implementado.
 - [x] ListarTemas implementado.
 - [x] CrearFase implementado.
 - [x] ListarFases implementado.
@@ -80,6 +81,7 @@
 - [x] POST /api/temas.
 - [x] GET /api/temas/{id}.
 - [x] PUT /api/temas/{id}/objetivos.
+- [x] PUT /api/temas/{id}/fase.
 - [x] GET /api/temas?usuarioId={id}.
 - [x] POST /api/fases.
 - [x] GET /api/fases?usuarioId={id}.
@@ -95,6 +97,10 @@
 - [x] GET Tema inexistente -> 404.
 - [x] Establecer objetivos de Tema -> 204.
 - [x] Establecer objetivos de Tema inexistente -> 404.
+- [x] Asignar Tema a Fase -> 204.
+- [x] Asignar Fase a Tema inexistente -> 404.
+- [x] Asignar Fase inexistente a Tema -> 404.
+- [x] Asignar Fase con Guid.Empty -> 400.
 - [x] Listar temas por Usuario -> 200.
 - [x] Listar temas para Usuario sin temas -> 200 con [].
 - [x] Listar temas con Guid.Empty -> 400.

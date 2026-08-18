@@ -16,5 +16,15 @@ public sealed class FaseRepository : IFaseRepository
     public Task<Fase?> ObtenerPorIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         _context.Fases.FirstOrDefaultAsync(f => f.Id == id, cancellationToken);
 
+    public async Task<IReadOnlyCollection<Fase>> ListarPorUsuarioAsync(
+        Guid usuarioId,
+        CancellationToken cancellationToken = default) =>
+        await _context.Fases
+            .AsNoTracking()
+            .Where(f => f.UsuarioId == usuarioId)
+            .OrderBy(f => f.Orden)
+            .ThenBy(f => f.Id)
+            .ToListAsync(cancellationToken);
+
     public void Agregar(Fase fase) => _context.Fases.Add(fase);
 }

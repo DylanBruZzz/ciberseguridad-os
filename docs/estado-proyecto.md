@@ -7,12 +7,13 @@ Branch: main
 Ultimo checkpoint:
 
 ```text
-3e6043d feat: add topic listing flow
+754bbaa feat: establish phase creation flow
 ```
 
 Checkpoint anterior:
 
 ```text
+3e6043d feat: add topic listing flow
 7e9c808 feat: establish topic objectives flow
 8bfdcb8 docs: add Codex operating context
 1f7dcb7 feat: validate first end-to-end roadmap flow
@@ -26,6 +27,7 @@ caf832a feat: establish validated initial persistence
 - ESTABLECER OBJETIVOS DE TEMA VALIDADO END-TO-END
 - LISTAR TEMAS VALIDADO END-TO-END
 - CREAR FASE VALIDADO END-TO-END
+- LISTAR FASES VALIDADO END-TO-END
 
 ## Migraciones Aplicadas
 
@@ -78,6 +80,9 @@ Fase E2E:
 - GET /api/temas?usuarioId={id-sin-temas} -> 200 con []
 - GET /api/temas?usuarioId={Guid.Empty} -> 400
 - POST /api/fases -> 201
+- GET /api/fases?usuarioId={id} -> 200
+- GET /api/fases?usuarioId={id-sin-fases} -> 200 con []
+- GET /api/fases?usuarioId={Guid.Empty} -> 400
 
 ## Build
 

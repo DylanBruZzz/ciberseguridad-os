@@ -1,4 +1,5 @@
 using Aprendizaje.Aplicacion.Roadmap.Fases.CrearFase;
+using Aprendizaje.Aplicacion.Roadmap.Fases.ListarFases;
 
 namespace Aprendizaje.Api.Endpoints.Roadmap;
 
@@ -9,6 +10,7 @@ public static class FaseEndpoints
         var grupo = app.MapGroup("/api/fases");
 
         grupo.MapPost("/", CrearFaseAsync);
+        grupo.MapGet("/", ListarFasesAsync);
 
         return app;
     }
@@ -25,6 +27,25 @@ public static class FaseEndpoints
                 cancellationToken);
 
             return Results.Json(resultado, statusCode: StatusCodes.Status201Created);
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> ListarFasesAsync(
+        Guid usuarioId,
+        ListarFasesCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new ListarFasesSolicitud(usuarioId),
+                cancellationToken);
+
+            return Results.Ok(resultado.Fases);
         }
         catch (ArgumentException ex)
         {

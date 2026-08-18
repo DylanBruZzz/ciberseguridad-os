@@ -68,6 +68,7 @@
 - [x] EstablecerObjetivosTema implementado.
 - [x] ListarTemas implementado.
 - [x] CrearFase implementado.
+- [x] ListarFases implementado.
 - [ ] Nuevos casos de uso por necesidad real.
 - [ ] Manejo de errores transversal evaluado.
 
@@ -81,6 +82,7 @@
 - [x] PUT /api/temas/{id}/objetivos.
 - [x] GET /api/temas?usuarioId={id}.
 - [x] POST /api/fases.
+- [x] GET /api/fases?usuarioId={id}.
 - [ ] Endpoints adicionales por caso de uso real.
 - [ ] Auth.
 
@@ -97,6 +99,9 @@
 - [x] Listar temas para Usuario sin temas -> 200 con [].
 - [x] Listar temas con Guid.Empty -> 400.
 - [x] Crear Fase -> 201.
+- [x] Listar fases por Usuario -> 200.
+- [x] Listar fases para Usuario sin fases -> 200 con [].
+- [x] Listar fases con Guid.Empty -> 400.
 - [ ] Nuevos flujos E2E por vertical slice.
 
 ## 10. Tests

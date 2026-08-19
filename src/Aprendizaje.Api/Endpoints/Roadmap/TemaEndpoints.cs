@@ -1,4 +1,5 @@
 using Aprendizaje.Aplicacion.Roadmap.Temas.AsignarTemaAFase;
+using Aprendizaje.Aplicacion.Roadmap.Temas.AsignarTemaPadre;
 using Aprendizaje.Aplicacion.Roadmap.Temas.CrearTema;
 using Aprendizaje.Aplicacion.Roadmap.Temas.EstablecerObjetivos;
 using Aprendizaje.Aplicacion.Roadmap.Temas.ListarTemas;
@@ -18,6 +19,7 @@ public static class TemaEndpoints
         grupo.MapGet("/{id:guid}", ObtenerTemaPorIdAsync);
         grupo.MapPut("/{id:guid}/objetivos", EstablecerObjetivosAsync);
         grupo.MapPut("/{temaId:guid}/fase", AsignarFaseAsync);
+        grupo.MapPut("/{temaId:guid}/padre", AsignarPadreAsync);
 
         return app;
     }
@@ -127,6 +129,40 @@ public static class TemaEndpoints
         }
     }
 
+    private static async Task<IResult> AsignarPadreAsync(
+        Guid temaId,
+        AsignarTemaPadreHttpRequest request,
+        AsignarTemaPadreCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new AsignarTemaPadreSolicitud(temaId, request.TemaPadreId),
+                cancellationToken);
+
+            return resultado.Estado switch
+            {
+                AsignarTemaPadreEstado.Actualizado => Results.NoContent(),
+                AsignarTemaPadreEstado.TemaNoEncontrado => Results.NotFound(),
+                AsignarTemaPadreEstado.TemaPadreNoEncontrado => Results.NotFound(),
+                AsignarTemaPadreEstado.UsuarioNoCoincide => Results.Conflict(new
+                {
+                    error = "El Tema y el Tema padre deben pertenecer al mismo Usuario."
+                }),
+                AsignarTemaPadreEstado.ConflictoJerarquia => Results.Conflict(new
+                {
+                    error = "La asignación crearía un ciclo directo en la jerarquía de Temas."
+                }),
+                _ => Results.Problem("Estado de asignación de Tema padre no reconocido.")
+            };
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
     private sealed record CrearTemaHttpRequest(
         Guid UsuarioId,
         string Nombre,
@@ -136,4 +172,6 @@ public static class TemaEndpoints
         IReadOnlyCollection<string>? Objetivos);
 
     private sealed record AsignarTemaAFaseHttpRequest(Guid FaseId);
+
+    private sealed record AsignarTemaPadreHttpRequest(Guid TemaPadreId);
 }

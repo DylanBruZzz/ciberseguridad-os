@@ -7,12 +7,13 @@ Branch: main
 Ultimo checkpoint:
 
 ```text
-2250c9a feat: add phase listing flow
+2d19acd feat: assign topic to phase
 ```
 
 Checkpoint anterior:
 
 ```text
+2250c9a feat: add phase listing flow
 754bbaa feat: establish phase creation flow
 3e6043d feat: add topic listing flow
 7e9c808 feat: establish topic objectives flow
@@ -30,6 +31,7 @@ caf832a feat: establish validated initial persistence
 - CREAR FASE VALIDADO END-TO-END
 - LISTAR FASES VALIDADO END-TO-END
 - ASIGNAR TEMA A FASE VALIDADO END-TO-END
+- ASIGNAR TEMA PADRE VALIDADO END-TO-END
 
 ## Migraciones Aplicadas
 
@@ -46,7 +48,7 @@ caf832a feat: establish validated initial persistence
 ## Datos E2E Actuales
 
 - Usuario: 1
-- Tema: 1
+- Tema: 2
 - Fase: 1
 
 Usuario E2E:
@@ -61,9 +63,17 @@ Tema E2E:
 - Nombre: Fundamentos de redes
 - TipoConocimiento: Conceptual
 - FaseId: 01A016CB-92F1-75B0-B5F6-803F92691273
+- TemaPadreId: null
 - Objetivos:
   - Comprender el modelo OSI
   - Diferenciar TCP y UDP
+
+Subtema E2E:
+
+- Id: 01A016F7-1517-7C35-BAF3-A1BEB648776C
+- Nombre: Modelo OSI
+- TipoConocimiento: Conceptual
+- TemaPadreId: 01A01604-8436-742A-A59B-B756B8FF07B3
 
 Fase E2E:
 
@@ -90,6 +100,11 @@ Fase E2E:
 - PUT fase Tema inexistente -> 404
 - PUT fase Fase inexistente -> 404
 - PUT fase con Guid.Empty -> 400
+- PUT /api/temas/{id}/padre -> 204
+- PUT padre Tema hijo inexistente -> 404
+- PUT padre Tema padre inexistente -> 404
+- PUT padre self-parent -> 400
+- PUT padre ciclo directo -> 409
 
 ## Build
 
@@ -115,6 +130,7 @@ Expandir caso de uso por caso de uso. No implementar masivamente.
 - read side;
 - Application dependency policy tests;
 - TemaDependencia race;
+- deteccion completa de ciclos profundos en jerarquia de Temas;
 - auth;
 - analytics;
 - integrations;

@@ -7,12 +7,14 @@ Branch: main
 Ultimo checkpoint:
 
 ```text
-16aeec2 feat: establish topic mastery criteria flow
+0c4ee2d docs: formalize Codex execution modes
 ```
 
 Checkpoint anterior:
 
 ```text
+a3382e8 feat: establish resource library flow
+16aeec2 feat: establish topic mastery criteria flow
 9739d1b feat: establish topic hierarchy flow
 2d19acd feat: assign topic to phase
 2250c9a feat: add phase listing flow
@@ -36,6 +38,7 @@ caf832a feat: establish validated initial persistence
 - ASIGNAR TEMA PADRE VALIDADO END-TO-END
 - MOTOR DE CRITERIOS DE TEMA VALIDADO END-TO-END
 - RESOURCE / BIBLIOTECA DE RECURSOS VALIDADO END-TO-END
+- STUDY / SESIONES DE ESTUDIO VALIDADO END-TO-END
 
 ## Migraciones Aplicadas
 
@@ -55,6 +58,7 @@ caf832a feat: establish validated initial persistence
 - Tema: 2
 - Fase: 1
 - Recurso: 1
+- SesionEstudio: 1
 
 Usuario E2E:
 
@@ -96,6 +100,16 @@ Fase E2E:
 - Id: 01A016CB-92F1-75B0-B5F6-803F92691273
 - Nombre: Fundamentos
 - Orden: 1
+
+SesionEstudio E2E:
+
+- Id: 01A01FD6-072F-7DB6-8513-F75C0C993AF9
+- Tema: 01A016F7-1517-7C35-BAF3-A1BEB648776C
+- Tipo: Teoria
+- Fecha: 2026-08-20
+- DuracionMinutos: 45
+- Notas: Estudio inicial del modelo OSI
+- RowVersion: verificada fisicamente y actualizada tras corregir duracion.
 
 ## Flujos Funcionales Actuales
 
@@ -141,6 +155,17 @@ Fase E2E:
 - PUT vínculo con Recurso inexistente -> 404
 - PUT vínculo con Tema inexistente -> 404
 - PUT vínculo con Guid.Empty -> 400
+- POST /api/sesiones-estudio -> 201
+- GET /api/sesiones-estudio/{id} -> 200
+- GET SesionEstudio inexistente -> 404
+- GET /api/sesiones-estudio?usuarioId={id} -> 200
+- GET /api/sesiones-estudio?usuarioId={id-sin-sesiones} -> 200 con []
+- GET /api/sesiones-estudio?usuarioId={Guid.Empty} -> 400
+- PUT /api/sesiones-estudio/{id}/duracion -> 204
+- PUT duracion SesionEstudio inexistente -> 404
+- PUT duracion con Guid.Empty -> 400
+- PUT duracion invalida -> 400
+- SesionRegistradaEvento confirmado por codigo; despacho sigue diferido.
 
 ## Build
 
@@ -153,9 +178,9 @@ Fase E2E:
 
 ## Proxima Area
 
-Resource / Study.
+Study / EntradaBitacora.
 
-Continuar con sesiones de estudio cuando se autorice el siguiente bloque funcional.
+Continuar con bitacora o herramientas de estudio cuando se autorice el siguiente bloque funcional.
 
 ## Pendientes Deliberados
 

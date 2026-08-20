@@ -1,0 +1,124 @@
+using Aprendizaje.Aplicacion.Study.SesionesEstudio.CorregirDuracionSesionEstudio;
+using Aprendizaje.Aplicacion.Study.SesionesEstudio.RegistrarSesionEstudio;
+using Aprendizaje.Aplicacion.Study.SesionesEstudio.ListarSesionesEstudio;
+using Aprendizaje.Aplicacion.Study.SesionesEstudio.ObtenerSesionEstudioPorId;
+using Aprendizaje.Dominio.Study;
+
+namespace Aprendizaje.Api.Endpoints.Study;
+
+public static class SesionEstudioEndpoints
+{
+    public static IEndpointRouteBuilder MapSesionEstudioEndpoints(this IEndpointRouteBuilder app)
+    {
+        var grupo = app.MapGroup("/api/sesiones-estudio");
+
+        grupo.MapPost("/", RegistrarSesionEstudioAsync);
+        grupo.MapGet("/", ListarSesionesEstudioAsync);
+        grupo.MapGet("/{id:guid}", ObtenerSesionEstudioPorIdAsync);
+        grupo.MapPut("/{id:guid}/duracion", CorregirDuracionAsync);
+
+        return app;
+    }
+
+    private static async Task<IResult> CorregirDuracionAsync(
+        Guid id,
+        CorregirDuracionSesionEstudioHttpRequest request,
+        CorregirDuracionSesionEstudioCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new CorregirDuracionSesionEstudioSolicitud(id, request.DuracionMinutos),
+                cancellationToken);
+
+            return resultado.Estado switch
+            {
+                CorregirDuracionSesionEstudioEstado.Actualizada => Results.NoContent(),
+                CorregirDuracionSesionEstudioEstado.SesionNoEncontrada => Results.NotFound(),
+                _ => Results.Problem("Estado de corrección de duración no reconocido.")
+            };
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> ObtenerSesionEstudioPorIdAsync(
+        Guid id,
+        ObtenerSesionEstudioPorIdCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        var resultado = await casoUso.EjecutarAsync(id, cancellationToken);
+
+        return resultado.Encontrado
+            ? Results.Ok(resultado.Sesion)
+            : Results.NotFound();
+    }
+
+    private static async Task<IResult> ListarSesionesEstudioAsync(
+        Guid usuarioId,
+        ListarSesionesEstudioCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new ListarSesionesEstudioSolicitud(usuarioId),
+                cancellationToken);
+
+            return Results.Ok(resultado.Sesiones);
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> RegistrarSesionEstudioAsync(
+        RegistrarSesionEstudioHttpRequest request,
+        RegistrarSesionEstudioCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new RegistrarSesionEstudioSolicitud(
+                    request.UsuarioId,
+                    request.TemaId,
+                    request.Fecha,
+                    request.DuracionMinutos,
+                    request.Tipo,
+                    request.Notas),
+                cancellationToken);
+
+            return resultado.Estado switch
+            {
+                RegistrarSesionEstudioEstado.Creada => Results.Created(
+                    $"/api/sesiones-estudio/{resultado.Id}",
+                    resultado),
+                RegistrarSesionEstudioEstado.TemaNoEncontrado => Results.NotFound(),
+                RegistrarSesionEstudioEstado.UsuarioNoCoincide => Results.Conflict(new
+                {
+                    error = "La Sesión de estudio y el Tema deben pertenecer al mismo Usuario."
+                }),
+                _ => Results.Problem("Estado de registro de Sesión de estudio no reconocido.")
+            };
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
+    private sealed record RegistrarSesionEstudioHttpRequest(
+        Guid UsuarioId,
+        Guid TemaId,
+        DateOnly Fecha,
+        int DuracionMinutos,
+        TipoSesion Tipo,
+        string? Notas);
+
+    private sealed record CorregirDuracionSesionEstudioHttpRequest(int DuracionMinutos);
+}

@@ -1,0 +1,3 @@
+namespace Aprendizaje.Aplicacion.Study.SesionesEstudio.ListarSesionesEstudio;
+
+public sealed record ListarSesionesEstudioResultado(IReadOnlyCollection<SesionEstudioResumen> Sesiones);

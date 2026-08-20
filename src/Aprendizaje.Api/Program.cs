@@ -1,6 +1,7 @@
 using Aprendizaje.Api.Endpoints.Nucleo;
 using Aprendizaje.Api.Endpoints.Resource;
 using Aprendizaje.Api.Endpoints.Roadmap;
+using Aprendizaje.Api.Endpoints.Study;
 using Aprendizaje.Aplicacion.Nucleo.Usuarios.CrearUsuario;
 using Aprendizaje.Aplicacion.Resource.Recursos.CrearRecurso;
 using Aprendizaje.Aplicacion.Resource.Recursos.ListarRecursos;
@@ -17,6 +18,10 @@ using Aprendizaje.Aplicacion.Roadmap.Temas.EstablecerObjetivos;
 using Aprendizaje.Aplicacion.Roadmap.Temas.ListarTemas;
 using Aprendizaje.Aplicacion.Roadmap.Temas.MarcarCriterio;
 using Aprendizaje.Aplicacion.Roadmap.Temas.ObtenerTemaPorId;
+using Aprendizaje.Aplicacion.Study.SesionesEstudio.CorregirDuracionSesionEstudio;
+using Aprendizaje.Aplicacion.Study.SesionesEstudio.ListarSesionesEstudio;
+using Aprendizaje.Aplicacion.Study.SesionesEstudio.ObtenerSesionEstudioPorId;
+using Aprendizaje.Aplicacion.Study.SesionesEstudio.RegistrarSesionEstudio;
 using Aprendizaje.Infraestructura.Configuracion;
 using System.Text.Json.Serialization;
 
@@ -38,6 +43,10 @@ builder.Services.AddScoped<CrearRecursoCasoUso>();
 builder.Services.AddScoped<ListarRecursosCasoUso>();
 builder.Services.AddScoped<ObtenerRecursoPorIdCasoUso>();
 builder.Services.AddScoped<VincularRecursoATemaCasoUso>();
+builder.Services.AddScoped<CorregirDuracionSesionEstudioCasoUso>();
+builder.Services.AddScoped<ListarSesionesEstudioCasoUso>();
+builder.Services.AddScoped<ObtenerSesionEstudioPorIdCasoUso>();
+builder.Services.AddScoped<RegistrarSesionEstudioCasoUso>();
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -48,6 +57,7 @@ var app = builder.Build();
 
 app.MapFaseEndpoints();
 app.MapRecursoEndpoints();
+app.MapSesionEstudioEndpoints();
 app.MapTemaEndpoints();
 app.MapUsuarioEndpoints();
 

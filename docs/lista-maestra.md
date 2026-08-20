@@ -67,6 +67,10 @@
 - [x] ObtenerRecursoPorId implementado.
 - [x] ListarRecursos implementado.
 - [x] VincularRecursoATema implementado.
+- [x] RegistrarSesionEstudio implementado.
+- [x] ObtenerSesionEstudio implementado.
+- [x] ListarSesionesEstudio implementado.
+- [x] CorregirDuracionSesionEstudio implementado.
 - [x] CrearTema implementado.
 - [x] ObtenerTemaPorId implementado.
 - [x] EstablecerObjetivosTema implementado.
@@ -90,6 +94,10 @@
 - [x] GET /api/recursos/{id}.
 - [x] GET /api/recursos?usuarioId={id}.
 - [x] PUT /api/recursos/{id}/temas/{temaId}.
+- [x] POST /api/sesiones-estudio.
+- [x] GET /api/sesiones-estudio/{id}.
+- [x] GET /api/sesiones-estudio?usuarioId={id}.
+- [x] PUT /api/sesiones-estudio/{id}/duracion.
 - [x] POST /api/temas.
 - [x] GET /api/temas/{id}.
 - [x] PUT /api/temas/{id}/objetivos.
@@ -145,6 +153,18 @@
 - [x] Vincular Recurso inexistente a Tema -> 404.
 - [x] Vincular Recurso a Tema inexistente -> 404.
 - [x] Vincular Recurso/Tema con Guid.Empty -> 400.
+- [x] Registrar SesionEstudio -> 201.
+- [x] Obtener SesionEstudio por Id -> 200.
+- [x] Obtener SesionEstudio inexistente -> 404.
+- [x] Listar sesiones por Usuario -> 200.
+- [x] Listar sesiones para Usuario sin sesiones -> 200 con [].
+- [x] Listar sesiones con Guid.Empty -> 400.
+- [x] Corregir duracion de SesionEstudio -> 204.
+- [x] Corregir duracion de SesionEstudio inexistente -> 404.
+- [x] Corregir duracion con Guid.Empty -> 400.
+- [x] Corregir duracion invalida -> 400.
+- [x] RowVersion de SesionEstudio verificada fisicamente.
+- [x] SesionRegistradaEvento confirmado por codigo.
 - [x] Listar temas por Usuario -> 200.
 - [x] Listar temas para Usuario sin temas -> 200 con [].
 - [x] Listar temas con Guid.Empty -> 400.

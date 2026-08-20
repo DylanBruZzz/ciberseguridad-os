@@ -2,6 +2,7 @@ using Aprendizaje.Aplicacion.Comun;
 using Aprendizaje.Dominio.Nucleo.Repositorios;
 using Aprendizaje.Dominio.Resource.Repositorios;
 using Aprendizaje.Dominio.Roadmap.Repositorios;
+using Aprendizaje.Dominio.Study.Repositorios;
 using Aprendizaje.Infraestructura.Persistencia;
 using Aprendizaje.Infraestructura.Persistencia.Interceptores;
 using Aprendizaje.Infraestructura.Persistencia.Repositorios;
@@ -25,6 +26,7 @@ public static class InyeccionDependencias
         services.AddScoped<ICompetenciaRepository, CompetenciaRepository>();
         services.AddScoped<ICertificacionRepository, CertificacionRepository>();
         services.AddScoped<IRecursoRepository, RecursoRepository>();
+        services.AddScoped<ISesionEstudioRepository, SesionEstudioRepository>();
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<AprendizajeDbContext>());
 
         services.AddDbContext<AprendizajeDbContext>((sp, options) =>

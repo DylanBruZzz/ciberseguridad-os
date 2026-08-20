@@ -63,6 +63,10 @@
 
 - [x] IUnitOfWork definido.
 - [x] CrearUsuario implementado.
+- [x] CrearRecurso implementado.
+- [x] ObtenerRecursoPorId implementado.
+- [x] ListarRecursos implementado.
+- [x] VincularRecursoATema implementado.
 - [x] CrearTema implementado.
 - [x] ObtenerTemaPorId implementado.
 - [x] EstablecerObjetivosTema implementado.
@@ -82,6 +86,10 @@
 - [x] ASP.NET Core Minimal APIs.
 - [x] JsonStringEnumConverter configurado para HTTP.
 - [x] POST /api/usuarios.
+- [x] POST /api/recursos.
+- [x] GET /api/recursos/{id}.
+- [x] GET /api/recursos?usuarioId={id}.
+- [x] PUT /api/recursos/{id}/temas/{temaId}.
 - [x] POST /api/temas.
 - [x] GET /api/temas/{id}.
 - [x] PUT /api/temas/{id}/objetivos.
@@ -126,6 +134,17 @@
 - [x] Desmarcar criterio no definido -> 409.
 - [x] Transicion observable a Tema dominado.
 - [x] TemaDominadoEvento confirmado por codigo en la transicion no dominado -> dominado.
+- [x] Crear Recurso -> 201.
+- [x] Obtener Recurso por Id -> 200.
+- [x] Obtener Recurso inexistente -> 404.
+- [x] Listar recursos por Usuario -> 200.
+- [x] Listar recursos para Usuario sin recursos -> 200 con [].
+- [x] Listar recursos con Guid.Empty -> 400.
+- [x] Vincular Recurso a Tema -> 204.
+- [x] Vincular Recurso a Tema es idempotente.
+- [x] Vincular Recurso inexistente a Tema -> 404.
+- [x] Vincular Recurso a Tema inexistente -> 404.
+- [x] Vincular Recurso/Tema con Guid.Empty -> 400.
 - [x] Listar temas por Usuario -> 200.
 - [x] Listar temas para Usuario sin temas -> 200 con [].
 - [x] Listar temas con Guid.Empty -> 400.

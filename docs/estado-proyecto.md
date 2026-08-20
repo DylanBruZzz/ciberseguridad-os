@@ -7,12 +7,13 @@ Branch: main
 Ultimo checkpoint:
 
 ```text
-9739d1b feat: establish topic hierarchy flow
+16aeec2 feat: establish topic mastery criteria flow
 ```
 
 Checkpoint anterior:
 
 ```text
+9739d1b feat: establish topic hierarchy flow
 2d19acd feat: assign topic to phase
 2250c9a feat: add phase listing flow
 754bbaa feat: establish phase creation flow
@@ -34,6 +35,7 @@ caf832a feat: establish validated initial persistence
 - ASIGNAR TEMA A FASE VALIDADO END-TO-END
 - ASIGNAR TEMA PADRE VALIDADO END-TO-END
 - MOTOR DE CRITERIOS DE TEMA VALIDADO END-TO-END
+- RESOURCE / BIBLIOTECA DE RECURSOS VALIDADO END-TO-END
 
 ## Migraciones Aplicadas
 
@@ -52,6 +54,7 @@ caf832a feat: establish validated initial persistence
 - Usuario: 1
 - Tema: 2
 - Fase: 1
+- Recurso: 1
 
 Usuario E2E:
 
@@ -79,6 +82,14 @@ Subtema E2E:
 - Criterios:
   - Teoria: cumplido
   - Practica: cumplido
+
+Recurso E2E:
+
+- Id: 01A01DEB-1C4A-7C05-9C43-1F08CADBA7C2
+- Titulo: Documentación modelo OSI
+- Tipo: Documentacion
+- Estado: PorClasificar
+- Tema vinculado: 01A016F7-1517-7C35-BAF3-A1BEB648776C
 
 Fase E2E:
 
@@ -119,6 +130,17 @@ Fase E2E:
 - DELETE /api/temas/{id}/criterios/{tipo}/cumplido -> 204
 - DELETE criterio no definido -> 409
 - Transicion observable a Tema dominado -> validada con todos los criterios cumplidos
+- POST /api/recursos -> 201
+- GET /api/recursos/{id} -> 200
+- GET Recurso inexistente -> 404
+- GET /api/recursos?usuarioId={id} -> 200
+- GET /api/recursos?usuarioId={id-sin-recursos} -> 200 con []
+- GET /api/recursos?usuarioId={Guid.Empty} -> 400
+- PUT /api/recursos/{id}/temas/{temaId} -> 204
+- PUT vínculo Recurso-Tema repetido -> 204 idempotente
+- PUT vínculo con Recurso inexistente -> 404
+- PUT vínculo con Tema inexistente -> 404
+- PUT vínculo con Guid.Empty -> 400
 
 ## Build
 
@@ -131,9 +153,9 @@ Fase E2E:
 
 ## Proxima Area
 
-Roadmap / Tema.
+Resource / Study.
 
-Expandir caso de uso por caso de uso. No implementar masivamente.
+Continuar con sesiones de estudio cuando se autorice el siguiente bloque funcional.
 
 ## Pendientes Deliberados
 

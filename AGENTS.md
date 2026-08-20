@@ -104,6 +104,81 @@ Para cada tarea:
 9. No commit salvo autorizacion.
 10. Entregar reporte compacto.
 
+## Modos de ejecución
+
+### MODO SLICE
+
+Usar cuando la tarea:
+
+- introduce una relacion estructural nueva;
+- puede requerir migracion;
+- cambia infraestructura transversal;
+- introduce auth;
+- introduce eventos, dispatcher u outbox;
+- introduce paquetes;
+- modifica decisiones arquitectonicas;
+- todavia no sigue un patron suficientemente validado.
+
+Flujo:
+
+auditar -> implementar -> validar -> reportar -> commit autorizado.
+
+### MODO BLOQUE
+
+Usar para 2 a 4 capacidades estrechamente relacionadas sobre patrones ya validados.
+
+Antes:
+
+- inspeccionar estado operativo;
+- working tree debe estar clean salvo autorizacion explicita;
+- build inicial.
+
+Despues de cada fase:
+
+1. build;
+2. prueba funcional/E2E;
+3. verificar persistencia cuando corresponda;
+4. git diff --check;
+5. registrar resultado interno;
+6. continuar automaticamente si todo pasa.
+
+DETENER TODO EL BLOQUE ante:
+
+- migracion inesperada;
+- cambio de esquema;
+- nueva decision arquitectonica;
+- paquete nuevo;
+- abstraccion/repositorio no previsto;
+- fallo de persistencia;
+- necesidad de ampliar alcance;
+- contradiccion con decisiones congeladas;
+- riesgo de datos no autorizado.
+
+No hacer commits intermedios salvo autorizacion explicita.
+
+Al finalizar:
+
+- build final;
+- diff;
+- status;
+- actualizacion de docs operativos solo con hechos validados;
+- un unico reporte consolidado.
+
+### MODO HITO
+
+Agrupa varios bloques.
+
+No ejecutar un HITO automaticamente sin plan previo aprobado.
+
+Debe detenerse entre fronteras de alto riesgo:
+
+- cambios arquitectonicos;
+- migraciones;
+- auth;
+- eventos/integraciones;
+- importaciones masivas;
+- cambios de modelo persistente.
+
 # Regla de detencion
 
 Si aparece:

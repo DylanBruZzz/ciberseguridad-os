@@ -7,8 +7,11 @@ using Aprendizaje.Aplicacion.Roadmap.Fases.ListarFases;
 using Aprendizaje.Aplicacion.Roadmap.Temas.AsignarTemaAFase;
 using Aprendizaje.Aplicacion.Roadmap.Temas.AsignarTemaPadre;
 using Aprendizaje.Aplicacion.Roadmap.Temas.CrearTema;
+using Aprendizaje.Aplicacion.Roadmap.Temas.DefinirCriteriosRelevantes;
+using Aprendizaje.Aplicacion.Roadmap.Temas.DesmarcarCriterio;
 using Aprendizaje.Aplicacion.Roadmap.Temas.EstablecerObjetivos;
 using Aprendizaje.Aplicacion.Roadmap.Temas.ListarTemas;
+using Aprendizaje.Aplicacion.Roadmap.Temas.MarcarCriterio;
 using Aprendizaje.Aplicacion.Roadmap.Temas.ObtenerTemaPorId;
 using System.Text.Json.Serialization;
 
@@ -19,9 +22,12 @@ builder.Services.AddScoped<ListarFasesCasoUso>();
 builder.Services.AddScoped<AsignarTemaAFaseCasoUso>();
 builder.Services.AddScoped<AsignarTemaPadreCasoUso>();
 builder.Services.AddScoped<CrearTemaCasoUso>();
+builder.Services.AddScoped<DefinirCriteriosRelevantesTemaCasoUso>();
+builder.Services.AddScoped<DesmarcarCriterioTemaCasoUso>();
 builder.Services.AddScoped<ObtenerTemaPorIdCasoUso>();
 builder.Services.AddScoped<EstablecerObjetivosTemaCasoUso>();
 builder.Services.AddScoped<ListarTemasCasoUso>();
+builder.Services.AddScoped<MarcarCriterioTemaCasoUso>();
 builder.Services.AddScoped<CrearUsuarioCasoUso>();
 builder.Services.ConfigureHttpJsonOptions(options =>
 {

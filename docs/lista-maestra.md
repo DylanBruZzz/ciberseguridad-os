@@ -68,6 +68,9 @@
 - [x] EstablecerObjetivosTema implementado.
 - [x] AsignarTemaAFase implementado.
 - [x] AsignarTemaPadre implementado.
+- [x] DefinirCriteriosRelevantes implementado.
+- [x] MarcarCriterio implementado.
+- [x] DesmarcarCriterio implementado.
 - [x] ListarTemas implementado.
 - [x] CrearFase implementado.
 - [x] ListarFases implementado.
@@ -82,6 +85,9 @@
 - [x] POST /api/temas.
 - [x] GET /api/temas/{id}.
 - [x] PUT /api/temas/{id}/objetivos.
+- [x] PUT /api/temas/{id}/criterios.
+- [x] PUT /api/temas/{id}/criterios/{tipo}/cumplido.
+- [x] DELETE /api/temas/{id}/criterios/{tipo}/cumplido.
 - [x] PUT /api/temas/{id}/fase.
 - [x] PUT /api/temas/{id}/padre.
 - [x] GET /api/temas?usuarioId={id}.
@@ -108,6 +114,18 @@
 - [x] Asignar Tema padre inexistente -> 404.
 - [x] Asignar Tema padre self-parent -> 400.
 - [x] Asignar Tema padre con ciclo directo -> 409.
+- [x] Definir criterios relevantes de Tema -> 204.
+- [x] Definir criterios con menos de 2 criterios distintos -> 400.
+- [x] Definir criterios duplicados -> normalizados por dominio.
+- [x] Redefinir criterios sin progreso -> 204.
+- [x] Redefinir criterios con progreso -> 409.
+- [x] Marcar criterio de Tema -> 204.
+- [x] Marcar criterio de Tema es idempotente.
+- [x] Marcar criterio no definido -> 409.
+- [x] Desmarcar criterio de Tema -> 204.
+- [x] Desmarcar criterio no definido -> 409.
+- [x] Transicion observable a Tema dominado.
+- [x] TemaDominadoEvento confirmado por codigo en la transicion no dominado -> dominado.
 - [x] Listar temas por Usuario -> 200.
 - [x] Listar temas para Usuario sin temas -> 200 con [].
 - [x] Listar temas con Guid.Empty -> 400.
@@ -121,6 +139,7 @@
 
 - [ ] Proyecto de tests.
 - [ ] Tests de dominio.
+- [ ] Test automatizado directo de TemaDominadoEvento.
 - [ ] Tests de Application.
 - [ ] Tests de persistencia.
 - [ ] Tests E2E automatizados.

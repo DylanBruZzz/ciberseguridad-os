@@ -1,8 +1,11 @@
 using Aprendizaje.Aplicacion.Roadmap.Temas.AsignarTemaAFase;
 using Aprendizaje.Aplicacion.Roadmap.Temas.AsignarTemaPadre;
 using Aprendizaje.Aplicacion.Roadmap.Temas.CrearTema;
+using Aprendizaje.Aplicacion.Roadmap.Temas.DefinirCriteriosRelevantes;
+using Aprendizaje.Aplicacion.Roadmap.Temas.DesmarcarCriterio;
 using Aprendizaje.Aplicacion.Roadmap.Temas.EstablecerObjetivos;
 using Aprendizaje.Aplicacion.Roadmap.Temas.ListarTemas;
+using Aprendizaje.Aplicacion.Roadmap.Temas.MarcarCriterio;
 using Aprendizaje.Aplicacion.Roadmap.Temas.ObtenerTemaPorId;
 using Aprendizaje.Dominio.Roadmap;
 
@@ -18,6 +21,9 @@ public static class TemaEndpoints
         grupo.MapGet("/", ListarTemasAsync);
         grupo.MapGet("/{id:guid}", ObtenerTemaPorIdAsync);
         grupo.MapPut("/{id:guid}/objetivos", EstablecerObjetivosAsync);
+        grupo.MapPut("/{temaId:guid}/criterios", DefinirCriteriosAsync);
+        grupo.MapPut("/{temaId:guid}/criterios/{tipo}/cumplido", MarcarCriterioAsync);
+        grupo.MapDelete("/{temaId:guid}/criterios/{tipo}/cumplido", DesmarcarCriterioAsync);
         grupo.MapPut("/{temaId:guid}/fase", AsignarFaseAsync);
         grupo.MapPut("/{temaId:guid}/padre", AsignarPadreAsync);
 
@@ -129,6 +135,96 @@ public static class TemaEndpoints
         }
     }
 
+    private static async Task<IResult> DefinirCriteriosAsync(
+        Guid temaId,
+        DefinirCriteriosRelevantesTemaHttpRequest request,
+        DefinirCriteriosRelevantesTemaCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        if (request.Criterios is null)
+            return Results.BadRequest(new { error = "La lista de criterios no puede ser null." });
+
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new DefinirCriteriosRelevantesTemaSolicitud(temaId, request.Criterios),
+                cancellationToken);
+
+            return resultado.Estado switch
+            {
+                DefinirCriteriosRelevantesTemaEstado.Actualizado => Results.NoContent(),
+                DefinirCriteriosRelevantesTemaEstado.TemaNoEncontrado => Results.NotFound(),
+                DefinirCriteriosRelevantesTemaEstado.ProgresoRegistrado => Results.Conflict(new
+                {
+                    error = "No se pueden redefinir los criterios relevantes mientras exista progreso registrado."
+                }),
+                _ => Results.Problem("Estado de definición de criterios no reconocido.")
+            };
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> MarcarCriterioAsync(
+        Guid temaId,
+        TipoCriterio tipo,
+        MarcarCriterioTemaCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new MarcarCriterioTemaSolicitud(temaId, tipo),
+                cancellationToken);
+
+            return resultado.Estado switch
+            {
+                MarcarCriterioTemaEstado.Actualizado => Results.NoContent(),
+                MarcarCriterioTemaEstado.TemaNoEncontrado => Results.NotFound(),
+                MarcarCriterioTemaEstado.CriterioNoDefinido => Results.Conflict(new
+                {
+                    error = $"{tipo} no es un criterio relevante para este Tema."
+                }),
+                _ => Results.Problem("Estado de marcado de criterio no reconocido.")
+            };
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> DesmarcarCriterioAsync(
+        Guid temaId,
+        TipoCriterio tipo,
+        DesmarcarCriterioTemaCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new DesmarcarCriterioTemaSolicitud(temaId, tipo),
+                cancellationToken);
+
+            return resultado.Estado switch
+            {
+                DesmarcarCriterioTemaEstado.Actualizado => Results.NoContent(),
+                DesmarcarCriterioTemaEstado.TemaNoEncontrado => Results.NotFound(),
+                DesmarcarCriterioTemaEstado.CriterioNoDefinido => Results.Conflict(new
+                {
+                    error = $"{tipo} no es un criterio relevante para este Tema."
+                }),
+                _ => Results.Problem("Estado de desmarcado de criterio no reconocido.")
+            };
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
     private static async Task<IResult> AsignarPadreAsync(
         Guid temaId,
         AsignarTemaPadreHttpRequest request,
@@ -170,6 +266,9 @@ public static class TemaEndpoints
 
     private sealed record EstablecerObjetivosTemaHttpRequest(
         IReadOnlyCollection<string>? Objetivos);
+
+    private sealed record DefinirCriteriosRelevantesTemaHttpRequest(
+        IReadOnlyCollection<TipoCriterio>? Criterios);
 
     private sealed record AsignarTemaAFaseHttpRequest(Guid FaseId);
 

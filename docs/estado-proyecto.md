@@ -7,12 +7,13 @@ Branch: main
 Ultimo checkpoint:
 
 ```text
-2d19acd feat: assign topic to phase
+9739d1b feat: establish topic hierarchy flow
 ```
 
 Checkpoint anterior:
 
 ```text
+2d19acd feat: assign topic to phase
 2250c9a feat: add phase listing flow
 754bbaa feat: establish phase creation flow
 3e6043d feat: add topic listing flow
@@ -32,6 +33,7 @@ caf832a feat: establish validated initial persistence
 - LISTAR FASES VALIDADO END-TO-END
 - ASIGNAR TEMA A FASE VALIDADO END-TO-END
 - ASIGNAR TEMA PADRE VALIDADO END-TO-END
+- MOTOR DE CRITERIOS DE TEMA VALIDADO END-TO-END
 
 ## Migraciones Aplicadas
 
@@ -74,6 +76,9 @@ Subtema E2E:
 - Nombre: Modelo OSI
 - TipoConocimiento: Conceptual
 - TemaPadreId: 01A01604-8436-742A-A59B-B756B8FF07B3
+- Criterios:
+  - Teoria: cumplido
+  - Practica: cumplido
 
 Fase E2E:
 
@@ -105,6 +110,15 @@ Fase E2E:
 - PUT padre Tema padre inexistente -> 404
 - PUT padre self-parent -> 400
 - PUT padre ciclo directo -> 409
+- PUT /api/temas/{id}/criterios -> 204
+- PUT criterios con menos de 2 criterios distintos -> 400
+- PUT criterios duplicados -> 204, normalizados por dominio
+- PUT criterios con progreso registrado -> 409
+- PUT /api/temas/{id}/criterios/{tipo}/cumplido -> 204
+- PUT criterio no definido -> 409
+- DELETE /api/temas/{id}/criterios/{tipo}/cumplido -> 204
+- DELETE criterio no definido -> 409
+- Transicion observable a Tema dominado -> validada con todos los criterios cumplidos
 
 ## Build
 
@@ -131,6 +145,7 @@ Expandir caso de uso por caso de uso. No implementar masivamente.
 - Application dependency policy tests;
 - TemaDependencia race;
 - deteccion completa de ciclos profundos en jerarquia de Temas;
+- prueba automatizada directa de TemaDominadoEvento;
 - auth;
 - analytics;
 - integrations;

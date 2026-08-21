@@ -5,4 +5,7 @@
     <Project Path="src/Aprendizaje.Infraestructura/Aprendizaje.Infraestructura.csproj" />
     <Project Path="src/Aprendizaje.Api/Aprendizaje.Api.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Aprendizaje.Tests/Aprendizaje.Tests.csproj" />
+  </Folder>
 </Solution>

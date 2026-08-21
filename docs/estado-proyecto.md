@@ -7,12 +7,13 @@ Branch: main
 Ultimo checkpoint:
 
 ```text
-0c4ee2d docs: formalize Codex execution modes
+73aa27c feat: establish study session flow
 ```
 
 Checkpoint anterior:
 
 ```text
+0c4ee2d docs: formalize Codex execution modes
 a3382e8 feat: establish resource library flow
 16aeec2 feat: establish topic mastery criteria flow
 9739d1b feat: establish topic hierarchy flow
@@ -39,6 +40,7 @@ caf832a feat: establish validated initial persistence
 - MOTOR DE CRITERIOS DE TEMA VALIDADO END-TO-END
 - RESOURCE / BIBLIOTECA DE RECURSOS VALIDADO END-TO-END
 - STUDY / SESIONES DE ESTUDIO VALIDADO END-TO-END
+- INFRAESTRUCTURA DE TESTS XUNIT MTP VALIDADA
 
 ## Migraciones Aplicadas
 
@@ -172,19 +174,35 @@ SesionEstudio E2E:
 - 0 warnings
 - 0 errores
 
+## Tests
+
+- Proyecto: tests/Aprendizaje.Tests
+- Framework: xUnit v3 3.2.2
+- Runner: Microsoft Testing Platform mediante global.json
+- SDK validado: .NET 10.0.400
+- Microsoft.NET.Test.Sdk: no requerido con la estrategia MTP actual
+- dotnet run del proyecto de tests: validado
+- dotnet test por proyecto: validado
+- dotnet test por solucion: validado
+- Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
+- Tests completos de Dominio/Application: pendientes.
+- Tests de integracion: pendientes.
+
 ## Estado Git Esperado
 
 - working tree clean
 
 ## Proxima Area
 
-Study / EntradaBitacora.
+Tests / Dominio.
 
-Continuar con bitacora o herramientas de estudio cuando se autorice el siguiente bloque funcional.
+Continuar con tests de dominio y Application antes de ampliar infraestructura de integracion.
 
 ## Pendientes Deliberados
 
-- tests automatizados;
+- tests completos de dominio;
+- tests de Application;
+- tests de integracion;
 - IDespachadorEventos concreto;
 - registro DespachoEventosInterceptor;
 - vw_TemaEstado;

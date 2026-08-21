@@ -176,7 +176,12 @@
 
 ## 10. Tests
 
-- [ ] Proyecto de tests.
+- [x] Proyecto de tests Aprendizaje.Tests creado.
+- [x] xUnit v3 configurado.
+- [x] Microsoft Testing Platform configurado como runner de dotnet test.
+- [x] Smoke test de Tema.Objetivos ejecutado correctamente.
+- [x] dotnet test por proyecto validado.
+- [x] dotnet test por solucion validado.
 - [ ] Tests de dominio.
 - [ ] Test automatizado directo de TemaDominadoEvento.
 - [ ] Tests de Application.

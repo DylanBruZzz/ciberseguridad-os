@@ -186,7 +186,10 @@
 - [x] Tests fundacionales de dominio para SesionEstudio.
 - [x] Test automatizado directo de TemaDominadoEvento.
 - [x] Test automatizado directo de SesionRegistradaEvento.
-- [ ] Tests de Application.
+- [x] Tests fundacionales de Application Roadmap.
+- [x] Tests fundacionales de Application Resource.
+- [x] Tests fundacionales de Application Study.
+- [x] Fakes minimos sin framework de mocking.
 - [ ] Tests de persistencia.
 - [ ] Tests E2E automatizados.
 - [ ] Tests de concurrencia donde aplique RowVersion.

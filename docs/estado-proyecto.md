@@ -7,12 +7,13 @@ Branch: main
 Ultimo checkpoint:
 
 ```text
-542a2cc test: establish xunit testing foundation
+b05cc6f test: cover core domain behavior
 ```
 
 Checkpoint anterior:
 
 ```text
+542a2cc test: establish xunit testing foundation
 73aa27c feat: establish study session flow
 0c4ee2d docs: formalize Codex execution modes
 a3382e8 feat: establish resource library flow
@@ -43,6 +44,7 @@ caf832a feat: establish validated initial persistence
 - STUDY / SESIONES DE ESTUDIO VALIDADO END-TO-END
 - INFRAESTRUCTURA DE TESTS XUNIT MTP VALIDADA
 - TESTS DE DOMINIO FUNDACIONALES VALIDADO
+- TESTS APPLICATION FUNDACIONALES VALIDADO
 
 ## Migraciones Aplicadas
 
@@ -189,7 +191,10 @@ SesionEstudio E2E:
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
 - Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, dominio y TemaDominadoEvento validados.
 - Tests de Dominio SesionEstudio: registro, invariantes, correccion de duracion y SesionRegistradaEvento validados.
-- Tests de Application: pendientes.
+- Tests de Application Roadmap: flujos criticos de Tema cubiertos con fakes minimos.
+- Tests de Application Resource: crear, obtener, listar y vincular cubiertos con fakes minimos.
+- Tests de Application Study: registrar, obtener, listar y corregir duracion cubiertos con fakes minimos.
+- Frameworks de mocking: no utilizados.
 - Tests de integracion: pendientes.
 
 ## Estado Git Esperado
@@ -198,14 +203,13 @@ SesionEstudio E2E:
 
 ## Proxima Area
 
-Tests / Dominio.
+Tests / Persistencia.
 
-Continuar con tests de dominio y Application antes de ampliar infraestructura de integracion.
+Continuar con auditoria y diseno de tests de persistencia/integracion antes de introducir base de datos de test.
 
 ## Pendientes Deliberados
 
 - tests completos de dominio;
-- tests de Application;
 - tests de integracion;
 - IDespachadorEventos concreto;
 - registro DespachoEventosInterceptor;

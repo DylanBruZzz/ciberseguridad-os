@@ -1,4 +1,5 @@
 using Aprendizaje.Dominio.Roadmap;
+using Aprendizaje.Dominio.Roadmap.Eventos;
 using Xunit;
 
 namespace Aprendizaje.Tests.Dominio.Roadmap;
@@ -8,9 +9,280 @@ public sealed class TemaTests
     [Fact]
     public void Crear_DebeExponerObjetivosComoColeccionVacia()
     {
-        var tema = Tema.Crear(Guid.CreateVersion7(), "Modelo OSI", TipoConocimiento.Conceptual);
+        var tema = CrearTema();
 
         Assert.NotNull(tema.Objetivos);
         Assert.Empty(tema.Objetivos);
     }
+
+    [Fact]
+    public void EstablecerObjetivos_DebeGuardarObjetivosValidosNormalizados()
+    {
+        var tema = CrearTema();
+
+        tema.EstablecerObjetivos([
+            "  Comprender el modelo OSI  ",
+            " ",
+            "",
+            "Diferenciar TCP y UDP",
+            "\t"
+        ]);
+
+        Assert.Equal(
+            ["Comprender el modelo OSI", "Diferenciar TCP y UDP"],
+            tema.Objetivos);
+    }
+
+    [Fact]
+    public void AsignarFase_DebeActualizarFaseId()
+    {
+        var tema = CrearTema();
+        var faseId = Guid.CreateVersion7();
+
+        tema.AsignarFase(faseId);
+
+        Assert.Equal(faseId, tema.FaseId);
+    }
+
+    [Fact]
+    public void AsignarFase_DebePermitirQuitarFase()
+    {
+        var tema = CrearTema();
+        tema.AsignarFase(Guid.CreateVersion7());
+
+        tema.AsignarFase(null);
+
+        Assert.Null(tema.FaseId);
+    }
+
+    [Fact]
+    public void AsignarTemaPadre_DebeActualizarTemaPadreId()
+    {
+        var tema = CrearTema();
+        var temaPadreId = Guid.CreateVersion7();
+
+        tema.AsignarTemaPadre(temaPadreId);
+
+        Assert.Equal(temaPadreId, tema.TemaPadreId);
+    }
+
+    [Fact]
+    public void AsignarTemaPadre_DebeRechazarSelfParent()
+    {
+        var tema = CrearTema();
+
+        Assert.Throws<InvalidOperationException>(() => tema.AsignarTemaPadre(tema.Id));
+    }
+
+    [Fact]
+    public void DefinirCriteriosRelevantes_DebeAceptarDosCriteriosDistintos()
+    {
+        var tema = CrearTema();
+
+        tema.DefinirCriteriosRelevantes([TipoCriterio.Teoria, TipoCriterio.Practica]);
+
+        Assert.Equal(2, tema.Criterios.Count);
+        Assert.Contains(tema.Criterios, criterio => criterio.Tipo == TipoCriterio.Teoria);
+        Assert.Contains(tema.Criterios, criterio => criterio.Tipo == TipoCriterio.Practica);
+        Assert.All(tema.Criterios, criterio =>
+        {
+            Assert.False(criterio.Cumplido);
+            Assert.Null(criterio.FechaCumplido);
+        });
+    }
+
+    [Fact]
+    public void DefinirCriteriosRelevantes_DebeAceptarHastaCincoCriterios()
+    {
+        var tema = CrearTema();
+
+        tema.DefinirCriteriosRelevantes([
+            TipoCriterio.Teoria,
+            TipoCriterio.Practica,
+            TipoCriterio.Explicacion,
+            TipoCriterio.Ejercicios,
+            TipoCriterio.Laboratorio
+        ]);
+
+        Assert.Equal(5, tema.Criterios.Count);
+    }
+
+    [Fact]
+    public void DefinirCriteriosRelevantes_DebeNormalizarDuplicados()
+    {
+        var tema = CrearTema();
+
+        tema.DefinirCriteriosRelevantes([
+            TipoCriterio.Teoria,
+            TipoCriterio.Teoria,
+            TipoCriterio.Practica,
+            TipoCriterio.Practica
+        ]);
+
+        Assert.Equal([TipoCriterio.Teoria, TipoCriterio.Practica], tema.Criterios.Select(c => c.Tipo));
+    }
+
+    [Fact]
+    public void DefinirCriteriosRelevantes_DebeRechazarMenosDeDosCriteriosDistintos()
+    {
+        var tema = CrearTema();
+
+        Assert.Throws<ArgumentException>(() =>
+            tema.DefinirCriteriosRelevantes([TipoCriterio.Teoria, TipoCriterio.Teoria]));
+    }
+
+    [Fact]
+    public void MarcarCriterio_DebeMarcarCriterioExistente()
+    {
+        var tema = CrearTemaConCriterios();
+        var antes = DateTime.UtcNow;
+
+        tema.MarcarCriterio(TipoCriterio.Teoria);
+
+        var criterio = ObtenerCriterio(tema, TipoCriterio.Teoria);
+        Assert.True(criterio.Cumplido);
+        Assert.NotNull(criterio.FechaCumplido);
+        Assert.True(criterio.FechaCumplido >= antes);
+        Assert.False(ObtenerCriterio(tema, TipoCriterio.Practica).Cumplido);
+    }
+
+    [Fact]
+    public void MarcarCriterio_DebeSerIdempotenteYSinReemplazarFechaOriginal()
+    {
+        var tema = CrearTemaConCriterios();
+        tema.MarcarCriterio(TipoCriterio.Teoria);
+        var fechaOriginal = ObtenerCriterio(tema, TipoCriterio.Teoria).FechaCumplido;
+
+        tema.MarcarCriterio(TipoCriterio.Teoria);
+
+        Assert.Equal(fechaOriginal, ObtenerCriterio(tema, TipoCriterio.Teoria).FechaCumplido);
+    }
+
+    [Fact]
+    public void MarcarCriterio_DebeRechazarCriterioNoDefinido()
+    {
+        var tema = CrearTemaConCriterios();
+
+        Assert.Throws<InvalidOperationException>(() => tema.MarcarCriterio(TipoCriterio.Laboratorio));
+    }
+
+    [Fact]
+    public void DesmarcarCriterio_DebeQuitarCumplimientoYFecha()
+    {
+        var tema = CrearTemaConCriterios();
+        tema.MarcarCriterio(TipoCriterio.Teoria);
+
+        tema.DesmarcarCriterio(TipoCriterio.Teoria);
+
+        var criterio = ObtenerCriterio(tema, TipoCriterio.Teoria);
+        Assert.False(criterio.Cumplido);
+        Assert.Null(criterio.FechaCumplido);
+    }
+
+    [Fact]
+    public void DesmarcarCriterio_DebeRechazarCriterioNoDefinido()
+    {
+        var tema = CrearTemaConCriterios();
+
+        Assert.Throws<InvalidOperationException>(() => tema.DesmarcarCriterio(TipoCriterio.Laboratorio));
+    }
+
+    [Fact]
+    public void DefinirCriteriosRelevantes_DebePermitirRedefinirSinProgreso()
+    {
+        var tema = CrearTemaConCriterios();
+
+        tema.DefinirCriteriosRelevantes([TipoCriterio.Explicacion, TipoCriterio.Ejercicios]);
+
+        Assert.Equal([TipoCriterio.Explicacion, TipoCriterio.Ejercicios], tema.Criterios.Select(c => c.Tipo));
+    }
+
+    [Fact]
+    public void DefinirCriteriosRelevantes_DebeRechazarRedefinirConProgreso()
+    {
+        var tema = CrearTemaConCriterios();
+        tema.MarcarCriterio(TipoCriterio.Teoria);
+
+        Assert.Throws<InvalidOperationException>(() =>
+            tema.DefinirCriteriosRelevantes([TipoCriterio.Explicacion, TipoCriterio.Ejercicios]));
+    }
+
+    [Fact]
+    public void EstaDominado_DebeSerFalseSinCriteriosMarcados()
+    {
+        var tema = CrearTemaConCriterios();
+
+        Assert.False(tema.EstaDominado());
+    }
+
+    [Fact]
+    public void EstaDominado_DebeSerFalseConUnCriterioMarcado()
+    {
+        var tema = CrearTemaConCriterios();
+
+        tema.MarcarCriterio(TipoCriterio.Teoria);
+
+        Assert.False(tema.EstaDominado());
+    }
+
+    [Fact]
+    public void EstaDominado_DebeSerTrueConTodosLosCriteriosMarcados()
+    {
+        var tema = CrearTemaConCriterios();
+
+        tema.MarcarCriterio(TipoCriterio.Teoria);
+        tema.MarcarCriterio(TipoCriterio.Practica);
+
+        Assert.True(tema.EstaDominado());
+    }
+
+    [Fact]
+    public void MarcarCriterio_NoDebeGenerarTemaDominadoEventoAntesDeCompletarTodos()
+    {
+        var tema = CrearTemaConCriterios();
+
+        tema.MarcarCriterio(TipoCriterio.Teoria);
+
+        Assert.Empty(tema.EventosDominio);
+    }
+
+    [Fact]
+    public void MarcarCriterio_DebeGenerarTemaDominadoEventoAlCompletarUltimoCriterio()
+    {
+        var tema = CrearTemaConCriterios();
+        tema.MarcarCriterio(TipoCriterio.Teoria);
+        var antes = DateTime.UtcNow;
+
+        tema.MarcarCriterio(TipoCriterio.Practica);
+
+        var evento = Assert.IsType<TemaDominadoEvento>(Assert.Single(tema.EventosDominio));
+        Assert.Equal(tema.Id, evento.TemaId);
+        Assert.True(evento.OcurrioEnUtc >= antes);
+    }
+
+    [Fact]
+    public void MarcarCriterio_NoDebeGenerarOtroTemaDominadoEventoSiYaEstabaDominado()
+    {
+        var tema = CrearTemaConCriterios();
+        tema.MarcarCriterio(TipoCriterio.Teoria);
+        tema.MarcarCriterio(TipoCriterio.Practica);
+
+        tema.MarcarCriterio(TipoCriterio.Practica);
+
+        Assert.Single(tema.EventosDominio);
+    }
+
+    private static Tema CrearTema() =>
+        Tema.Crear(Guid.CreateVersion7(), "Modelo OSI", TipoConocimiento.Conceptual);
+
+    private static Tema CrearTemaConCriterios()
+    {
+        var tema = CrearTema();
+        tema.DefinirCriteriosRelevantes([TipoCriterio.Teoria, TipoCriterio.Practica]);
+
+        return tema;
+    }
+
+    private static CriterioTema ObtenerCriterio(Tema tema, TipoCriterio tipo) =>
+        tema.Criterios.Single(criterio => criterio.Tipo == tipo);
 }

@@ -182,8 +182,10 @@
 - [x] Smoke test de Tema.Objetivos ejecutado correctamente.
 - [x] dotnet test por proyecto validado.
 - [x] dotnet test por solucion validado.
-- [ ] Tests de dominio.
-- [ ] Test automatizado directo de TemaDominadoEvento.
+- [x] Tests fundacionales de dominio para Tema.
+- [x] Tests fundacionales de dominio para SesionEstudio.
+- [x] Test automatizado directo de TemaDominadoEvento.
+- [x] Test automatizado directo de SesionRegistradaEvento.
 - [ ] Tests de Application.
 - [ ] Tests de persistencia.
 - [ ] Tests E2E automatizados.

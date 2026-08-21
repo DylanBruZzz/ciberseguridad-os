@@ -7,12 +7,13 @@ Branch: main
 Ultimo checkpoint:
 
 ```text
-73aa27c feat: establish study session flow
+542a2cc test: establish xunit testing foundation
 ```
 
 Checkpoint anterior:
 
 ```text
+73aa27c feat: establish study session flow
 0c4ee2d docs: formalize Codex execution modes
 a3382e8 feat: establish resource library flow
 16aeec2 feat: establish topic mastery criteria flow
@@ -41,6 +42,7 @@ caf832a feat: establish validated initial persistence
 - RESOURCE / BIBLIOTECA DE RECURSOS VALIDADO END-TO-END
 - STUDY / SESIONES DE ESTUDIO VALIDADO END-TO-END
 - INFRAESTRUCTURA DE TESTS XUNIT MTP VALIDADA
+- TESTS DE DOMINIO FUNDACIONALES VALIDADO
 
 ## Migraciones Aplicadas
 
@@ -185,7 +187,9 @@ SesionEstudio E2E:
 - dotnet test por proyecto: validado
 - dotnet test por solucion: validado
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
-- Tests completos de Dominio/Application: pendientes.
+- Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, dominio y TemaDominadoEvento validados.
+- Tests de Dominio SesionEstudio: registro, invariantes, correccion de duracion y SesionRegistradaEvento validados.
+- Tests de Application: pendientes.
 - Tests de integracion: pendientes.
 
 ## Estado Git Esperado

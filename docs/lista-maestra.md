@@ -190,7 +190,9 @@
 - [x] Tests fundacionales de Application Resource.
 - [x] Tests fundacionales de Application Study.
 - [x] Fakes minimos sin framework de mocking.
-- [ ] Tests de persistencia.
+- [x] Tests fundacionales de persistencia sobre SQL Server real y AprendizajeTestsDb exclusiva.
+- [x] Guard rail de tests de integracion contra uso accidental de AprendizajeDb.
+- [x] Tests de persistencia para Tema.Objetivos, RowVersion de SesionEstudio, RecursoTema, query filter y FK real.
 - [ ] Tests E2E automatizados.
 - [ ] Tests de concurrencia donde aplique RowVersion.
 

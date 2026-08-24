@@ -45,6 +45,7 @@ caf832a feat: establish validated initial persistence
 - INFRAESTRUCTURA DE TESTS XUNIT MTP VALIDADA
 - TESTS DE DOMINIO FUNDACIONALES VALIDADO
 - TESTS APPLICATION FUNDACIONALES VALIDADO
+- TESTS DE INTEGRACION/PERSISTENCIA FUNDACIONALES VALIDADO SOBRE SQL SERVER REAL
 
 ## Migraciones Aplicadas
 
@@ -187,15 +188,18 @@ SesionEstudio E2E:
 - Microsoft.NET.Test.Sdk: no requerido con la estrategia MTP actual
 - dotnet run del proyecto de tests: validado
 - dotnet test por proyecto: validado
-- dotnet test por solucion: validado
+- dotnet test por solucion: validado con 73 tests correctos
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
 - Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, dominio y TemaDominadoEvento validados.
 - Tests de Dominio SesionEstudio: registro, invariantes, correccion de duracion y SesionRegistradaEvento validados.
 - Tests de Application Roadmap: flujos criticos de Tema cubiertos con fakes minimos.
 - Tests de Application Resource: crear, obtener, listar y vincular cubiertos con fakes minimos.
 - Tests de Application Study: registrar, obtener, listar y corregir duracion cubiertos con fakes minimos.
+- Tests de integracion/persistencia: SQL Server real .\MSSQLSERVER01 con base exclusiva AprendizajeTestsDb.
+- Guard rail de integracion: rechaza AprendizajeDb, database vacio y cualquier base distinta a AprendizajeTestsDb antes de recrear.
+- Tests de persistencia cubren: Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
 - Frameworks de mocking: no utilizados.
-- Tests de integracion: pendientes.
+- Tests de integracion fundacionales: validados.
 
 ## Estado Git Esperado
 

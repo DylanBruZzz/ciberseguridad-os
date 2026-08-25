@@ -83,6 +83,11 @@
 - [x] ListarLaboratorios implementado.
 - [x] VincularLaboratorioATema implementado.
 - [x] VincularLaboratorioAHerramienta implementado.
+- [x] CrearProyecto implementado.
+- [x] ObtenerProyectoPorId implementado.
+- [x] ListarProyectos implementado.
+- [x] VincularProyectoATema implementado.
+- [x] VincularProyectoAHerramienta implementado.
 - [x] CrearTema implementado.
 - [x] ObtenerTemaPorId implementado.
 - [x] EstablecerObjetivosTema implementado.
@@ -122,6 +127,11 @@
 - [x] GET /api/laboratorios?usuarioId={id}.
 - [x] PUT /api/laboratorios/{id}/temas/{temaId}.
 - [x] PUT /api/laboratorios/{id}/herramientas/{herramientaId}.
+- [x] POST /api/proyectos.
+- [x] GET /api/proyectos/{id}.
+- [x] GET /api/proyectos?usuarioId={id}.
+- [x] PUT /api/proyectos/{id}/temas/{temaId}.
+- [x] PUT /api/proyectos/{id}/herramientas/{herramientaId}.
 - [x] POST /api/temas.
 - [x] GET /api/temas/{id}.
 - [x] PUT /api/temas/{id}/objetivos.
@@ -215,6 +225,14 @@
 - [x] Vincular Laboratorio a Tema es idempotente.
 - [x] Vincular Laboratorio a Herramienta -> 204.
 - [x] Vincular Laboratorio a Herramienta es idempotente.
+- [x] Crear Proyecto -> 201.
+- [x] Obtener Proyecto por Id -> 200.
+- [x] Listar proyectos por Usuario -> 200.
+- [x] Listar proyectos con Guid.Empty -> 400.
+- [x] Vincular Proyecto a Tema -> 204.
+- [x] Vincular Proyecto a Tema es idempotente.
+- [x] Vincular Proyecto a Herramienta -> 204.
+- [x] Vincular Proyecto a Herramienta es idempotente.
 - [ ] Nuevos flujos E2E por vertical slice.
 
 ## 10. Tests
@@ -241,6 +259,9 @@
 - [x] Tests fundacionales de dominio para Laboratorio.
 - [x] Tests fundacionales de Application para Laboratorio y vinculos a Tema/Herramienta.
 - [x] Tests de persistencia para LaboratorioTema y LaboratorioHerramienta.
+- [x] Tests fundacionales de dominio para Proyecto.
+- [x] Tests fundacionales de Application para Proyecto y vinculos a Tema/Herramienta.
+- [x] Tests de persistencia para ProyectoTema, ProyectoHerramienta y RowVersion de Proyecto.
 - [ ] Tests E2E automatizados.
 - [ ] Tests de concurrencia donde aplique RowVersion.
 

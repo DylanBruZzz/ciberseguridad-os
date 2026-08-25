@@ -1,5 +1,7 @@
 using Aprendizaje.Aplicacion.Evidence.Laboratorios.VincularLaboratorioAHerramienta;
 using Aprendizaje.Aplicacion.Evidence.Laboratorios.VincularLaboratorioATema;
+using Aprendizaje.Aplicacion.Evidence.Proyectos.VincularProyectoAHerramienta;
+using Aprendizaje.Aplicacion.Evidence.Proyectos.VincularProyectoATema;
 using Aprendizaje.Aplicacion.Resource.Recursos.VincularRecursoATema;
 using Aprendizaje.Aplicacion.Study.SesionesEstudio.VincularHerramientaASesionEstudio;
 using Aprendizaje.Dominio.Evidence;
@@ -294,6 +296,173 @@ public sealed class PersistenciaSqlServerTests
 
             Assert.Equal(1, filas);
         }
+    }
+
+    [Fact]
+    public async Task ProyectoTema_VinculoNoSeDuplica()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+        var tema = Tema.Crear(usuario.Id, "Modelo OSI", TipoConocimiento.Conceptual);
+        var proyecto = Proyecto.Crear(usuario.Id, "Analizador de tráfico OSI");
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            contexto.Usuarios.Add(usuario);
+            contexto.Temas.Add(tema);
+            contexto.Proyectos.Add(proyecto);
+            await contexto.GuardarCambiosAsync(CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var casoUso = new VincularProyectoATemaCasoUso(
+                new ProyectoRepository(contexto),
+                new TemaRepository(contexto),
+                contexto);
+
+            var primerResultado = await casoUso.EjecutarAsync(
+                new VincularProyectoATemaSolicitud(proyecto.Id, tema.Id),
+                CancellationToken);
+            var segundoResultado = await casoUso.EjecutarAsync(
+                new VincularProyectoATemaSolicitud(proyecto.Id, tema.Id),
+                CancellationToken);
+
+            Assert.Equal(VincularProyectoATemaEstado.Actualizado, primerResultado.Estado);
+            Assert.Equal(VincularProyectoATemaEstado.Actualizado, segundoResultado.Estado);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var filas = await contexto.Database
+                .SqlQueryRaw<int>(
+                    "SELECT COUNT(*) AS [Value] FROM [evidence].[ProyectoTema] WHERE [ProyectoId] = {0} AND [TemaId] = {1}",
+                    proyecto.Id,
+                    tema.Id)
+                .SingleAsync(CancellationToken);
+
+            Assert.Equal(1, filas);
+        }
+    }
+
+    [Fact]
+    public async Task ProyectoHerramienta_VinculoNoSeDuplica()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+        var proyecto = Proyecto.Crear(usuario.Id, "Analizador de tráfico OSI");
+        var herramienta = Herramienta.Crear($"Wireshark Integration {Guid.CreateVersion7():N}");
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            contexto.Usuarios.Add(usuario);
+            contexto.Proyectos.Add(proyecto);
+            contexto.Herramientas.Add(herramienta);
+            await contexto.GuardarCambiosAsync(CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var casoUso = new VincularProyectoAHerramientaCasoUso(
+                new ProyectoRepository(contexto),
+                new HerramientaRepository(contexto),
+                contexto);
+
+            var primerResultado = await casoUso.EjecutarAsync(
+                new VincularProyectoAHerramientaSolicitud(proyecto.Id, herramienta.Id),
+                CancellationToken);
+            var segundoResultado = await casoUso.EjecutarAsync(
+                new VincularProyectoAHerramientaSolicitud(proyecto.Id, herramienta.Id),
+                CancellationToken);
+
+            Assert.Equal(VincularProyectoAHerramientaEstado.Actualizado, primerResultado.Estado);
+            Assert.Equal(VincularProyectoAHerramientaEstado.Actualizado, segundoResultado.Estado);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var filas = await contexto.Database
+                .SqlQueryRaw<int>(
+                    "SELECT COUNT(*) AS [Value] FROM [evidence].[ProyectoHerramienta] WHERE [ProyectoId] = {0} AND [HerramientaId] = {1}",
+                    proyecto.Id,
+                    herramienta.Id)
+                .SingleAsync(CancellationToken);
+
+            Assert.Equal(1, filas);
+        }
+    }
+
+    [Fact]
+    public async Task Proyecto_RowVersion_SePueblaAlInsertar()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+        var proyecto = Proyecto.Crear(usuario.Id, "Analizador de tráfico OSI");
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            contexto.Usuarios.Add(usuario);
+            contexto.Proyectos.Add(proyecto);
+            await contexto.GuardarCambiosAsync(CancellationToken);
+
+            var versionInicial = Assert.IsType<byte[]>(proyecto.VersionFila);
+            Assert.NotEmpty(versionInicial);
+        }
+    }
+
+    [Fact]
+    public async Task Proyecto_RowVersion_NoCambiaAlVincularTemaOHerramienta()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+        var tema = Tema.Crear(usuario.Id, "Modelo OSI", TipoConocimiento.Conceptual);
+        var proyecto = Proyecto.Crear(usuario.Id, "Analizador de tráfico OSI");
+        var herramienta = Herramienta.Crear($"Wireshark Integration {Guid.CreateVersion7():N}");
+        byte[] versionAntes;
+        byte[] versionDespues;
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            contexto.Usuarios.Add(usuario);
+            contexto.Temas.Add(tema);
+            contexto.Proyectos.Add(proyecto);
+            contexto.Herramientas.Add(herramienta);
+            await contexto.GuardarCambiosAsync(CancellationToken);
+
+            versionAntes = Assert.IsType<byte[]>(proyecto.VersionFila);
+            Assert.NotEmpty(versionAntes);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var vincularTema = new VincularProyectoATemaCasoUso(
+                new ProyectoRepository(contexto),
+                new TemaRepository(contexto),
+                contexto);
+            var vincularHerramienta = new VincularProyectoAHerramientaCasoUso(
+                new ProyectoRepository(contexto),
+                new HerramientaRepository(contexto),
+                contexto);
+
+            await vincularTema.EjecutarAsync(
+                new VincularProyectoATemaSolicitud(proyecto.Id, tema.Id),
+                CancellationToken);
+            await vincularHerramienta.EjecutarAsync(
+                new VincularProyectoAHerramientaSolicitud(proyecto.Id, herramienta.Id),
+                CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var rematerializado = await contexto.Proyectos
+                .AsNoTracking()
+                .SingleAsync(p => p.Id == proyecto.Id, CancellationToken);
+
+            versionDespues = Assert.IsType<byte[]>(rematerializado.VersionFila);
+            Assert.NotEmpty(versionDespues);
+        }
+
+        Assert.Equal(versionAntes, versionDespues);
     }
 
     [Fact]

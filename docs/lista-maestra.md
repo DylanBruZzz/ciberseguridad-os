@@ -71,6 +71,13 @@
 - [x] ObtenerSesionEstudio implementado.
 - [x] ListarSesionesEstudio implementado.
 - [x] CorregirDuracionSesionEstudio implementado.
+- [x] CrearEntradaBitacora implementado.
+- [x] ObtenerEntradaBitacoraPorId implementado.
+- [x] ListarEntradasBitacora implementado.
+- [x] CrearHerramienta implementado.
+- [x] ObtenerHerramientaPorId implementado.
+- [x] ListarHerramientas implementado.
+- [x] VincularHerramientaASesionEstudio implementado.
 - [x] CrearTema implementado.
 - [x] ObtenerTemaPorId implementado.
 - [x] EstablecerObjetivosTema implementado.
@@ -98,6 +105,13 @@
 - [x] GET /api/sesiones-estudio/{id}.
 - [x] GET /api/sesiones-estudio?usuarioId={id}.
 - [x] PUT /api/sesiones-estudio/{id}/duracion.
+- [x] PUT /api/sesiones-estudio/{id}/herramientas/{herramientaId}.
+- [x] POST /api/entradas-bitacora.
+- [x] GET /api/entradas-bitacora/{id}.
+- [x] GET /api/entradas-bitacora?usuarioId={id}.
+- [x] POST /api/herramientas.
+- [x] GET /api/herramientas/{id}.
+- [x] GET /api/herramientas.
 - [x] POST /api/temas.
 - [x] GET /api/temas/{id}.
 - [x] PUT /api/temas/{id}/objetivos.
@@ -165,6 +179,16 @@
 - [x] Corregir duracion invalida -> 400.
 - [x] RowVersion de SesionEstudio verificada fisicamente.
 - [x] SesionRegistradaEvento confirmado por codigo.
+- [x] Crear EntradaBitacora -> 201.
+- [x] Obtener EntradaBitacora por Id -> 200.
+- [x] Listar entradas de bitacora por Usuario -> 200.
+- [x] Listar entradas de bitacora para Usuario sin entradas -> 200 con [].
+- [x] Listar entradas de bitacora con Guid.Empty -> 400.
+- [x] Crear Herramienta -> 201.
+- [x] Obtener Herramienta por Id -> 200.
+- [x] Listar herramientas -> 200.
+- [x] Vincular Herramienta a SesionEstudio -> 204.
+- [x] Vincular Herramienta a SesionEstudio es idempotente.
 - [x] Listar temas por Usuario -> 200.
 - [x] Listar temas para Usuario sin temas -> 200 con [].
 - [x] Listar temas con Guid.Empty -> 400.
@@ -192,7 +216,9 @@
 - [x] Fakes minimos sin framework de mocking.
 - [x] Tests fundacionales de persistencia sobre SQL Server real y AprendizajeTestsDb exclusiva.
 - [x] Guard rail de tests de integracion contra uso accidental de AprendizajeDb.
-- [x] Tests de persistencia para Tema.Objetivos, RowVersion de SesionEstudio, RecursoTema, query filter y FK real.
+- [x] Tests de persistencia para Tema.Objetivos, RowVersion de SesionEstudio, RecursoTema, SesionHerramienta, query filter y FK real.
+- [x] Tests fundacionales de dominio para EntradaBitacora y Herramienta.
+- [x] Tests fundacionales de Application para EntradaBitacora, Herramienta y SesionHerramienta.
 - [ ] Tests E2E automatizados.
 - [ ] Tests de concurrencia donde aplique RowVersion.
 

@@ -26,6 +26,8 @@ public static class InyeccionDependencias
         services.AddScoped<ICompetenciaRepository, CompetenciaRepository>();
         services.AddScoped<ICertificacionRepository, CertificacionRepository>();
         services.AddScoped<IRecursoRepository, RecursoRepository>();
+        services.AddScoped<IEntradaBitacoraRepository, EntradaBitacoraRepository>();
+        services.AddScoped<IHerramientaRepository, HerramientaRepository>();
         services.AddScoped<ISesionEstudioRepository, SesionEstudioRepository>();
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<AprendizajeDbContext>());
 

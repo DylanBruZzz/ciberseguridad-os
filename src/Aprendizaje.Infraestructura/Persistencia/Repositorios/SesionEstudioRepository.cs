@@ -1,5 +1,6 @@
 using Aprendizaje.Dominio.Study;
 using Aprendizaje.Dominio.Study.Repositorios;
+using Aprendizaje.Infraestructura.Persistencia.ModelosUnion;
 using Microsoft.EntityFrameworkCore;
 
 namespace Aprendizaje.Infraestructura.Persistencia.Repositorios;
@@ -26,5 +27,15 @@ public sealed class SesionEstudioRepository : ISesionEstudioRepository
             .ThenBy(s => s.Id)
             .ToListAsync(cancellationToken);
 
+    public Task<bool> ExisteVinculoHerramientaAsync(
+        Guid sesionId,
+        Guid herramientaId,
+        CancellationToken cancellationToken = default) =>
+        _context.Set<SesionHerramienta>()
+            .AnyAsync(s => s.SesionId == sesionId && s.HerramientaId == herramientaId, cancellationToken);
+
     public void Agregar(SesionEstudio sesion) => _context.SesionesEstudio.Add(sesion);
+
+    public void VincularHerramienta(Guid sesionId, Guid herramientaId) =>
+        _context.Set<SesionHerramienta>().Add(new SesionHerramienta(sesionId, herramientaId));
 }

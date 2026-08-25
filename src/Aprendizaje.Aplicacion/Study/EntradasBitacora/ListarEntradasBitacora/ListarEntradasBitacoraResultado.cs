@@ -1,0 +1,3 @@
+namespace Aprendizaje.Aplicacion.Study.EntradasBitacora.ListarEntradasBitacora;
+
+public sealed record ListarEntradasBitacoraResultado(IReadOnlyCollection<EntradaBitacoraResumen> Entradas);

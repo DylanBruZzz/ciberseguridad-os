@@ -1,0 +1,3 @@
+namespace Aprendizaje.Aplicacion.Study.SesionesEstudio.VincularHerramientaASesionEstudio;
+
+public sealed record VincularHerramientaASesionEstudioSolicitud(Guid SesionId, Guid HerramientaId);

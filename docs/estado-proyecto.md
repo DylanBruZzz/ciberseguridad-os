@@ -7,12 +7,14 @@ Branch: main
 Ultimo checkpoint:
 
 ```text
-b05cc6f test: cover core domain behavior
+c0d4fc3 test: cover critical persistence behavior
 ```
 
 Checkpoint anterior:
 
 ```text
+c4e5a59 test: cover core application flows
+b05cc6f test: cover core domain behavior
 542a2cc test: establish xunit testing foundation
 73aa27c feat: establish study session flow
 0c4ee2d docs: formalize Codex execution modes
@@ -46,6 +48,10 @@ caf832a feat: establish validated initial persistence
 - TESTS DE DOMINIO FUNDACIONALES VALIDADO
 - TESTS APPLICATION FUNDACIONALES VALIDADO
 - TESTS DE INTEGRACION/PERSISTENCIA FUNDACIONALES VALIDADO SOBRE SQL SERVER REAL
+- ENTRADA BITACORA VALIDADO END-TO-END
+- HERRAMIENTA SOPORTE MINIMO VALIDADO END-TO-END
+- SESION-HERRAMIENTA VALIDADO END-TO-END
+- STUDY MINIMO CERRADO
 
 ## Migraciones Aplicadas
 
@@ -66,6 +72,9 @@ caf832a feat: establish validated initial persistence
 - Fase: 1
 - Recurso: 1
 - SesionEstudio: 1
+- EntradaBitacora: 1
+- Herramienta: 1
+- SesionHerramienta: 1
 
 Usuario E2E:
 
@@ -117,6 +126,20 @@ SesionEstudio E2E:
 - DuracionMinutos: 45
 - Notas: Estudio inicial del modelo OSI
 - RowVersion: verificada fisicamente y actualizada tras corregir duracion.
+
+EntradaBitacora E2E:
+
+- Id: 01A0364E-1D06-7644-9F33-84D1597A3942
+- Usuario: 01A015CC-1AC8-7EB0-A2C8-5D2A33894DCC
+- Tema: 01A016F7-1517-7C35-BAF3-A1BEB648776C
+- Texto: Repaso inicial del modelo OSI
+
+Herramienta E2E:
+
+- Id: 01A0364E-1F1D-7418-92F8-BE5DBC14C7FD
+- Nombre: Wireshark E2E Study
+- Categoria: Redes
+- Vinculada a SesionEstudio: 01A01FD6-072F-7DB6-8513-F75C0C993AF9
 
 ## Flujos Funcionales Actuales
 
@@ -173,6 +196,16 @@ SesionEstudio E2E:
 - PUT duracion con Guid.Empty -> 400
 - PUT duracion invalida -> 400
 - SesionRegistradaEvento confirmado por codigo; despacho sigue diferido.
+- POST /api/entradas-bitacora -> 201
+- GET /api/entradas-bitacora/{id} -> 200
+- GET /api/entradas-bitacora?usuarioId={id} -> 200
+- GET /api/entradas-bitacora?usuarioId={id-sin-entradas} -> 200 con []
+- GET /api/entradas-bitacora?usuarioId={Guid.Empty} -> 400
+- POST /api/herramientas -> 201
+- GET /api/herramientas/{id} -> 200
+- GET /api/herramientas -> 200
+- PUT /api/sesiones-estudio/{id}/herramientas/{herramientaId} -> 204
+- PUT vinculo SesionEstudio-Herramienta repetido -> 204 idempotente
 
 ## Build
 
@@ -188,16 +221,17 @@ SesionEstudio E2E:
 - Microsoft.NET.Test.Sdk: no requerido con la estrategia MTP actual
 - dotnet run del proyecto de tests: validado
 - dotnet test por proyecto: validado
-- dotnet test por solucion: validado con 73 tests correctos
+- dotnet test por solucion: validado con 106 tests correctos
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
 - Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, dominio y TemaDominadoEvento validados.
 - Tests de Dominio SesionEstudio: registro, invariantes, correccion de duracion y SesionRegistradaEvento validados.
+- Tests de Dominio EntradaBitacora y Herramienta validados.
 - Tests de Application Roadmap: flujos criticos de Tema cubiertos con fakes minimos.
 - Tests de Application Resource: crear, obtener, listar y vincular cubiertos con fakes minimos.
-- Tests de Application Study: registrar, obtener, listar y corregir duracion cubiertos con fakes minimos.
+- Tests de Application Study: SesionEstudio, EntradaBitacora, Herramienta y SesionHerramienta cubiertos con fakes minimos.
 - Tests de integracion/persistencia: SQL Server real .\MSSQLSERVER01 con base exclusiva AprendizajeTestsDb.
 - Guard rail de integracion: rechaza AprendizajeDb, database vacio y cualquier base distinta a AprendizajeTestsDb antes de recrear.
-- Tests de persistencia cubren: Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
+- Tests de persistencia cubren: Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica SesionHerramienta, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
 - Frameworks de mocking: no utilizados.
 - Tests de integracion fundacionales: validados.
 
@@ -207,9 +241,9 @@ SesionEstudio E2E:
 
 ## Proxima Area
 
-Tests / Persistencia.
+Study minimo cerrado.
 
-Continuar con auditoria y diseno de tests de persistencia/integracion antes de introducir base de datos de test.
+Proxima area sugerida: definir siguiente bloque fuera de Study minimo, respetando pendientes deliberados.
 
 ## Pendientes Deliberados
 

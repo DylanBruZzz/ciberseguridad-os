@@ -2,6 +2,7 @@ using Aprendizaje.Aplicacion.Study.SesionesEstudio.CorregirDuracionSesionEstudio
 using Aprendizaje.Aplicacion.Study.SesionesEstudio.RegistrarSesionEstudio;
 using Aprendizaje.Aplicacion.Study.SesionesEstudio.ListarSesionesEstudio;
 using Aprendizaje.Aplicacion.Study.SesionesEstudio.ObtenerSesionEstudioPorId;
+using Aprendizaje.Aplicacion.Study.SesionesEstudio.VincularHerramientaASesionEstudio;
 using Aprendizaje.Dominio.Study;
 
 namespace Aprendizaje.Api.Endpoints.Study;
@@ -16,8 +17,35 @@ public static class SesionEstudioEndpoints
         grupo.MapGet("/", ListarSesionesEstudioAsync);
         grupo.MapGet("/{id:guid}", ObtenerSesionEstudioPorIdAsync);
         grupo.MapPut("/{id:guid}/duracion", CorregirDuracionAsync);
+        grupo.MapPut("/{sesionId:guid}/herramientas/{herramientaId:guid}", VincularHerramientaAsync);
 
         return app;
+    }
+
+    private static async Task<IResult> VincularHerramientaAsync(
+        Guid sesionId,
+        Guid herramientaId,
+        VincularHerramientaASesionEstudioCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new VincularHerramientaASesionEstudioSolicitud(sesionId, herramientaId),
+                cancellationToken);
+
+            return resultado.Estado switch
+            {
+                VincularHerramientaASesionEstudioEstado.Actualizado => Results.NoContent(),
+                VincularHerramientaASesionEstudioEstado.SesionNoEncontrada => Results.NotFound(),
+                VincularHerramientaASesionEstudioEstado.HerramientaNoEncontrada => Results.NotFound(),
+                _ => Results.Problem("Estado de vínculo Sesión-Herramienta no reconocido.")
+            };
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
     }
 
     private static async Task<IResult> CorregirDuracionAsync(

@@ -19,9 +19,16 @@ using Aprendizaje.Aplicacion.Roadmap.Temas.ListarTemas;
 using Aprendizaje.Aplicacion.Roadmap.Temas.MarcarCriterio;
 using Aprendizaje.Aplicacion.Roadmap.Temas.ObtenerTemaPorId;
 using Aprendizaje.Aplicacion.Study.SesionesEstudio.CorregirDuracionSesionEstudio;
+using Aprendizaje.Aplicacion.Study.EntradasBitacora.CrearEntradaBitacora;
+using Aprendizaje.Aplicacion.Study.EntradasBitacora.ListarEntradasBitacora;
+using Aprendizaje.Aplicacion.Study.EntradasBitacora.ObtenerEntradaBitacoraPorId;
+using Aprendizaje.Aplicacion.Study.Herramientas.CrearHerramienta;
+using Aprendizaje.Aplicacion.Study.Herramientas.ListarHerramientas;
+using Aprendizaje.Aplicacion.Study.Herramientas.ObtenerHerramientaPorId;
 using Aprendizaje.Aplicacion.Study.SesionesEstudio.ListarSesionesEstudio;
 using Aprendizaje.Aplicacion.Study.SesionesEstudio.ObtenerSesionEstudioPorId;
 using Aprendizaje.Aplicacion.Study.SesionesEstudio.RegistrarSesionEstudio;
+using Aprendizaje.Aplicacion.Study.SesionesEstudio.VincularHerramientaASesionEstudio;
 using Aprendizaje.Infraestructura.Configuracion;
 using System.Text.Json.Serialization;
 
@@ -44,9 +51,16 @@ builder.Services.AddScoped<ListarRecursosCasoUso>();
 builder.Services.AddScoped<ObtenerRecursoPorIdCasoUso>();
 builder.Services.AddScoped<VincularRecursoATemaCasoUso>();
 builder.Services.AddScoped<CorregirDuracionSesionEstudioCasoUso>();
+builder.Services.AddScoped<CrearEntradaBitacoraCasoUso>();
+builder.Services.AddScoped<ListarEntradasBitacoraCasoUso>();
+builder.Services.AddScoped<ObtenerEntradaBitacoraPorIdCasoUso>();
+builder.Services.AddScoped<CrearHerramientaCasoUso>();
+builder.Services.AddScoped<ListarHerramientasCasoUso>();
+builder.Services.AddScoped<ObtenerHerramientaPorIdCasoUso>();
 builder.Services.AddScoped<ListarSesionesEstudioCasoUso>();
 builder.Services.AddScoped<ObtenerSesionEstudioPorIdCasoUso>();
 builder.Services.AddScoped<RegistrarSesionEstudioCasoUso>();
+builder.Services.AddScoped<VincularHerramientaASesionEstudioCasoUso>();
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -55,7 +69,9 @@ builder.Services.AddInfraestructura(builder.Configuration);
 
 var app = builder.Build();
 
+app.MapEntradaBitacoraEndpoints();
 app.MapFaseEndpoints();
+app.MapHerramientaEndpoints();
 app.MapRecursoEndpoints();
 app.MapSesionEstudioEndpoints();
 app.MapTemaEndpoints();

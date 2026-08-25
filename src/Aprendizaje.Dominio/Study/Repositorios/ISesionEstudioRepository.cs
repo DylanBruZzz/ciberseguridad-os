@@ -8,5 +8,12 @@ public interface ISesionEstudioRepository
         Guid usuarioId,
         CancellationToken cancellationToken = default);
 
+    Task<bool> ExisteVinculoHerramientaAsync(
+        Guid sesionId,
+        Guid herramientaId,
+        CancellationToken cancellationToken = default);
+
     void Agregar(SesionEstudio sesion);
+
+    void VincularHerramienta(Guid sesionId, Guid herramientaId);
 }

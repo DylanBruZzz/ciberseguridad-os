@@ -6,6 +6,7 @@ using Aprendizaje.Aplicacion.Evidence.Proyectos.VincularProyectoAHerramienta;
 using Aprendizaje.Aplicacion.Evidence.Proyectos.VincularProyectoATema;
 using Aprendizaje.Aplicacion.Evidence.Writeups.VincularWriteupATema;
 using Aprendizaje.Aplicacion.Resource.Recursos.VincularRecursoATema;
+using Aprendizaje.Aplicacion.Roadmap.Competencias.VincularCompetenciaATema;
 using Aprendizaje.Aplicacion.Study.SesionesEstudio.VincularHerramientaASesionEstudio;
 using Aprendizaje.Dominio.Evidence;
 using Aprendizaje.Dominio.Nucleo;
@@ -222,6 +223,53 @@ public sealed class PersistenciaSqlServerTests
                 .SqlQueryRaw<int>(
                     "SELECT COUNT(*) AS [Value] FROM [resource].[RecursoTema] WHERE [RecursoId] = {0} AND [TemaId] = {1}",
                     recurso.Id,
+                    tema.Id)
+                .SingleAsync(CancellationToken);
+
+            Assert.Equal(1, filas);
+        }
+    }
+
+    [Fact]
+    public async Task CompetenciaTema_VinculoNoSeDuplica()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+        var tema = Tema.Crear(usuario.Id, "Modelo OSI", TipoConocimiento.Conceptual);
+        var competencia = Competencia.Crear(usuario.Id, "Comprensión de fundamentos de redes");
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            contexto.Usuarios.Add(usuario);
+            contexto.Temas.Add(tema);
+            contexto.Competencias.Add(competencia);
+            await contexto.GuardarCambiosAsync(CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var casoUso = new VincularCompetenciaATemaCasoUso(
+                new CompetenciaRepository(contexto),
+                new TemaRepository(contexto),
+                contexto);
+
+            var primerResultado = await casoUso.EjecutarAsync(
+                new VincularCompetenciaATemaSolicitud(competencia.Id, tema.Id),
+                CancellationToken);
+            var segundoResultado = await casoUso.EjecutarAsync(
+                new VincularCompetenciaATemaSolicitud(competencia.Id, tema.Id),
+                CancellationToken);
+
+            Assert.Equal(VincularCompetenciaATemaEstado.Actualizado, primerResultado.Estado);
+            Assert.Equal(VincularCompetenciaATemaEstado.Actualizado, segundoResultado.Estado);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var filas = await contexto.Database
+                .SqlQueryRaw<int>(
+                    "SELECT COUNT(*) AS [Value] FROM [roadmap].[CompetenciaTema] WHERE [CompetenciaId] = {0} AND [TemaId] = {1}",
+                    competencia.Id,
                     tema.Id)
                 .SingleAsync(CancellationToken);
 

@@ -1,0 +1,3 @@
+namespace Aprendizaje.Aplicacion.Roadmap.Competencias.ListarCompetencias;
+
+public sealed record ListarCompetenciasResultado(IReadOnlyCollection<CompetenciaResumen> Competencias);

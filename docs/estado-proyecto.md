@@ -7,12 +7,13 @@ Branch: main
 Ultimo checkpoint:
 
 ```text
-96277a0 feat: complete minimal evidence module
+8940e65 feat: establish advanced topic planning flow
 ```
 
 Checkpoint anterior:
 
 ```text
+96277a0 feat: complete minimal evidence module
 603e62d feat: establish certification evidence flow
 f9e452a feat: establish writeup evidence flow
 b1a4d6c feat: establish technical artifact evidence flow
@@ -82,6 +83,9 @@ caf832a feat: establish validated initial persistence
 - ROADMAP AVANZADO TEMA PLANIFICACION/PERCEPCION VALIDADO END-TO-END
 - INTERVALO REPASO DE TEMA CONFIGURABLE END-TO-END
 - ROWVERSION DE TEMA VERIFICADA TRAS UPDATE REAL
+- ROADMAP AVANZADO COMPETENCIA VALIDADO END-TO-END
+- COMPETENCIA-TEMA VALIDADO END-TO-END
+- OWNERSHIP COMPETENCIA-TEMA VALIDADO EN APPLICATION
 
 ## Migraciones Aplicadas
 
@@ -119,6 +123,8 @@ caf832a feat: establish validated initial persistence
 - Certificacion: 1
 - CertificacionObtenida: 1
 - Nota: 1
+- Competencia: 1
+- CompetenciaTema: 1
 
 Usuario E2E:
 
@@ -152,6 +158,14 @@ Subtema E2E:
 - Criterios:
   - Teoria: cumplido
   - Practica: cumplido
+
+Competencia E2E:
+
+- Id: 01A03AE8-7EEF-7981-B925-D1A8A66B0A53
+- Usuario: 01A015CC-1AC8-7EB0-A2C8-5D2A33894DCC
+- Nombre: Comprensión de fundamentos de redes E2E Roadmap
+- Descripcion: null
+- Tema vinculado: 01A016F7-1517-7C35-BAF3-A1BEB648776C
 
 Recurso E2E:
 
@@ -293,6 +307,13 @@ Nota E2E:
 - GET /api/temas?usuarioId={id} -> 200
 - GET /api/temas?usuarioId={id-sin-temas} -> 200 con []
 - GET /api/temas?usuarioId={Guid.Empty} -> 400
+- POST /api/competencias -> 201
+- GET /api/competencias/{id} -> 200
+- GET /api/competencias?usuarioId={id} -> 200
+- GET /api/competencias?usuarioId={id-sin-competencias} -> 200 con []
+- GET /api/competencias?usuarioId={Guid.Empty} -> 400
+- PUT /api/competencias/{id}/temas/{temaId} -> 204
+- PUT vinculo Competencia-Tema repetido -> 204 idempotente
 - POST /api/fases -> 201
 - GET /api/fases?usuarioId={id} -> 200
 - GET /api/fases?usuarioId={id-sin-fases} -> 200 con []
@@ -411,9 +432,10 @@ Nota E2E:
 - Microsoft.NET.Test.Sdk: no requerido con la estrategia MTP actual
 - dotnet run del proyecto de tests: validado
 - dotnet test por proyecto: validado
-- dotnet test por solucion: validado con 276 tests correctos
+- dotnet test por solucion: validado con 293 tests correctos
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
 - Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, planificacion, percepcion, IntervaloRepaso, dominio y TemaDominadoEvento validados.
+- Tests de Dominio Competencia validados.
 - Tests de Dominio SesionEstudio: registro, invariantes, correccion de duracion y SesionRegistradaEvento validados.
 - Tests de Dominio EntradaBitacora y Herramienta validados.
 - Tests de Dominio Laboratorio validados.
@@ -422,7 +444,7 @@ Nota E2E:
 - Tests de Dominio Writeup validados.
 - Tests de Dominio Certificacion y CertificacionObtenida validados.
 - Tests de Dominio Nota validados.
-- Tests de Application Roadmap: flujos criticos de Tema, planificacion, percepcion e IntervaloRepaso cubiertos con fakes minimos.
+- Tests de Application Roadmap: flujos criticos de Tema, planificacion, percepcion, IntervaloRepaso y Competencia/CompetenciaTema cubiertos con fakes minimos.
 - Tests de Application Resource: crear, obtener, listar y vincular cubiertos con fakes minimos.
 - Tests de Application Study: SesionEstudio, EntradaBitacora, Herramienta y SesionHerramienta cubiertos con fakes minimos.
 - Tests de Application Evidence: Laboratorio crear, obtener, listar, vincular a Tema y vincular a Herramienta cubiertos con fakes minimos.
@@ -434,7 +456,7 @@ Nota E2E:
 - Tests de Application Evidence: Nota crear sobre Tema/Proyecto/Laboratorio/Writeup/ArtefactoTecnico, obtener y listar cubiertos con fakes minimos.
 - Tests de integracion/persistencia: SQL Server real .\MSSQLSERVER01 con base exclusiva AprendizajeTestsDb.
 - Guard rail de integracion: rechaza AprendizajeDb, database vacio y cualquier base distinta a AprendizajeTestsDb antes de recrear.
-- Tests de persistencia cubren: Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, planificacion/percepcion/IntervaloRepaso de Tema, RowVersion de Tema tras update, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, idempotencia fisica ProyectoTema, idempotencia fisica ProyectoHerramienta, idempotencia fisica ArtefactoTema, idempotencia fisica ArtefactoHerramienta, idempotencia fisica WriteupTema, RowVersion de Proyecto poblada al insertar y estable al vincular joins, FK real CertificacionObtenida -> Certificacion, valores iniciales de CertificacionObtenida, query filter de CertificacionObtenida, Nota con un padre valido, CHECK CK_Nota_UnSoloPadre para cero y dos padres, query filter de Nota, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
+- Tests de persistencia cubren: Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, planificacion/percepcion/IntervaloRepaso de Tema, RowVersion de Tema tras update, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica CompetenciaTema, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, idempotencia fisica ProyectoTema, idempotencia fisica ProyectoHerramienta, idempotencia fisica ArtefactoTema, idempotencia fisica ArtefactoHerramienta, idempotencia fisica WriteupTema, RowVersion de Proyecto poblada al insertar y estable al vincular joins, FK real CertificacionObtenida -> Certificacion, valores iniciales de CertificacionObtenida, query filter de CertificacionObtenida, Nota con un padre valido, CHECK CK_Nota_UnSoloPadre para cero y dos padres, query filter de Nota, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
 - Frameworks de mocking: no utilizados.
 - Tests de integracion fundacionales: validados.
 
@@ -444,9 +466,9 @@ Nota E2E:
 
 ## Proxima Area
 
-Roadmap avanzado iniciado: planificacion/percepcion de Tema e IntervaloRepaso configurables desde Application/API y validados end-to-end.
+Roadmap avanzado iniciado: planificacion/percepcion de Tema, IntervaloRepaso y Competencia/CompetenciaTema configurables desde Application/API y validados end-to-end.
 
-Proxima area sugerida: continuar Roadmap avanzado con Competencia/CompetenciaTema o CertificacionTema antes de Analytics/read side.
+Proxima area sugerida: continuar Roadmap avanzado con CertificacionTema antes de Analytics/read side.
 
 ## Pendientes Deliberados
 

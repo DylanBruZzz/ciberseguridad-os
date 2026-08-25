@@ -116,6 +116,10 @@
 - [x] ActualizarPercepcionTema implementado.
 - [x] ActualizarPlanificacionTema implementado.
 - [x] ConfigurarIntervaloRepasoTema implementado.
+- [x] CrearCompetencia implementado.
+- [x] ObtenerCompetenciaPorId implementado.
+- [x] ListarCompetencias implementado.
+- [x] VincularCompetenciaATema implementado.
 - [x] AsignarTemaAFase implementado.
 - [x] AsignarTemaPadre implementado.
 - [x] DefinirCriteriosRelevantes implementado.
@@ -185,6 +189,10 @@
 - [x] PUT /api/temas/{id}/percepcion.
 - [x] PUT /api/temas/{id}/planificacion.
 - [x] PUT /api/temas/{id}/intervalo-repaso.
+- [x] POST /api/competencias.
+- [x] GET /api/competencias/{id}.
+- [x] GET /api/competencias?usuarioId={id}.
+- [x] PUT /api/competencias/{id}/temas/{temaId}.
 - [x] PUT /api/temas/{id}/criterios.
 - [x] PUT /api/temas/{id}/criterios/{tipo}/cumplido.
 - [x] DELETE /api/temas/{id}/criterios/{tipo}/cumplido.
@@ -212,6 +220,13 @@
 - [x] Configurar IntervaloRepaso de Tema -> 204.
 - [x] Configurar IntervaloRepaso de Tema con Guid.Empty -> 400.
 - [x] GET Tema devuelve percepcion, planificacion e IntervaloRepaso configurados.
+- [x] Crear Competencia -> 201.
+- [x] Obtener Competencia por Id -> 200.
+- [x] Listar competencias por Usuario -> 200.
+- [x] Listar competencias para Usuario sin competencias -> 200 con [].
+- [x] Listar competencias con Guid.Empty -> 400.
+- [x] Vincular Competencia a Tema -> 204.
+- [x] Vincular Competencia a Tema es idempotente.
 - [x] Asignar Tema a Fase -> 204.
 - [x] Asignar Fase a Tema inexistente -> 404.
 - [x] Asignar Fase inexistente a Tema -> 404.
@@ -335,11 +350,13 @@
 - [x] dotnet test por solucion validado.
 - [x] Tests fundacionales de dominio para Tema.
 - [x] Tests de dominio para planificacion, percepcion e IntervaloRepaso de Tema.
+- [x] Tests de dominio para Competencia.
 - [x] Tests fundacionales de dominio para SesionEstudio.
 - [x] Test automatizado directo de TemaDominadoEvento.
 - [x] Test automatizado directo de SesionRegistradaEvento.
 - [x] Tests fundacionales de Application Roadmap.
 - [x] Tests de Application Roadmap para planificacion, percepcion e IntervaloRepaso de Tema.
+- [x] Tests de Application Roadmap para Competencia y CompetenciaTema.
 - [x] Tests fundacionales de Application Resource.
 - [x] Tests fundacionales de Application Study.
 - [x] Fakes minimos sin framework de mocking.
@@ -347,6 +364,7 @@
 - [x] Guard rail de tests de integracion contra uso accidental de AprendizajeDb.
 - [x] Tests de persistencia para Tema.Objetivos, RowVersion de SesionEstudio, RecursoTema, SesionHerramienta, query filter y FK real.
 - [x] Tests de persistencia para planificacion/percepcion/IntervaloRepaso de Tema y RowVersion de Tema tras update.
+- [x] Tests de persistencia para CompetenciaTema.
 - [x] Tests fundacionales de dominio para EntradaBitacora y Herramienta.
 - [x] Tests fundacionales de Application para EntradaBitacora, Herramienta y SesionHerramienta.
 - [x] Tests fundacionales de dominio para Laboratorio.

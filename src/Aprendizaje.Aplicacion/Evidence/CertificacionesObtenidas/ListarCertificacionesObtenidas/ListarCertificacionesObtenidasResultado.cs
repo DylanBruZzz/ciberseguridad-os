@@ -1,0 +1,4 @@
+namespace Aprendizaje.Aplicacion.Evidence.CertificacionesObtenidas.ListarCertificacionesObtenidas;
+
+public sealed record ListarCertificacionesObtenidasResultado(
+    IReadOnlyCollection<CertificacionObtenidaResumen> CertificacionesObtenidas);

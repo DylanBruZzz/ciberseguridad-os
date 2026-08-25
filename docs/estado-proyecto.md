@@ -7,12 +7,13 @@ Branch: main
 Ultimo checkpoint:
 
 ```text
-b1a4d6c feat: establish technical artifact evidence flow
+f9e452a feat: establish writeup evidence flow
 ```
 
 Checkpoint anterior:
 
 ```text
+b1a4d6c feat: establish technical artifact evidence flow
 6805d19 feat: establish project evidence flow
 430e4bf feat: establish laboratory evidence flow
 85f077d feat: complete minimal study module
@@ -68,6 +69,9 @@ caf832a feat: establish validated initial persistence
 - ARTEFACTO-HERRAMIENTA VALIDADO END-TO-END
 - EVIDENCE WRITEUP VALIDADO END-TO-END
 - WRITEUP-TEMA VALIDADO END-TO-END
+- CERTIFICACION SOPORTE MINIMO VALIDADO END-TO-END
+- EVIDENCE CERTIFICACIONOBTENIDA VALIDADO END-TO-END
+- FK CERTIFICACIONOBTENIDA-CERTIFICACION VALIDADA SOBRE SQL SERVER REAL
 
 ## Migraciones Aplicadas
 
@@ -102,6 +106,8 @@ caf832a feat: establish validated initial persistence
 - ArtefactoHerramienta: 1
 - Writeup: 1
 - WriteupTema: 1
+- Certificacion: 1
+- CertificacionObtenida: 1
 
 Usuario E2E:
 
@@ -214,6 +220,24 @@ Writeup E2E:
 - EstadoMadurez: Borrador
 - Tema vinculado: 01A016F7-1517-7C35-BAF3-A1BEB648776C
 
+Certificacion E2E:
+
+- Id: 01A0396F-2D99-7805-AEF4-D5A85D587BED
+- Nombre: CompTIA Network+ E2E Evidence
+- Proveedor: null
+- TipoCosto: Pago
+- Url: null
+- Catalogo global: si
+
+CertificacionObtenida E2E:
+
+- Id: 01A0396F-3B45-7C8C-84AE-D870B729E04D
+- Usuario: 01A015CC-1AC8-7EB0-A2C8-5D2A33894DCC
+- Certificacion: 01A0396F-2D99-7805-AEF4-D5A85D587BED
+- FechaObtencion: 2026-08-25
+- EvidenciaUrl: null
+- EstadoMadurez: Documentado
+
 ## Flujos Funcionales Actuales
 
 - POST /api/usuarios -> 201
@@ -310,6 +334,14 @@ Writeup E2E:
 - GET /api/writeups?usuarioId={Guid.Empty} -> 400
 - PUT /api/writeups/{id}/temas/{temaId} -> 204
 - PUT vinculo Writeup-Tema repetido -> 204 idempotente
+- POST /api/certificaciones -> 201
+- GET /api/certificaciones/{id} -> 200
+- GET /api/certificaciones -> 200
+- POST /api/certificaciones-obtenidas -> 201
+- GET /api/certificaciones-obtenidas/{id} -> 200
+- GET /api/certificaciones-obtenidas?usuarioId={id} -> 200
+- GET /api/certificaciones-obtenidas?usuarioId={id-sin-certificaciones} -> 200 con []
+- GET /api/certificaciones-obtenidas?usuarioId={Guid.Empty} -> 400
 
 ## Build
 
@@ -325,7 +357,7 @@ Writeup E2E:
 - Microsoft.NET.Test.Sdk: no requerido con la estrategia MTP actual
 - dotnet run del proyecto de tests: validado
 - dotnet test por proyecto: validado
-- dotnet test por solucion: validado con 191 tests correctos
+- dotnet test por solucion: validado con 215 tests correctos
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
 - Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, dominio y TemaDominadoEvento validados.
 - Tests de Dominio SesionEstudio: registro, invariantes, correccion de duracion y SesionRegistradaEvento validados.
@@ -334,6 +366,7 @@ Writeup E2E:
 - Tests de Dominio Proyecto validados.
 - Tests de Dominio ArtefactoTecnico validados.
 - Tests de Dominio Writeup validados.
+- Tests de Dominio Certificacion y CertificacionObtenida validados.
 - Tests de Application Roadmap: flujos criticos de Tema cubiertos con fakes minimos.
 - Tests de Application Resource: crear, obtener, listar y vincular cubiertos con fakes minimos.
 - Tests de Application Study: SesionEstudio, EntradaBitacora, Herramienta y SesionHerramienta cubiertos con fakes minimos.
@@ -341,9 +374,11 @@ Writeup E2E:
 - Tests de Application Evidence: Proyecto crear, obtener, listar, vincular a Tema y vincular a Herramienta cubiertos con fakes minimos.
 - Tests de Application Evidence: ArtefactoTecnico crear, obtener, listar, vincular a Tema y vincular a Herramienta cubiertos con fakes minimos.
 - Tests de Application Evidence: Writeup crear, obtener, listar y vincular a Tema cubiertos con fakes minimos.
+- Tests de Application Roadmap: Certificacion crear, obtener y listar cubiertos con fake minimo.
+- Tests de Application Evidence: CertificacionObtenida crear, obtener y listar cubiertos con fakes minimos.
 - Tests de integracion/persistencia: SQL Server real .\MSSQLSERVER01 con base exclusiva AprendizajeTestsDb.
 - Guard rail de integracion: rechaza AprendizajeDb, database vacio y cualquier base distinta a AprendizajeTestsDb antes de recrear.
-- Tests de persistencia cubren: Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, idempotencia fisica ProyectoTema, idempotencia fisica ProyectoHerramienta, idempotencia fisica ArtefactoTema, idempotencia fisica ArtefactoHerramienta, idempotencia fisica WriteupTema, RowVersion de Proyecto poblada al insertar y estable al vincular joins, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
+- Tests de persistencia cubren: Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, idempotencia fisica ProyectoTema, idempotencia fisica ProyectoHerramienta, idempotencia fisica ArtefactoTema, idempotencia fisica ArtefactoHerramienta, idempotencia fisica WriteupTema, RowVersion de Proyecto poblada al insertar y estable al vincular joins, FK real CertificacionObtenida -> Certificacion, valores iniciales de CertificacionObtenida, query filter de CertificacionObtenida, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
 - Frameworks de mocking: no utilizados.
 - Tests de integracion fundacionales: validados.
 
@@ -353,9 +388,9 @@ Writeup E2E:
 
 ## Proxima Area
 
-Slices Evidence funcionales cerrados: Laboratorio, Proyecto, ArtefactoTecnico y Writeup con crear/obtener/listar y vinculos reales validados.
+Slices Evidence funcionales cerrados: Laboratorio, Proyecto, ArtefactoTecnico, Writeup y CertificacionObtenida con crear/obtener/listar y vinculos/relaciones reales validados.
 
-Proxima area sugerida: continuar Evidence con CertificacionObtenida, Nota o el siguiente slice aprobado.
+Proxima area sugerida: continuar Evidence con Nota o el siguiente slice aprobado.
 
 ## Pendientes Deliberados
 
@@ -371,7 +406,7 @@ Proxima area sugerida: continuar Evidence con CertificacionObtenida, Nota o el s
 - prueba automatizada directa de TemaDominadoEvento;
 - concurrencia HTTP/ETag/If-Match para Proyecto;
 - updates de Proyecto;
-- Nota/CertificacionObtenida;
+- Nota;
 - auth;
 - analytics;
 - integrations;

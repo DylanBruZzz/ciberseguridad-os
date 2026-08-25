@@ -97,6 +97,12 @@
 - [x] ObtenerWriteupPorId implementado.
 - [x] ListarWriteups implementado.
 - [x] VincularWriteupATema implementado.
+- [x] CrearCertificacion implementado.
+- [x] ObtenerCertificacionPorId implementado.
+- [x] ListarCertificaciones implementado.
+- [x] CrearCertificacionObtenida implementado.
+- [x] ObtenerCertificacionObtenidaPorId implementado.
+- [x] ListarCertificacionesObtenidas implementado.
 - [x] CrearTema implementado.
 - [x] ObtenerTemaPorId implementado.
 - [x] EstablecerObjetivosTema implementado.
@@ -150,6 +156,12 @@
 - [x] GET /api/writeups/{id}.
 - [x] GET /api/writeups?usuarioId={id}.
 - [x] PUT /api/writeups/{id}/temas/{temaId}.
+- [x] POST /api/certificaciones.
+- [x] GET /api/certificaciones/{id}.
+- [x] GET /api/certificaciones.
+- [x] POST /api/certificaciones-obtenidas.
+- [x] GET /api/certificaciones-obtenidas/{id}.
+- [x] GET /api/certificaciones-obtenidas?usuarioId={id}.
 - [x] POST /api/temas.
 - [x] GET /api/temas/{id}.
 - [x] PUT /api/temas/{id}/objetivos.
@@ -265,6 +277,14 @@
 - [x] Listar writeups con Guid.Empty -> 400.
 - [x] Vincular Writeup a Tema -> 204.
 - [x] Vincular Writeup a Tema es idempotente.
+- [x] Crear Certificacion -> 201.
+- [x] Obtener Certificacion por Id -> 200.
+- [x] Listar certificaciones -> 200.
+- [x] Crear CertificacionObtenida -> 201.
+- [x] Obtener CertificacionObtenida por Id -> 200.
+- [x] Listar certificaciones obtenidas por Usuario -> 200.
+- [x] Listar certificaciones obtenidas para Usuario sin resultados -> 200 con [].
+- [x] Listar certificaciones obtenidas con Guid.Empty -> 400.
 - [ ] Nuevos flujos E2E por vertical slice.
 
 ## 10. Tests
@@ -300,6 +320,10 @@
 - [x] Tests fundacionales de dominio para Writeup.
 - [x] Tests fundacionales de Application para Writeup y vinculo a Tema.
 - [x] Tests de persistencia para WriteupTema.
+- [x] Tests fundacionales de dominio para Certificacion y CertificacionObtenida.
+- [x] Tests fundacionales de Application para Certificacion.
+- [x] Tests fundacionales de Application para CertificacionObtenida.
+- [x] Tests de persistencia para CertificacionObtenida.
 - [ ] Tests E2E automatizados.
 - [ ] Tests de concurrencia donde aplique RowVersion.
 

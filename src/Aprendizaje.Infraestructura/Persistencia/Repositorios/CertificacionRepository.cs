@@ -16,5 +16,12 @@ public sealed class CertificacionRepository : ICertificacionRepository
     public Task<Certificacion?> ObtenerPorIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         _context.Certificaciones.FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
 
+    public async Task<IReadOnlyCollection<Certificacion>> ListarAsync(CancellationToken cancellationToken = default) =>
+        await _context.Certificaciones
+            .AsNoTracking()
+            .OrderBy(c => c.Nombre)
+            .ThenBy(c => c.Id)
+            .ToListAsync(cancellationToken);
+
     public void Agregar(Certificacion certificacion) => _context.Certificaciones.Add(certificacion);
 }

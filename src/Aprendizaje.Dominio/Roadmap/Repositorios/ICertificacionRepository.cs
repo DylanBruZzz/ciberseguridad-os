@@ -6,5 +6,7 @@ public interface ICertificacionRepository
 {
     Task<Certificacion?> ObtenerPorIdAsync(Guid id, CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyCollection<Certificacion>> ListarAsync(CancellationToken cancellationToken = default);
+
     void Agregar(Certificacion certificacion);
 }

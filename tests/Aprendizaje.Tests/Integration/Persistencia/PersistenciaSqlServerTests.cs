@@ -616,6 +616,102 @@ public sealed class PersistenciaSqlServerTests
     }
 
     [Fact]
+    public async Task CertificacionObtenida_FK_RechazaCertificacionInexistente()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+        var certificacionObtenida = CertificacionObtenida.Registrar(
+            usuario.Id,
+            Guid.CreateVersion7(),
+            new DateOnly(2026, 8, 25));
+
+        await using var contexto = ambiente.CrearNuevoContexto();
+        contexto.Usuarios.Add(usuario);
+        contexto.CertificacionesObtenidas.Add(certificacionObtenida);
+
+        await Assert.ThrowsAsync<DbUpdateException>(() => contexto.GuardarCambiosAsync(CancellationToken));
+    }
+
+    [Fact]
+    public async Task CertificacionObtenida_PersisteValoresIniciales()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+        var certificacion = Certificacion.Crear($"CompTIA Network+ Integration {Guid.CreateVersion7():N}", TipoCosto.Pago);
+        var fechaObtencion = new DateOnly(2026, 8, 25);
+        var certificacionObtenida = CertificacionObtenida.Registrar(usuario.Id, certificacion.Id, fechaObtencion);
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            contexto.Usuarios.Add(usuario);
+            contexto.Certificaciones.Add(certificacion);
+            contexto.CertificacionesObtenidas.Add(certificacionObtenida);
+            await contexto.GuardarCambiosAsync(CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var persistida = await contexto.CertificacionesObtenidas
+                .AsNoTracking()
+                .SingleAsync(c => c.Id == certificacionObtenida.Id, CancellationToken);
+            var estadoMadurez = await contexto.Database
+                .SqlQueryRaw<string>(
+                    "SELECT [EstadoMadurez] AS [Value] FROM [evidence].[CertificacionObtenida] WHERE [Id] = {0}",
+                    certificacionObtenida.Id)
+                .SingleAsync(CancellationToken);
+
+            Assert.Equal(usuario.Id, persistida.UsuarioId);
+            Assert.Equal(certificacion.Id, persistida.CertificacionId);
+            Assert.Equal(fechaObtencion, persistida.FechaObtencion);
+            Assert.Equal(EstadoMadurez.Documentado, persistida.EstadoMadurez);
+            Assert.Equal(nameof(EstadoMadurez.Documentado), estadoMadurez);
+            Assert.Null(persistida.EvidenciaUrl);
+        }
+    }
+
+    [Fact]
+    public async Task CertificacionObtenida_QueryFilter_OcultaEliminadoLogicamente()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+        var certificacion = Certificacion.Crear($"CompTIA Network+ Integration {Guid.CreateVersion7():N}", TipoCosto.Pago);
+        var certificacionObtenida = CertificacionObtenida.Registrar(
+            usuario.Id,
+            certificacion.Id,
+            new DateOnly(2026, 8, 25));
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            contexto.Usuarios.Add(usuario);
+            contexto.Certificaciones.Add(certificacion);
+            contexto.CertificacionesObtenidas.Add(certificacionObtenida);
+            await contexto.GuardarCambiosAsync(CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var persistida = await contexto.CertificacionesObtenidas
+                .SingleAsync(c => c.Id == certificacionObtenida.Id, CancellationToken);
+
+            persistida.MarcarComoEliminado();
+            await contexto.GuardarCambiosAsync(CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var consultaNormal = await contexto.CertificacionesObtenidas
+                .FirstOrDefaultAsync(c => c.Id == certificacionObtenida.Id, CancellationToken);
+            var consultaSinFiltro = await contexto.CertificacionesObtenidas
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(c => c.Id == certificacionObtenida.Id, CancellationToken);
+
+            Assert.Null(consultaNormal);
+            Assert.NotNull(consultaSinFiltro);
+            Assert.NotNull(consultaSinFiltro.FechaEliminacionUtc);
+        }
+    }
+
+    [Fact]
     public async Task Tema_QueryFilter_OcultaEliminadoLogicamente()
     {
         await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);

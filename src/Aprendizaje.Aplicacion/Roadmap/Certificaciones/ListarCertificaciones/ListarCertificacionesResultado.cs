@@ -1,0 +1,3 @@
+namespace Aprendizaje.Aplicacion.Roadmap.Certificaciones.ListarCertificaciones;
+
+public sealed record ListarCertificacionesResultado(IReadOnlyCollection<CertificacionResumen> Certificaciones);

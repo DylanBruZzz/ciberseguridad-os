@@ -1,0 +1,3 @@
+namespace Aprendizaje.Aplicacion.Evidence.CertificacionesObtenidas.ListarCertificacionesObtenidas;
+
+public sealed record ListarCertificacionesObtenidasSolicitud(Guid UsuarioId);

@@ -13,6 +13,7 @@ using Aprendizaje.Dominio.Resource;
 using Aprendizaje.Dominio.Roadmap;
 using Aprendizaje.Dominio.Study;
 using Aprendizaje.Infraestructura.Persistencia.Repositorios;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
@@ -704,6 +705,132 @@ public sealed class PersistenciaSqlServerTests
             var consultaSinFiltro = await contexto.CertificacionesObtenidas
                 .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(c => c.Id == certificacionObtenida.Id, CancellationToken);
+
+            Assert.Null(consultaNormal);
+            Assert.NotNull(consultaSinFiltro);
+            Assert.NotNull(consultaSinFiltro.FechaEliminacionUtc);
+        }
+    }
+
+    [Fact]
+    public async Task Nota_UnPadreValido_Persiste()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+        var proyecto = Proyecto.Crear(usuario.Id, "Analizador OSI Integration");
+        var nota = Nota.SobreProyecto(
+            usuario.Id,
+            proyecto.Id,
+            "Observación de cierre del proyecto OSI",
+            TipoNota.Nota);
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            contexto.Usuarios.Add(usuario);
+            contexto.Proyectos.Add(proyecto);
+            contexto.Notas.Add(nota);
+            await contexto.GuardarCambiosAsync(CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var padresInformados = await contexto.Database
+                .SqlQueryRaw<int>(
+                    "SELECT " +
+                    "(CASE WHEN [TemaId] IS NOT NULL THEN 1 ELSE 0 END) + " +
+                    "(CASE WHEN [ProyectoId] IS NOT NULL THEN 1 ELSE 0 END) + " +
+                    "(CASE WHEN [LaboratorioId] IS NOT NULL THEN 1 ELSE 0 END) + " +
+                    "(CASE WHEN [WriteupId] IS NOT NULL THEN 1 ELSE 0 END) + " +
+                    "(CASE WHEN [ArtefactoTecnicoId] IS NOT NULL THEN 1 ELSE 0 END) AS [Value] " +
+                    "FROM [evidence].[Nota] WHERE [Id] = {0}",
+                    nota.Id)
+                .SingleAsync(CancellationToken);
+            var persistida = await contexto.Notas
+                .AsNoTracking()
+                .SingleAsync(n => n.Id == nota.Id, CancellationToken);
+
+            Assert.Equal(1, padresInformados);
+            Assert.Equal(usuario.Id, persistida.UsuarioId);
+            Assert.Equal(proyecto.Id, persistida.ProyectoId);
+            Assert.Null(persistida.TemaId);
+            Assert.Null(persistida.LaboratorioId);
+            Assert.Null(persistida.WriteupId);
+            Assert.Null(persistida.ArtefactoTecnicoId);
+            Assert.Equal("Observación de cierre del proyecto OSI", persistida.Texto);
+            Assert.Equal(TipoNota.Nota, persistida.Tipo);
+        }
+    }
+
+    [Fact]
+    public async Task Nota_Check_RechazaCeroPadres()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+
+        await using var contexto = ambiente.CrearNuevoContexto();
+        contexto.Usuarios.Add(usuario);
+        await contexto.GuardarCambiosAsync(CancellationToken);
+
+        await Assert.ThrowsAsync<SqlException>(() => contexto.Database.ExecuteSqlInterpolatedAsync(
+            $"""
+             INSERT INTO [evidence].[Nota] ([Id], [UsuarioId], [Texto], [Tipo])
+             VALUES ({Guid.CreateVersion7()}, {usuario.Id}, {"Nota sin padre"}, {nameof(TipoNota.Nota)})
+             """,
+            CancellationToken));
+    }
+
+    [Fact]
+    public async Task Nota_Check_RechazaDosPadres()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+        var tema = Tema.Crear(usuario.Id, "Modelo OSI", TipoConocimiento.Conceptual);
+        var proyecto = Proyecto.Crear(usuario.Id, "Analizador OSI Integration");
+
+        await using var contexto = ambiente.CrearNuevoContexto();
+        contexto.Usuarios.Add(usuario);
+        contexto.Temas.Add(tema);
+        contexto.Proyectos.Add(proyecto);
+        await contexto.GuardarCambiosAsync(CancellationToken);
+
+        await Assert.ThrowsAsync<SqlException>(() => contexto.Database.ExecuteSqlInterpolatedAsync(
+            $"""
+             INSERT INTO [evidence].[Nota] ([Id], [UsuarioId], [TemaId], [ProyectoId], [Texto], [Tipo])
+             VALUES ({Guid.CreateVersion7()}, {usuario.Id}, {tema.Id}, {proyecto.Id}, {"Nota con dos padres"}, {nameof(TipoNota.Nota)})
+             """,
+            CancellationToken));
+    }
+
+    [Fact]
+    public async Task Nota_QueryFilter_OcultaSoftDelete()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+        var proyecto = Proyecto.Crear(usuario.Id, "Analizador OSI Integration");
+        var nota = Nota.SobreProyecto(usuario.Id, proyecto.Id, "Observación de cierre del proyecto OSI");
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            contexto.Usuarios.Add(usuario);
+            contexto.Proyectos.Add(proyecto);
+            contexto.Notas.Add(nota);
+            await contexto.GuardarCambiosAsync(CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var persistida = await contexto.Notas.SingleAsync(n => n.Id == nota.Id, CancellationToken);
+
+            persistida.MarcarComoEliminado();
+            await contexto.GuardarCambiosAsync(CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var consultaNormal = await contexto.Notas.FirstOrDefaultAsync(n => n.Id == nota.Id, CancellationToken);
+            var consultaSinFiltro = await contexto.Notas
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(n => n.Id == nota.Id, CancellationToken);
 
             Assert.Null(consultaNormal);
             Assert.NotNull(consultaSinFiltro);

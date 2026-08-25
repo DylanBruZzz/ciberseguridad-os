@@ -103,6 +103,13 @@
 - [x] CrearCertificacionObtenida implementado.
 - [x] ObtenerCertificacionObtenidaPorId implementado.
 - [x] ListarCertificacionesObtenidas implementado.
+- [x] CrearNotaParaTema implementado.
+- [x] CrearNotaParaProyecto implementado.
+- [x] CrearNotaParaLaboratorio implementado.
+- [x] CrearNotaParaWriteup implementado.
+- [x] CrearNotaParaArtefactoTecnico implementado.
+- [x] ObtenerNotaPorId implementado.
+- [x] ListarNotas implementado.
 - [x] CrearTema implementado.
 - [x] ObtenerTemaPorId implementado.
 - [x] EstablecerObjetivosTema implementado.
@@ -162,6 +169,13 @@
 - [x] POST /api/certificaciones-obtenidas.
 - [x] GET /api/certificaciones-obtenidas/{id}.
 - [x] GET /api/certificaciones-obtenidas?usuarioId={id}.
+- [x] POST /api/temas/{temaId}/notas.
+- [x] POST /api/proyectos/{proyectoId}/notas.
+- [x] POST /api/laboratorios/{laboratorioId}/notas.
+- [x] POST /api/writeups/{writeupId}/notas.
+- [x] POST /api/artefactos-tecnicos/{artefactoTecnicoId}/notas.
+- [x] GET /api/notas/{id}.
+- [x] GET /api/notas?usuarioId={id}.
 - [x] POST /api/temas.
 - [x] GET /api/temas/{id}.
 - [x] PUT /api/temas/{id}/objetivos.
@@ -285,6 +299,17 @@
 - [x] Listar certificaciones obtenidas por Usuario -> 200.
 - [x] Listar certificaciones obtenidas para Usuario sin resultados -> 200 con [].
 - [x] Listar certificaciones obtenidas con Guid.Empty -> 400.
+- [x] Crear Nota para Tema -> 201.
+- [x] Crear Nota para Proyecto -> 201.
+- [x] Crear Nota para Laboratorio -> 201.
+- [x] Crear Nota para Writeup -> 201.
+- [x] Crear Nota para ArtefactoTecnico -> 201.
+- [x] Crear Nota con padre inexistente -> 404.
+- [x] Crear Nota con padre de otro Usuario -> 409.
+- [x] Obtener Nota por Id -> 200.
+- [x] Listar notas por Usuario -> 200.
+- [x] Listar notas con Guid.Empty -> 400.
+- [x] CertificacionObtenida no es padre de Nota.
 - [ ] Nuevos flujos E2E por vertical slice.
 
 ## 10. Tests
@@ -324,6 +349,9 @@
 - [x] Tests fundacionales de Application para Certificacion.
 - [x] Tests fundacionales de Application para CertificacionObtenida.
 - [x] Tests de persistencia para CertificacionObtenida.
+- [x] Tests fundacionales de dominio para Nota.
+- [x] Tests fundacionales de Application para Nota y ownership de sus 5 padres.
+- [x] Tests de persistencia para Nota y CK_Nota_UnSoloPadre.
 - [ ] Tests E2E automatizados.
 - [ ] Tests de concurrencia donde aplique RowVersion.
 

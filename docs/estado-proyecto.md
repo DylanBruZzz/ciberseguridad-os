@@ -7,12 +7,13 @@ Branch: main
 Ultimo checkpoint:
 
 ```text
-f9e452a feat: establish writeup evidence flow
+603e62d feat: establish certification evidence flow
 ```
 
 Checkpoint anterior:
 
 ```text
+f9e452a feat: establish writeup evidence flow
 b1a4d6c feat: establish technical artifact evidence flow
 6805d19 feat: establish project evidence flow
 430e4bf feat: establish laboratory evidence flow
@@ -72,6 +73,11 @@ caf832a feat: establish validated initial persistence
 - CERTIFICACION SOPORTE MINIMO VALIDADO END-TO-END
 - EVIDENCE CERTIFICACIONOBTENIDA VALIDADO END-TO-END
 - FK CERTIFICACIONOBTENIDA-CERTIFICACION VALIDADA SOBRE SQL SERVER REAL
+- EVIDENCE NOTA VALIDADO END-TO-END
+- NOTA CON 5 TIPOS DE PADRE VALIDADA
+- OWNERSHIP NOTA-PADRE VALIDADO EN APPLICATION
+- CK_NOTA_UNSOLOPADRE VALIDADO SOBRE SQL SERVER REAL
+- HITO EVIDENCE MINIMO FUNCIONAL CERRADO
 
 ## Migraciones Aplicadas
 
@@ -108,6 +114,7 @@ caf832a feat: establish validated initial persistence
 - WriteupTema: 1
 - Certificacion: 1
 - CertificacionObtenida: 1
+- Nota: 1
 
 Usuario E2E:
 
@@ -238,6 +245,20 @@ CertificacionObtenida E2E:
 - EvidenciaUrl: null
 - EstadoMadurez: Documentado
 
+Nota E2E:
+
+- Id: 01A0398C-3C84-7B1B-87D6-5A5D773A26C4
+- Usuario: 01A015CC-1AC8-7EB0-A2C8-5D2A33894DCC
+- Proyecto: 01A036BB-D0BC-71EA-A339-1178A34A7F0A
+- Tema: null
+- Laboratorio: null
+- Writeup: null
+- ArtefactoTecnico: null
+- Texto: Observación de cierre del proyecto OSI
+- Tipo: Nota
+- Padres informados: 1
+- CertificacionObtenida no es padre de Nota.
+
 ## Flujos Funcionales Actuales
 
 - POST /api/usuarios -> 201
@@ -342,6 +363,16 @@ CertificacionObtenida E2E:
 - GET /api/certificaciones-obtenidas?usuarioId={id} -> 200
 - GET /api/certificaciones-obtenidas?usuarioId={id-sin-certificaciones} -> 200 con []
 - GET /api/certificaciones-obtenidas?usuarioId={Guid.Empty} -> 400
+- POST /api/temas/{temaId}/notas -> 201
+- POST /api/proyectos/{proyectoId}/notas -> 201
+- POST /api/laboratorios/{laboratorioId}/notas -> 201
+- POST /api/writeups/{writeupId}/notas -> 201
+- POST /api/artefactos-tecnicos/{artefactoTecnicoId}/notas -> 201
+- POST Nota con padre inexistente -> 404
+- POST Nota con padre de otro Usuario -> 409
+- GET /api/notas/{id} -> 200
+- GET /api/notas?usuarioId={id} -> 200
+- GET /api/notas?usuarioId={Guid.Empty} -> 400
 
 ## Build
 
@@ -357,7 +388,7 @@ CertificacionObtenida E2E:
 - Microsoft.NET.Test.Sdk: no requerido con la estrategia MTP actual
 - dotnet run del proyecto de tests: validado
 - dotnet test por proyecto: validado
-- dotnet test por solucion: validado con 215 tests correctos
+- dotnet test por solucion: validado con 254 tests correctos
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
 - Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, dominio y TemaDominadoEvento validados.
 - Tests de Dominio SesionEstudio: registro, invariantes, correccion de duracion y SesionRegistradaEvento validados.
@@ -367,6 +398,7 @@ CertificacionObtenida E2E:
 - Tests de Dominio ArtefactoTecnico validados.
 - Tests de Dominio Writeup validados.
 - Tests de Dominio Certificacion y CertificacionObtenida validados.
+- Tests de Dominio Nota validados.
 - Tests de Application Roadmap: flujos criticos de Tema cubiertos con fakes minimos.
 - Tests de Application Resource: crear, obtener, listar y vincular cubiertos con fakes minimos.
 - Tests de Application Study: SesionEstudio, EntradaBitacora, Herramienta y SesionHerramienta cubiertos con fakes minimos.
@@ -376,9 +408,10 @@ CertificacionObtenida E2E:
 - Tests de Application Evidence: Writeup crear, obtener, listar y vincular a Tema cubiertos con fakes minimos.
 - Tests de Application Roadmap: Certificacion crear, obtener y listar cubiertos con fake minimo.
 - Tests de Application Evidence: CertificacionObtenida crear, obtener y listar cubiertos con fakes minimos.
+- Tests de Application Evidence: Nota crear sobre Tema/Proyecto/Laboratorio/Writeup/ArtefactoTecnico, obtener y listar cubiertos con fakes minimos.
 - Tests de integracion/persistencia: SQL Server real .\MSSQLSERVER01 con base exclusiva AprendizajeTestsDb.
 - Guard rail de integracion: rechaza AprendizajeDb, database vacio y cualquier base distinta a AprendizajeTestsDb antes de recrear.
-- Tests de persistencia cubren: Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, idempotencia fisica ProyectoTema, idempotencia fisica ProyectoHerramienta, idempotencia fisica ArtefactoTema, idempotencia fisica ArtefactoHerramienta, idempotencia fisica WriteupTema, RowVersion de Proyecto poblada al insertar y estable al vincular joins, FK real CertificacionObtenida -> Certificacion, valores iniciales de CertificacionObtenida, query filter de CertificacionObtenida, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
+- Tests de persistencia cubren: Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, idempotencia fisica ProyectoTema, idempotencia fisica ProyectoHerramienta, idempotencia fisica ArtefactoTema, idempotencia fisica ArtefactoHerramienta, idempotencia fisica WriteupTema, RowVersion de Proyecto poblada al insertar y estable al vincular joins, FK real CertificacionObtenida -> Certificacion, valores iniciales de CertificacionObtenida, query filter de CertificacionObtenida, Nota con un padre valido, CHECK CK_Nota_UnSoloPadre para cero y dos padres, query filter de Nota, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
 - Frameworks de mocking: no utilizados.
 - Tests de integracion fundacionales: validados.
 
@@ -388,9 +421,9 @@ CertificacionObtenida E2E:
 
 ## Proxima Area
 
-Slices Evidence funcionales cerrados: Laboratorio, Proyecto, ArtefactoTecnico, Writeup y CertificacionObtenida con crear/obtener/listar y vinculos/relaciones reales validados.
+Slices Evidence funcionales cerrados: Laboratorio, Proyecto, ArtefactoTecnico, Writeup, CertificacionObtenida y Nota con crear/obtener/listar y vinculos/relaciones reales validados.
 
-Proxima area sugerida: continuar Evidence con Nota o el siguiente slice aprobado.
+Proxima area sugerida: auditar Analytics/read side ahora que Evidence minimo funcional quedo cerrado.
 
 ## Pendientes Deliberados
 
@@ -406,7 +439,6 @@ Proxima area sugerida: continuar Evidence con Nota o el siguiente slice aprobado
 - prueba automatizada directa de TemaDominadoEvento;
 - concurrencia HTTP/ETag/If-Match para Proyecto;
 - updates de Proyecto;
-- Nota;
 - auth;
 - analytics;
 - integrations;

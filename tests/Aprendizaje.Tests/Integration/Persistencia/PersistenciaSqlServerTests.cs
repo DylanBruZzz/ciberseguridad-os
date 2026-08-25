@@ -4,6 +4,7 @@ using Aprendizaje.Aplicacion.Evidence.Laboratorios.VincularLaboratorioAHerramien
 using Aprendizaje.Aplicacion.Evidence.Laboratorios.VincularLaboratorioATema;
 using Aprendizaje.Aplicacion.Evidence.Proyectos.VincularProyectoAHerramienta;
 using Aprendizaje.Aplicacion.Evidence.Proyectos.VincularProyectoATema;
+using Aprendizaje.Aplicacion.Evidence.Writeups.VincularWriteupATema;
 using Aprendizaje.Aplicacion.Resource.Recursos.VincularRecursoATema;
 using Aprendizaje.Aplicacion.Study.SesionesEstudio.VincularHerramientaASesionEstudio;
 using Aprendizaje.Dominio.Evidence;
@@ -561,6 +562,53 @@ public sealed class PersistenciaSqlServerTests
                     "SELECT COUNT(*) AS [Value] FROM [evidence].[ArtefactoHerramienta] WHERE [ArtefactoTecnicoId] = {0} AND [HerramientaId] = {1}",
                     artefacto.Id,
                     herramienta.Id)
+                .SingleAsync(CancellationToken);
+
+            Assert.Equal(1, filas);
+        }
+    }
+
+    [Fact]
+    public async Task WriteupTema_VinculoNoSeDuplica()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+        var tema = Tema.Crear(usuario.Id, "Modelo OSI", TipoConocimiento.Conceptual);
+        var writeup = Writeup.Crear(usuario.Id, "Análisis del modelo OSI con Wireshark");
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            contexto.Usuarios.Add(usuario);
+            contexto.Temas.Add(tema);
+            contexto.Writeups.Add(writeup);
+            await contexto.GuardarCambiosAsync(CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var casoUso = new VincularWriteupATemaCasoUso(
+                new WriteupRepository(contexto),
+                new TemaRepository(contexto),
+                contexto);
+
+            var primerResultado = await casoUso.EjecutarAsync(
+                new VincularWriteupATemaSolicitud(writeup.Id, tema.Id),
+                CancellationToken);
+            var segundoResultado = await casoUso.EjecutarAsync(
+                new VincularWriteupATemaSolicitud(writeup.Id, tema.Id),
+                CancellationToken);
+
+            Assert.Equal(VincularWriteupATemaEstado.Actualizado, primerResultado.Estado);
+            Assert.Equal(VincularWriteupATemaEstado.Actualizado, segundoResultado.Estado);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var filas = await contexto.Database
+                .SqlQueryRaw<int>(
+                    "SELECT COUNT(*) AS [Value] FROM [evidence].[WriteupTema] WHERE [WriteupId] = {0} AND [TemaId] = {1}",
+                    writeup.Id,
+                    tema.Id)
                 .SingleAsync(CancellationToken);
 
             Assert.Equal(1, filas);

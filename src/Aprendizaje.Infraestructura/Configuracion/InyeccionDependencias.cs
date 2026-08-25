@@ -29,6 +29,7 @@ public static class InyeccionDependencias
         services.AddScoped<IArtefactoTecnicoRepository, ArtefactoTecnicoRepository>();
         services.AddScoped<ILaboratorioRepository, LaboratorioRepository>();
         services.AddScoped<IProyectoRepository, ProyectoRepository>();
+        services.AddScoped<IWriteupRepository, WriteupRepository>();
         services.AddScoped<IRecursoRepository, RecursoRepository>();
         services.AddScoped<IEntradaBitacoraRepository, EntradaBitacoraRepository>();
         services.AddScoped<IHerramientaRepository, HerramientaRepository>();

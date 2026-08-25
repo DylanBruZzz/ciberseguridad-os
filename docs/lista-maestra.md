@@ -93,6 +93,10 @@
 - [x] ListarArtefactosTecnicos implementado.
 - [x] VincularArtefactoATema implementado.
 - [x] VincularArtefactoAHerramienta implementado.
+- [x] CrearWriteup implementado.
+- [x] ObtenerWriteupPorId implementado.
+- [x] ListarWriteups implementado.
+- [x] VincularWriteupATema implementado.
 - [x] CrearTema implementado.
 - [x] ObtenerTemaPorId implementado.
 - [x] EstablecerObjetivosTema implementado.
@@ -142,6 +146,10 @@
 - [x] GET /api/artefactos-tecnicos?usuarioId={id}.
 - [x] PUT /api/artefactos-tecnicos/{id}/temas/{temaId}.
 - [x] PUT /api/artefactos-tecnicos/{id}/herramientas/{herramientaId}.
+- [x] POST /api/writeups.
+- [x] GET /api/writeups/{id}.
+- [x] GET /api/writeups?usuarioId={id}.
+- [x] PUT /api/writeups/{id}/temas/{temaId}.
 - [x] POST /api/temas.
 - [x] GET /api/temas/{id}.
 - [x] PUT /api/temas/{id}/objetivos.
@@ -251,6 +259,12 @@
 - [x] Vincular ArtefactoTecnico a Tema es idempotente.
 - [x] Vincular ArtefactoTecnico a Herramienta -> 204.
 - [x] Vincular ArtefactoTecnico a Herramienta es idempotente.
+- [x] Crear Writeup -> 201.
+- [x] Obtener Writeup por Id -> 200.
+- [x] Listar writeups por Usuario -> 200.
+- [x] Listar writeups con Guid.Empty -> 400.
+- [x] Vincular Writeup a Tema -> 204.
+- [x] Vincular Writeup a Tema es idempotente.
 - [ ] Nuevos flujos E2E por vertical slice.
 
 ## 10. Tests
@@ -283,6 +297,9 @@
 - [x] Tests fundacionales de dominio para ArtefactoTecnico.
 - [x] Tests fundacionales de Application para ArtefactoTecnico y vinculos a Tema/Herramienta.
 - [x] Tests de persistencia para ArtefactoTema y ArtefactoHerramienta.
+- [x] Tests fundacionales de dominio para Writeup.
+- [x] Tests fundacionales de Application para Writeup y vinculo a Tema.
+- [x] Tests de persistencia para WriteupTema.
 - [ ] Tests E2E automatizados.
 - [ ] Tests de concurrencia donde aplique RowVersion.
 

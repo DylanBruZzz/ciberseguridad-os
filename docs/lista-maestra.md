@@ -78,6 +78,11 @@
 - [x] ObtenerHerramientaPorId implementado.
 - [x] ListarHerramientas implementado.
 - [x] VincularHerramientaASesionEstudio implementado.
+- [x] CrearLaboratorio implementado.
+- [x] ObtenerLaboratorioPorId implementado.
+- [x] ListarLaboratorios implementado.
+- [x] VincularLaboratorioATema implementado.
+- [x] VincularLaboratorioAHerramienta implementado.
 - [x] CrearTema implementado.
 - [x] ObtenerTemaPorId implementado.
 - [x] EstablecerObjetivosTema implementado.
@@ -112,6 +117,11 @@
 - [x] POST /api/herramientas.
 - [x] GET /api/herramientas/{id}.
 - [x] GET /api/herramientas.
+- [x] POST /api/laboratorios.
+- [x] GET /api/laboratorios/{id}.
+- [x] GET /api/laboratorios?usuarioId={id}.
+- [x] PUT /api/laboratorios/{id}/temas/{temaId}.
+- [x] PUT /api/laboratorios/{id}/herramientas/{herramientaId}.
 - [x] POST /api/temas.
 - [x] GET /api/temas/{id}.
 - [x] PUT /api/temas/{id}/objetivos.
@@ -196,6 +206,15 @@
 - [x] Listar fases por Usuario -> 200.
 - [x] Listar fases para Usuario sin fases -> 200 con [].
 - [x] Listar fases con Guid.Empty -> 400.
+- [x] Crear Laboratorio -> 201.
+- [x] Obtener Laboratorio por Id -> 200.
+- [x] Listar laboratorios por Usuario -> 200.
+- [x] Listar laboratorios para Usuario sin laboratorios -> 200 con [].
+- [x] Listar laboratorios con Guid.Empty -> 400.
+- [x] Vincular Laboratorio a Tema -> 204.
+- [x] Vincular Laboratorio a Tema es idempotente.
+- [x] Vincular Laboratorio a Herramienta -> 204.
+- [x] Vincular Laboratorio a Herramienta es idempotente.
 - [ ] Nuevos flujos E2E por vertical slice.
 
 ## 10. Tests
@@ -219,6 +238,9 @@
 - [x] Tests de persistencia para Tema.Objetivos, RowVersion de SesionEstudio, RecursoTema, SesionHerramienta, query filter y FK real.
 - [x] Tests fundacionales de dominio para EntradaBitacora y Herramienta.
 - [x] Tests fundacionales de Application para EntradaBitacora, Herramienta y SesionHerramienta.
+- [x] Tests fundacionales de dominio para Laboratorio.
+- [x] Tests fundacionales de Application para Laboratorio y vinculos a Tema/Herramienta.
+- [x] Tests de persistencia para LaboratorioTema y LaboratorioHerramienta.
 - [ ] Tests E2E automatizados.
 - [ ] Tests de concurrencia donde aplique RowVersion.
 

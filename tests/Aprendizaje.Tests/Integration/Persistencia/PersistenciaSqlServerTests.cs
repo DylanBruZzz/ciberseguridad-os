@@ -1,5 +1,8 @@
+using Aprendizaje.Aplicacion.Evidence.Laboratorios.VincularLaboratorioAHerramienta;
+using Aprendizaje.Aplicacion.Evidence.Laboratorios.VincularLaboratorioATema;
 using Aprendizaje.Aplicacion.Resource.Recursos.VincularRecursoATema;
 using Aprendizaje.Aplicacion.Study.SesionesEstudio.VincularHerramientaASesionEstudio;
+using Aprendizaje.Dominio.Evidence;
 using Aprendizaje.Dominio.Nucleo;
 using Aprendizaje.Dominio.Resource;
 using Aprendizaje.Dominio.Roadmap;
@@ -192,6 +195,100 @@ public sealed class PersistenciaSqlServerTests
                 .SqlQueryRaw<int>(
                     "SELECT COUNT(*) AS [Value] FROM [study].[SesionHerramienta] WHERE [SesionId] = {0} AND [HerramientaId] = {1}",
                     sesion.Id,
+                    herramienta.Id)
+                .SingleAsync(CancellationToken);
+
+            Assert.Equal(1, filas);
+        }
+    }
+
+    [Fact]
+    public async Task LaboratorioTema_VinculoNoSeDuplica()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+        var tema = Tema.Crear(usuario.Id, "Modelo OSI", TipoConocimiento.Conceptual);
+        var laboratorio = Laboratorio.Crear(usuario.Id, "Análisis de tráfico OSI");
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            contexto.Usuarios.Add(usuario);
+            contexto.Temas.Add(tema);
+            contexto.Laboratorios.Add(laboratorio);
+            await contexto.GuardarCambiosAsync(CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var casoUso = new VincularLaboratorioATemaCasoUso(
+                new LaboratorioRepository(contexto),
+                new TemaRepository(contexto),
+                contexto);
+
+            var primerResultado = await casoUso.EjecutarAsync(
+                new VincularLaboratorioATemaSolicitud(laboratorio.Id, tema.Id),
+                CancellationToken);
+            var segundoResultado = await casoUso.EjecutarAsync(
+                new VincularLaboratorioATemaSolicitud(laboratorio.Id, tema.Id),
+                CancellationToken);
+
+            Assert.Equal(VincularLaboratorioATemaEstado.Actualizado, primerResultado.Estado);
+            Assert.Equal(VincularLaboratorioATemaEstado.Actualizado, segundoResultado.Estado);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var filas = await contexto.Database
+                .SqlQueryRaw<int>(
+                    "SELECT COUNT(*) AS [Value] FROM [evidence].[LaboratorioTema] WHERE [LaboratorioId] = {0} AND [TemaId] = {1}",
+                    laboratorio.Id,
+                    tema.Id)
+                .SingleAsync(CancellationToken);
+
+            Assert.Equal(1, filas);
+        }
+    }
+
+    [Fact]
+    public async Task LaboratorioHerramienta_VinculoNoSeDuplica()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+        var laboratorio = Laboratorio.Crear(usuario.Id, "Análisis de tráfico OSI");
+        var herramienta = Herramienta.Crear($"Wireshark Integration {Guid.CreateVersion7():N}");
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            contexto.Usuarios.Add(usuario);
+            contexto.Laboratorios.Add(laboratorio);
+            contexto.Herramientas.Add(herramienta);
+            await contexto.GuardarCambiosAsync(CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var casoUso = new VincularLaboratorioAHerramientaCasoUso(
+                new LaboratorioRepository(contexto),
+                new HerramientaRepository(contexto),
+                contexto);
+
+            var primerResultado = await casoUso.EjecutarAsync(
+                new VincularLaboratorioAHerramientaSolicitud(laboratorio.Id, herramienta.Id),
+                CancellationToken);
+            var segundoResultado = await casoUso.EjecutarAsync(
+                new VincularLaboratorioAHerramientaSolicitud(laboratorio.Id, herramienta.Id),
+                CancellationToken);
+
+            Assert.Equal(VincularLaboratorioAHerramientaEstado.Actualizado, primerResultado.Estado);
+            Assert.Equal(VincularLaboratorioAHerramientaEstado.Actualizado, segundoResultado.Estado);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var filas = await contexto.Database
+                .SqlQueryRaw<int>(
+                    "SELECT COUNT(*) AS [Value] FROM [evidence].[LaboratorioHerramienta] WHERE [LaboratorioId] = {0} AND [HerramientaId] = {1}",
+                    laboratorio.Id,
                     herramienta.Id)
                 .SingleAsync(CancellationToken);
 

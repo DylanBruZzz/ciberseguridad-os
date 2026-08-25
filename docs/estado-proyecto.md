@@ -7,12 +7,13 @@ Branch: main
 Ultimo checkpoint:
 
 ```text
-c0d4fc3 test: cover critical persistence behavior
+85f077d feat: complete minimal study module
 ```
 
 Checkpoint anterior:
 
 ```text
+c0d4fc3 test: cover critical persistence behavior
 c4e5a59 test: cover core application flows
 b05cc6f test: cover core domain behavior
 542a2cc test: establish xunit testing foundation
@@ -52,6 +53,9 @@ caf832a feat: establish validated initial persistence
 - HERRAMIENTA SOPORTE MINIMO VALIDADO END-TO-END
 - SESION-HERRAMIENTA VALIDADO END-TO-END
 - STUDY MINIMO CERRADO
+- EVIDENCE LABORATORIO VALIDADO END-TO-END
+- LABORATORIO-TEMA VALIDADO END-TO-END
+- LABORATORIO-HERRAMIENTA VALIDADO END-TO-END
 
 ## Migraciones Aplicadas
 
@@ -75,6 +79,9 @@ caf832a feat: establish validated initial persistence
 - EntradaBitacora: 1
 - Herramienta: 1
 - SesionHerramienta: 1
+- Laboratorio: 1
+- LaboratorioTema: 1
+- LaboratorioHerramienta: 1
 
 Usuario E2E:
 
@@ -140,6 +147,21 @@ Herramienta E2E:
 - Nombre: Wireshark E2E Study
 - Categoria: Redes
 - Vinculada a SesionEstudio: 01A01FD6-072F-7DB6-8513-F75C0C993AF9
+- Vinculada a Laboratorio: 01A0366B-9775-7BFD-8F16-408B94E557CA
+
+Laboratorio E2E:
+
+- Id: 01A0366B-9775-7BFD-8F16-408B94E557CA
+- Usuario: 01A015CC-1AC8-7EB0-A2C8-5D2A33894DCC
+- Nombre: Análisis de tráfico OSI con Wireshark
+- Objetivo: Identificar capas del modelo OSI en tráfico capturado
+- EntornoVms: Wireshark
+- Hallazgos: Tráfico de prueba clasificado por capas
+- TiempoInvertidoMinutos: 45
+- Fecha: 2026-08-24
+- EstadoMadurez: Borrador
+- Tema vinculado: 01A016F7-1517-7C35-BAF3-A1BEB648776C
+- Herramienta vinculada: 01A0364E-1F1D-7418-92F8-BE5DBC14C7FD
 
 ## Flujos Funcionales Actuales
 
@@ -206,6 +228,15 @@ Herramienta E2E:
 - GET /api/herramientas -> 200
 - PUT /api/sesiones-estudio/{id}/herramientas/{herramientaId} -> 204
 - PUT vinculo SesionEstudio-Herramienta repetido -> 204 idempotente
+- POST /api/laboratorios -> 201
+- GET /api/laboratorios/{id} -> 200
+- GET /api/laboratorios?usuarioId={id} -> 200
+- GET /api/laboratorios?usuarioId={id-sin-laboratorios} -> 200 con []
+- GET /api/laboratorios?usuarioId={Guid.Empty} -> 400
+- PUT /api/laboratorios/{id}/temas/{temaId} -> 204
+- PUT vinculo Laboratorio-Tema repetido -> 204 idempotente
+- PUT /api/laboratorios/{id}/herramientas/{herramientaId} -> 204
+- PUT vinculo Laboratorio-Herramienta repetido -> 204 idempotente
 
 ## Build
 
@@ -221,17 +252,19 @@ Herramienta E2E:
 - Microsoft.NET.Test.Sdk: no requerido con la estrategia MTP actual
 - dotnet run del proyecto de tests: validado
 - dotnet test por proyecto: validado
-- dotnet test por solucion: validado con 106 tests correctos
+- dotnet test por solucion: validado con 129 tests correctos
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
 - Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, dominio y TemaDominadoEvento validados.
 - Tests de Dominio SesionEstudio: registro, invariantes, correccion de duracion y SesionRegistradaEvento validados.
 - Tests de Dominio EntradaBitacora y Herramienta validados.
+- Tests de Dominio Laboratorio validados.
 - Tests de Application Roadmap: flujos criticos de Tema cubiertos con fakes minimos.
 - Tests de Application Resource: crear, obtener, listar y vincular cubiertos con fakes minimos.
 - Tests de Application Study: SesionEstudio, EntradaBitacora, Herramienta y SesionHerramienta cubiertos con fakes minimos.
+- Tests de Application Evidence: Laboratorio crear, obtener, listar, vincular a Tema y vincular a Herramienta cubiertos con fakes minimos.
 - Tests de integracion/persistencia: SQL Server real .\MSSQLSERVER01 con base exclusiva AprendizajeTestsDb.
 - Guard rail de integracion: rechaza AprendizajeDb, database vacio y cualquier base distinta a AprendizajeTestsDb antes de recrear.
-- Tests de persistencia cubren: Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica SesionHerramienta, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
+- Tests de persistencia cubren: Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
 - Frameworks de mocking: no utilizados.
 - Tests de integracion fundacionales: validados.
 
@@ -241,9 +274,9 @@ Herramienta E2E:
 
 ## Proxima Area
 
-Study minimo cerrado.
+Primer slice Evidence funcional cerrado: Laboratorio crear/obtener/listar y vinculos LaboratorioTema/LaboratorioHerramienta validados.
 
-Proxima area sugerida: definir siguiente bloque fuera de Study minimo, respetando pendientes deliberados.
+Proxima area sugerida: continuar Evidence con Proyecto o el siguiente slice aprobado; Proyecto sigue pendiente.
 
 ## Pendientes Deliberados
 

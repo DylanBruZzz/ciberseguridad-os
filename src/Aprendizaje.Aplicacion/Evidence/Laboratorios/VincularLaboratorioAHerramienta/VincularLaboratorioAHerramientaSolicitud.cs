@@ -1,0 +1,3 @@
+namespace Aprendizaje.Aplicacion.Evidence.Laboratorios.VincularLaboratorioAHerramienta;
+
+public sealed record VincularLaboratorioAHerramientaSolicitud(Guid LaboratorioId, Guid HerramientaId);

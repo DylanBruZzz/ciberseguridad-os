@@ -88,6 +88,11 @@
 - [x] ListarProyectos implementado.
 - [x] VincularProyectoATema implementado.
 - [x] VincularProyectoAHerramienta implementado.
+- [x] CrearArtefactoTecnico implementado.
+- [x] ObtenerArtefactoTecnicoPorId implementado.
+- [x] ListarArtefactosTecnicos implementado.
+- [x] VincularArtefactoATema implementado.
+- [x] VincularArtefactoAHerramienta implementado.
 - [x] CrearTema implementado.
 - [x] ObtenerTemaPorId implementado.
 - [x] EstablecerObjetivosTema implementado.
@@ -132,6 +137,11 @@
 - [x] GET /api/proyectos?usuarioId={id}.
 - [x] PUT /api/proyectos/{id}/temas/{temaId}.
 - [x] PUT /api/proyectos/{id}/herramientas/{herramientaId}.
+- [x] POST /api/artefactos-tecnicos.
+- [x] GET /api/artefactos-tecnicos/{id}.
+- [x] GET /api/artefactos-tecnicos?usuarioId={id}.
+- [x] PUT /api/artefactos-tecnicos/{id}/temas/{temaId}.
+- [x] PUT /api/artefactos-tecnicos/{id}/herramientas/{herramientaId}.
 - [x] POST /api/temas.
 - [x] GET /api/temas/{id}.
 - [x] PUT /api/temas/{id}/objetivos.
@@ -233,6 +243,14 @@
 - [x] Vincular Proyecto a Tema es idempotente.
 - [x] Vincular Proyecto a Herramienta -> 204.
 - [x] Vincular Proyecto a Herramienta es idempotente.
+- [x] Crear ArtefactoTecnico -> 201.
+- [x] Obtener ArtefactoTecnico por Id -> 200.
+- [x] Listar artefactos tecnicos por Usuario -> 200.
+- [x] Listar artefactos tecnicos con Guid.Empty -> 400.
+- [x] Vincular ArtefactoTecnico a Tema -> 204.
+- [x] Vincular ArtefactoTecnico a Tema es idempotente.
+- [x] Vincular ArtefactoTecnico a Herramienta -> 204.
+- [x] Vincular ArtefactoTecnico a Herramienta es idempotente.
 - [ ] Nuevos flujos E2E por vertical slice.
 
 ## 10. Tests
@@ -262,6 +280,9 @@
 - [x] Tests fundacionales de dominio para Proyecto.
 - [x] Tests fundacionales de Application para Proyecto y vinculos a Tema/Herramienta.
 - [x] Tests de persistencia para ProyectoTema, ProyectoHerramienta y RowVersion de Proyecto.
+- [x] Tests fundacionales de dominio para ArtefactoTecnico.
+- [x] Tests fundacionales de Application para ArtefactoTecnico y vinculos a Tema/Herramienta.
+- [x] Tests de persistencia para ArtefactoTema y ArtefactoHerramienta.
 - [ ] Tests E2E automatizados.
 - [ ] Tests de concurrencia donde aplique RowVersion.
 

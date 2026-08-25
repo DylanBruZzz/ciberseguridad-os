@@ -4,4 +4,14 @@ internal sealed class ArtefactoHerramienta
 {
     public Guid ArtefactoTecnicoId { get; private set; }
     public Guid HerramientaId { get; private set; }
+
+    private ArtefactoHerramienta()
+    {
+    }
+
+    internal ArtefactoHerramienta(Guid artefactoTecnicoId, Guid herramientaId)
+    {
+        ArtefactoTecnicoId = artefactoTecnicoId;
+        HerramientaId = herramientaId;
+    }
 }

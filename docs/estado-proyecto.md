@@ -7,12 +7,13 @@ Branch: main
 Ultimo checkpoint:
 
 ```text
-430e4bf feat: establish laboratory evidence flow
+6805d19 feat: establish project evidence flow
 ```
 
 Checkpoint anterior:
 
 ```text
+430e4bf feat: establish laboratory evidence flow
 85f077d feat: complete minimal study module
 c0d4fc3 test: cover critical persistence behavior
 c4e5a59 test: cover core application flows
@@ -61,6 +62,9 @@ caf832a feat: establish validated initial persistence
 - PROYECTO-TEMA VALIDADO END-TO-END
 - PROYECTO-HERRAMIENTA VALIDADO END-TO-END
 - ROWVERSION DE PROYECTO PROTEGIDA POR TESTS DE INTEGRACION
+- EVIDENCE ARTEFACTOTECNICO VALIDADO END-TO-END
+- ARTEFACTO-TEMA VALIDADO END-TO-END
+- ARTEFACTO-HERRAMIENTA VALIDADO END-TO-END
 
 ## Migraciones Aplicadas
 
@@ -90,6 +94,9 @@ caf832a feat: establish validated initial persistence
 - Proyecto: 1
 - ProyectoTema: 1
 - ProyectoHerramienta: 1
+- ArtefactoTecnico: 1
+- ArtefactoTema: 1
+- ArtefactoHerramienta: 1
 
 Usuario E2E:
 
@@ -182,6 +189,16 @@ Proyecto E2E:
 - Tema vinculado: 01A016F7-1517-7C35-BAF3-A1BEB648776C
 - Herramienta vinculada: 01A0364E-1F1D-7418-92F8-BE5DBC14C7FD
 
+ArtefactoTecnico E2E:
+
+- Id: 01A03704-78C5-73A5-B683-0AB4E0C213FA
+- Usuario: 01A015CC-1AC8-7EB0-A2C8-5D2A33894DCC
+- TipoArtefacto: Cheatsheet
+- Nombre: Filtros Wireshark para análisis OSI
+- EstadoMadurez: Borrador
+- Tema vinculado: 01A016F7-1517-7C35-BAF3-A1BEB648776C
+- Herramienta vinculada: 01A0364E-1F1D-7418-92F8-BE5DBC14C7FD
+
 ## Flujos Funcionales Actuales
 
 - POST /api/usuarios -> 201
@@ -264,6 +281,14 @@ Proyecto E2E:
 - PUT vinculo Proyecto-Tema repetido -> 204 idempotente
 - PUT /api/proyectos/{id}/herramientas/{herramientaId} -> 204
 - PUT vinculo Proyecto-Herramienta repetido -> 204 idempotente
+- POST /api/artefactos-tecnicos -> 201
+- GET /api/artefactos-tecnicos/{id} -> 200
+- GET /api/artefactos-tecnicos?usuarioId={id} -> 200
+- GET /api/artefactos-tecnicos?usuarioId={Guid.Empty} -> 400
+- PUT /api/artefactos-tecnicos/{id}/temas/{temaId} -> 204
+- PUT vinculo Artefacto-Tema repetido -> 204 idempotente
+- PUT /api/artefactos-tecnicos/{id}/herramientas/{herramientaId} -> 204
+- PUT vinculo Artefacto-Herramienta repetido -> 204 idempotente
 
 ## Build
 
@@ -279,21 +304,23 @@ Proyecto E2E:
 - Microsoft.NET.Test.Sdk: no requerido con la estrategia MTP actual
 - dotnet run del proyecto de tests: validado
 - dotnet test por proyecto: validado
-- dotnet test por solucion: validado con 154 tests correctos
+- dotnet test por solucion: validado con 175 tests correctos
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
 - Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, dominio y TemaDominadoEvento validados.
 - Tests de Dominio SesionEstudio: registro, invariantes, correccion de duracion y SesionRegistradaEvento validados.
 - Tests de Dominio EntradaBitacora y Herramienta validados.
 - Tests de Dominio Laboratorio validados.
 - Tests de Dominio Proyecto validados.
+- Tests de Dominio ArtefactoTecnico validados.
 - Tests de Application Roadmap: flujos criticos de Tema cubiertos con fakes minimos.
 - Tests de Application Resource: crear, obtener, listar y vincular cubiertos con fakes minimos.
 - Tests de Application Study: SesionEstudio, EntradaBitacora, Herramienta y SesionHerramienta cubiertos con fakes minimos.
 - Tests de Application Evidence: Laboratorio crear, obtener, listar, vincular a Tema y vincular a Herramienta cubiertos con fakes minimos.
 - Tests de Application Evidence: Proyecto crear, obtener, listar, vincular a Tema y vincular a Herramienta cubiertos con fakes minimos.
+- Tests de Application Evidence: ArtefactoTecnico crear, obtener, listar, vincular a Tema y vincular a Herramienta cubiertos con fakes minimos.
 - Tests de integracion/persistencia: SQL Server real .\MSSQLSERVER01 con base exclusiva AprendizajeTestsDb.
 - Guard rail de integracion: rechaza AprendizajeDb, database vacio y cualquier base distinta a AprendizajeTestsDb antes de recrear.
-- Tests de persistencia cubren: Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, idempotencia fisica ProyectoTema, idempotencia fisica ProyectoHerramienta, RowVersion de Proyecto poblada al insertar y estable al vincular joins, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
+- Tests de persistencia cubren: Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, idempotencia fisica ProyectoTema, idempotencia fisica ProyectoHerramienta, idempotencia fisica ArtefactoTema, idempotencia fisica ArtefactoHerramienta, RowVersion de Proyecto poblada al insertar y estable al vincular joins, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
 - Frameworks de mocking: no utilizados.
 - Tests de integracion fundacionales: validados.
 
@@ -303,9 +330,9 @@ Proyecto E2E:
 
 ## Proxima Area
 
-Slices Evidence funcionales cerrados: Laboratorio y Proyecto con crear/obtener/listar y vinculos a Tema/Herramienta validados.
+Slices Evidence funcionales cerrados: Laboratorio, Proyecto y ArtefactoTecnico con crear/obtener/listar y vinculos a Tema/Herramienta validados.
 
-Proxima area sugerida: continuar Evidence con Writeup, ArtefactoTecnico, Nota o el siguiente slice aprobado.
+Proxima area sugerida: continuar Evidence con Writeup, CertificacionObtenida, Nota o el siguiente slice aprobado.
 
 ## Pendientes Deliberados
 
@@ -321,7 +348,7 @@ Proxima area sugerida: continuar Evidence con Writeup, ArtefactoTecnico, Nota o 
 - prueba automatizada directa de TemaDominadoEvento;
 - concurrencia HTTP/ETag/If-Match para Proyecto;
 - updates de Proyecto;
-- Writeup/ArtefactoTecnico/Nota/CertificacionObtenida;
+- Writeup/Nota/CertificacionObtenida;
 - auth;
 - analytics;
 - integrations;

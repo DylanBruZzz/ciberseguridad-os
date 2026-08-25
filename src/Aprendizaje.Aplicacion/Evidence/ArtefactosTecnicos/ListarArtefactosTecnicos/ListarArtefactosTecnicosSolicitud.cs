@@ -1,0 +1,3 @@
+namespace Aprendizaje.Aplicacion.Evidence.ArtefactosTecnicos.ListarArtefactosTecnicos;
+
+public sealed record ListarArtefactosTecnicosSolicitud(Guid UsuarioId);

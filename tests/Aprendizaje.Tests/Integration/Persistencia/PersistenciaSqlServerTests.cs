@@ -1,3 +1,5 @@
+using Aprendizaje.Aplicacion.Evidence.ArtefactosTecnicos.VincularArtefactoAHerramienta;
+using Aprendizaje.Aplicacion.Evidence.ArtefactosTecnicos.VincularArtefactoATema;
 using Aprendizaje.Aplicacion.Evidence.Laboratorios.VincularLaboratorioAHerramienta;
 using Aprendizaje.Aplicacion.Evidence.Laboratorios.VincularLaboratorioATema;
 using Aprendizaje.Aplicacion.Evidence.Proyectos.VincularProyectoAHerramienta;
@@ -463,6 +465,106 @@ public sealed class PersistenciaSqlServerTests
         }
 
         Assert.Equal(versionAntes, versionDespues);
+    }
+
+    [Fact]
+    public async Task ArtefactoTema_VinculoNoSeDuplica()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+        var tema = Tema.Crear(usuario.Id, "Modelo OSI", TipoConocimiento.Conceptual);
+        var artefacto = ArtefactoTecnico.Crear(
+            usuario.Id,
+            TipoArtefacto.Cheatsheet,
+            "Filtros Wireshark para análisis OSI");
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            contexto.Usuarios.Add(usuario);
+            contexto.Temas.Add(tema);
+            contexto.ArtefactosTecnicos.Add(artefacto);
+            await contexto.GuardarCambiosAsync(CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var casoUso = new VincularArtefactoATemaCasoUso(
+                new ArtefactoTecnicoRepository(contexto),
+                new TemaRepository(contexto),
+                contexto);
+
+            var primerResultado = await casoUso.EjecutarAsync(
+                new VincularArtefactoATemaSolicitud(artefacto.Id, tema.Id),
+                CancellationToken);
+            var segundoResultado = await casoUso.EjecutarAsync(
+                new VincularArtefactoATemaSolicitud(artefacto.Id, tema.Id),
+                CancellationToken);
+
+            Assert.Equal(VincularArtefactoATemaEstado.Actualizado, primerResultado.Estado);
+            Assert.Equal(VincularArtefactoATemaEstado.Actualizado, segundoResultado.Estado);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var filas = await contexto.Database
+                .SqlQueryRaw<int>(
+                    "SELECT COUNT(*) AS [Value] FROM [evidence].[ArtefactoTema] WHERE [ArtefactoTecnicoId] = {0} AND [TemaId] = {1}",
+                    artefacto.Id,
+                    tema.Id)
+                .SingleAsync(CancellationToken);
+
+            Assert.Equal(1, filas);
+        }
+    }
+
+    [Fact]
+    public async Task ArtefactoHerramienta_VinculoNoSeDuplica()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+        var artefacto = ArtefactoTecnico.Crear(
+            usuario.Id,
+            TipoArtefacto.Cheatsheet,
+            "Filtros Wireshark para análisis OSI");
+        var herramienta = Herramienta.Crear($"Wireshark Integration {Guid.CreateVersion7():N}");
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            contexto.Usuarios.Add(usuario);
+            contexto.ArtefactosTecnicos.Add(artefacto);
+            contexto.Herramientas.Add(herramienta);
+            await contexto.GuardarCambiosAsync(CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var casoUso = new VincularArtefactoAHerramientaCasoUso(
+                new ArtefactoTecnicoRepository(contexto),
+                new HerramientaRepository(contexto),
+                contexto);
+
+            var primerResultado = await casoUso.EjecutarAsync(
+                new VincularArtefactoAHerramientaSolicitud(artefacto.Id, herramienta.Id),
+                CancellationToken);
+            var segundoResultado = await casoUso.EjecutarAsync(
+                new VincularArtefactoAHerramientaSolicitud(artefacto.Id, herramienta.Id),
+                CancellationToken);
+
+            Assert.Equal(VincularArtefactoAHerramientaEstado.Actualizado, primerResultado.Estado);
+            Assert.Equal(VincularArtefactoAHerramientaEstado.Actualizado, segundoResultado.Estado);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var filas = await contexto.Database
+                .SqlQueryRaw<int>(
+                    "SELECT COUNT(*) AS [Value] FROM [evidence].[ArtefactoHerramienta] WHERE [ArtefactoTecnicoId] = {0} AND [HerramientaId] = {1}",
+                    artefacto.Id,
+                    herramienta.Id)
+                .SingleAsync(CancellationToken);
+
+            Assert.Equal(1, filas);
+        }
     }
 
     [Fact]

@@ -1,0 +1,3 @@
+namespace Aprendizaje.Aplicacion.Evidence.ArtefactosTecnicos.VincularArtefactoAHerramienta;
+
+public sealed record VincularArtefactoAHerramientaSolicitud(Guid ArtefactoTecnicoId, Guid HerramientaId);

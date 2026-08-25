@@ -113,6 +113,9 @@
 - [x] CrearTema implementado.
 - [x] ObtenerTemaPorId implementado.
 - [x] EstablecerObjetivosTema implementado.
+- [x] ActualizarPercepcionTema implementado.
+- [x] ActualizarPlanificacionTema implementado.
+- [x] ConfigurarIntervaloRepasoTema implementado.
 - [x] AsignarTemaAFase implementado.
 - [x] AsignarTemaPadre implementado.
 - [x] DefinirCriteriosRelevantes implementado.
@@ -179,6 +182,9 @@
 - [x] POST /api/temas.
 - [x] GET /api/temas/{id}.
 - [x] PUT /api/temas/{id}/objetivos.
+- [x] PUT /api/temas/{id}/percepcion.
+- [x] PUT /api/temas/{id}/planificacion.
+- [x] PUT /api/temas/{id}/intervalo-repaso.
 - [x] PUT /api/temas/{id}/criterios.
 - [x] PUT /api/temas/{id}/criterios/{tipo}/cumplido.
 - [x] DELETE /api/temas/{id}/criterios/{tipo}/cumplido.
@@ -199,6 +205,13 @@
 - [x] GET Tema inexistente -> 404.
 - [x] Establecer objetivos de Tema -> 204.
 - [x] Establecer objetivos de Tema inexistente -> 404.
+- [x] Actualizar percepcion de Tema -> 204.
+- [x] Actualizar percepcion de Tema con Guid.Empty -> 400.
+- [x] Actualizar planificacion de Tema -> 204.
+- [x] Actualizar planificacion de Tema con Guid.Empty -> 400.
+- [x] Configurar IntervaloRepaso de Tema -> 204.
+- [x] Configurar IntervaloRepaso de Tema con Guid.Empty -> 400.
+- [x] GET Tema devuelve percepcion, planificacion e IntervaloRepaso configurados.
 - [x] Asignar Tema a Fase -> 204.
 - [x] Asignar Fase a Tema inexistente -> 404.
 - [x] Asignar Fase inexistente a Tema -> 404.
@@ -321,16 +334,19 @@
 - [x] dotnet test por proyecto validado.
 - [x] dotnet test por solucion validado.
 - [x] Tests fundacionales de dominio para Tema.
+- [x] Tests de dominio para planificacion, percepcion e IntervaloRepaso de Tema.
 - [x] Tests fundacionales de dominio para SesionEstudio.
 - [x] Test automatizado directo de TemaDominadoEvento.
 - [x] Test automatizado directo de SesionRegistradaEvento.
 - [x] Tests fundacionales de Application Roadmap.
+- [x] Tests de Application Roadmap para planificacion, percepcion e IntervaloRepaso de Tema.
 - [x] Tests fundacionales de Application Resource.
 - [x] Tests fundacionales de Application Study.
 - [x] Fakes minimos sin framework de mocking.
 - [x] Tests fundacionales de persistencia sobre SQL Server real y AprendizajeTestsDb exclusiva.
 - [x] Guard rail de tests de integracion contra uso accidental de AprendizajeDb.
 - [x] Tests de persistencia para Tema.Objetivos, RowVersion de SesionEstudio, RecursoTema, SesionHerramienta, query filter y FK real.
+- [x] Tests de persistencia para planificacion/percepcion/IntervaloRepaso de Tema y RowVersion de Tema tras update.
 - [x] Tests fundacionales de dominio para EntradaBitacora y Herramienta.
 - [x] Tests fundacionales de Application para EntradaBitacora, Herramienta y SesionHerramienta.
 - [x] Tests fundacionales de dominio para Laboratorio.
@@ -354,6 +370,7 @@
 - [x] Tests de persistencia para Nota y CK_Nota_UnSoloPadre.
 - [ ] Tests E2E automatizados.
 - [ ] Tests de concurrencia donde aplique RowVersion.
+- [ ] Concurrencia HTTP/ETag/If-Match para Tema.
 
 ## 11. Read side / Analytics
 

@@ -1,5 +1,8 @@
+using Aprendizaje.Aplicacion.Roadmap.Temas.ActualizarPercepcion;
+using Aprendizaje.Aplicacion.Roadmap.Temas.ActualizarPlanificacion;
 using Aprendizaje.Aplicacion.Roadmap.Temas.AsignarTemaAFase;
 using Aprendizaje.Aplicacion.Roadmap.Temas.AsignarTemaPadre;
+using Aprendizaje.Aplicacion.Roadmap.Temas.ConfigurarIntervaloRepaso;
 using Aprendizaje.Aplicacion.Roadmap.Temas.DefinirCriteriosRelevantes;
 using Aprendizaje.Aplicacion.Roadmap.Temas.DesmarcarCriterio;
 using Aprendizaje.Aplicacion.Roadmap.Temas.MarcarCriterio;
@@ -11,6 +14,197 @@ namespace Aprendizaje.Tests.Application.Roadmap;
 
 public sealed class TemasApplicationTests
 {
+    [Fact]
+    public async Task ActualizarPercepcion_DebeRetornarTemaNoEncontradoSinGuardar()
+    {
+        var temas = new FakeTemaRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var casoUso = new ActualizarPercepcionTemaCasoUso(temas, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(
+            new ActualizarPercepcionTemaSolicitud(Guid.CreateVersion7(), 4, 3),
+            CancellationToken);
+
+        Assert.False(resultado.Encontrado);
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task ActualizarPercepcion_DebeActualizarValoresYGuardar()
+    {
+        var temas = new FakeTemaRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var tema = CrearTema();
+        temas.Agregar(tema);
+        var casoUso = new ActualizarPercepcionTemaCasoUso(temas, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(
+            new ActualizarPercepcionTemaSolicitud(tema.Id, 4, 2),
+            CancellationToken);
+
+        Assert.True(resultado.Encontrado);
+        Assert.Equal(4, tema.DificultadPercibida?.Valor);
+        Assert.Equal(2, tema.Confianza?.Valor);
+        Assert.Equal(1, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task ActualizarPercepcion_DebeRechazarNivelInvalidoSinGuardar()
+    {
+        var temas = new FakeTemaRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var tema = CrearTema();
+        temas.Agregar(tema);
+        var casoUso = new ActualizarPercepcionTemaCasoUso(temas, unitOfWork);
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => casoUso.EjecutarAsync(
+            new ActualizarPercepcionTemaSolicitud(tema.Id, 6, 2),
+            CancellationToken));
+
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task ActualizarPlanificacion_DebeRetornarTemaNoEncontradoSinGuardar()
+    {
+        var temas = new FakeTemaRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var casoUso = new ActualizarPlanificacionTemaCasoUso(temas, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(
+            new ActualizarPlanificacionTemaSolicitud(
+                Guid.CreateVersion7(),
+                new DateOnly(2026, 8, 25),
+                new DateOnly(2026, 9, 10)),
+            CancellationToken);
+
+        Assert.False(resultado.Encontrado);
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task ActualizarPlanificacion_DebeActualizarFechasYGuardar()
+    {
+        var temas = new FakeTemaRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var tema = CrearTema();
+        temas.Agregar(tema);
+        var casoUso = new ActualizarPlanificacionTemaCasoUso(temas, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(
+            new ActualizarPlanificacionTemaSolicitud(
+                tema.Id,
+                new DateOnly(2026, 8, 25),
+                new DateOnly(2026, 9, 10)),
+            CancellationToken);
+
+        Assert.True(resultado.Encontrado);
+        Assert.Equal(new DateOnly(2026, 8, 25), tema.FechaInicio);
+        Assert.Equal(new DateOnly(2026, 9, 10), tema.FechaFin);
+        Assert.Equal(1, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task ActualizarPlanificacion_DebeRechazarFechasVaciasSinGuardar()
+    {
+        var temas = new FakeTemaRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var casoUso = new ActualizarPlanificacionTemaCasoUso(temas, unitOfWork);
+
+        await Assert.ThrowsAsync<ArgumentException>(() => casoUso.EjecutarAsync(
+            new ActualizarPlanificacionTemaSolicitud(Guid.CreateVersion7(), null, null),
+            CancellationToken));
+
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task ActualizarPlanificacion_DebePropagarInvarianteTemporalSinGuardar()
+    {
+        var temas = new FakeTemaRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var tema = CrearTema();
+        temas.Agregar(tema);
+        var casoUso = new ActualizarPlanificacionTemaCasoUso(temas, unitOfWork);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => casoUso.EjecutarAsync(
+            new ActualizarPlanificacionTemaSolicitud(
+                tema.Id,
+                new DateOnly(2026, 9, 10),
+                new DateOnly(2026, 8, 25)),
+            CancellationToken));
+
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task ConfigurarIntervaloRepaso_DebeRetornarTemaNoEncontradoSinGuardar()
+    {
+        var temas = new FakeTemaRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var casoUso = new ConfigurarIntervaloRepasoTemaCasoUso(temas, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(
+            new ConfigurarIntervaloRepasoTemaSolicitud(Guid.CreateVersion7(), 21),
+            CancellationToken);
+
+        Assert.False(resultado.Encontrado);
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task ConfigurarIntervaloRepaso_DebeActualizarIntervaloYGuardar()
+    {
+        var temas = new FakeTemaRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var tema = CrearTema();
+        temas.Agregar(tema);
+        var casoUso = new ConfigurarIntervaloRepasoTemaCasoUso(temas, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(
+            new ConfigurarIntervaloRepasoTemaSolicitud(tema.Id, 21),
+            CancellationToken);
+
+        Assert.True(resultado.Encontrado);
+        Assert.Equal(21, tema.IntervaloRepaso?.Dias);
+        Assert.Equal(1, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task ConfigurarIntervaloRepaso_DebePermitirQuitarIntervaloPropio()
+    {
+        var temas = new FakeTemaRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var tema = CrearTema();
+        temas.Agregar(tema);
+        tema.ConfigurarIntervaloRepaso(Aprendizaje.Dominio.Roadmap.ValueObjects.IntervaloRepaso.Crear(21));
+        var casoUso = new ConfigurarIntervaloRepasoTemaCasoUso(temas, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(
+            new ConfigurarIntervaloRepasoTemaSolicitud(tema.Id, null),
+            CancellationToken);
+
+        Assert.True(resultado.Encontrado);
+        Assert.Null(tema.IntervaloRepaso);
+        Assert.Equal(1, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task ConfigurarIntervaloRepaso_DebeRechazarDiasInvalidosSinGuardar()
+    {
+        var temas = new FakeTemaRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var tema = CrearTema();
+        temas.Agregar(tema);
+        var casoUso = new ConfigurarIntervaloRepasoTemaCasoUso(temas, unitOfWork);
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => casoUso.EjecutarAsync(
+            new ConfigurarIntervaloRepasoTemaSolicitud(tema.Id, 0),
+            CancellationToken));
+
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
     [Fact]
     public async Task AsignarTemaAFase_DebeRetornarTemaNoEncontradoSinGuardar()
     {

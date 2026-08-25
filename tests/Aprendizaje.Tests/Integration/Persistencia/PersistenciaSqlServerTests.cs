@@ -11,6 +11,7 @@ using Aprendizaje.Dominio.Evidence;
 using Aprendizaje.Dominio.Nucleo;
 using Aprendizaje.Dominio.Resource;
 using Aprendizaje.Dominio.Roadmap;
+using Aprendizaje.Dominio.Roadmap.ValueObjects;
 using Aprendizaje.Dominio.Study;
 using Aprendizaje.Infraestructura.Persistencia.Repositorios;
 using Microsoft.Data.SqlClient;
@@ -54,6 +55,81 @@ public sealed class PersistenciaSqlServerTests
             Assert.NotNull(rematerializado.Objetivos);
             Assert.Empty(rematerializado.Objetivos);
         }
+    }
+
+    [Fact]
+    public async Task Tema_PlanificacionPercepcion_PersisteCorrectamente()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+        var tema = Tema.Crear(usuario.Id, "Modelo OSI", TipoConocimiento.Conceptual);
+        var fechaInicio = new DateOnly(2026, 8, 25);
+        var fechaFin = new DateOnly(2026, 9, 10);
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            contexto.Usuarios.Add(usuario);
+            contexto.Temas.Add(tema);
+            await contexto.GuardarCambiosAsync(CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var persistido = await contexto.Temas.SingleAsync(t => t.Id == tema.Id, CancellationToken);
+
+            persistido.ActualizarDificultadPercibida(NivelPercepcion.Crear(4));
+            persistido.ActualizarConfianza(NivelPercepcion.Crear(2));
+            persistido.IniciarEstudio(fechaInicio);
+            persistido.FinalizarEstudio(fechaFin);
+            persistido.ConfigurarIntervaloRepaso(IntervaloRepaso.Crear(21));
+            await contexto.GuardarCambiosAsync(CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var rematerializado = await contexto.Temas
+                .AsNoTracking()
+                .SingleAsync(t => t.Id == tema.Id, CancellationToken);
+
+            Assert.Equal(4, rematerializado.DificultadPercibida?.Valor);
+            Assert.Equal(2, rematerializado.Confianza?.Valor);
+            Assert.Equal(fechaInicio, rematerializado.FechaInicio);
+            Assert.Equal(fechaFin, rematerializado.FechaFin);
+            Assert.Equal(21, rematerializado.IntervaloRepaso?.Dias);
+        }
+    }
+
+    [Fact]
+    public async Task Tema_RowVersion_CambiaTrasActualizarPlanificacionOPercepcion()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+        var tema = Tema.Crear(usuario.Id, "Modelo OSI", TipoConocimiento.Conceptual);
+        byte[] versionInicial;
+        byte[] versionPosterior;
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            contexto.Usuarios.Add(usuario);
+            contexto.Temas.Add(tema);
+            await contexto.GuardarCambiosAsync(CancellationToken);
+
+            versionInicial = Assert.IsType<byte[]>(tema.VersionFila);
+            Assert.NotEmpty(versionInicial);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var persistido = await contexto.Temas.SingleAsync(t => t.Id == tema.Id, CancellationToken);
+
+            persistido.ActualizarDificultadPercibida(NivelPercepcion.Crear(5));
+            await contexto.GuardarCambiosAsync(CancellationToken);
+
+            versionPosterior = Assert.IsType<byte[]>(persistido.VersionFila);
+            Assert.NotEmpty(versionPosterior);
+        }
+
+        Assert.NotEqual(versionInicial, versionPosterior);
     }
 
     [Fact]

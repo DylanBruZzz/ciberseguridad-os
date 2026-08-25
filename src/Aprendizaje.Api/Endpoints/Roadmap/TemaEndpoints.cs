@@ -1,5 +1,8 @@
+using Aprendizaje.Aplicacion.Roadmap.Temas.ActualizarPercepcion;
+using Aprendizaje.Aplicacion.Roadmap.Temas.ActualizarPlanificacion;
 using Aprendizaje.Aplicacion.Roadmap.Temas.AsignarTemaAFase;
 using Aprendizaje.Aplicacion.Roadmap.Temas.AsignarTemaPadre;
+using Aprendizaje.Aplicacion.Roadmap.Temas.ConfigurarIntervaloRepaso;
 using Aprendizaje.Aplicacion.Roadmap.Temas.CrearTema;
 using Aprendizaje.Aplicacion.Roadmap.Temas.DefinirCriteriosRelevantes;
 using Aprendizaje.Aplicacion.Roadmap.Temas.DesmarcarCriterio;
@@ -21,6 +24,9 @@ public static class TemaEndpoints
         grupo.MapGet("/", ListarTemasAsync);
         grupo.MapGet("/{id:guid}", ObtenerTemaPorIdAsync);
         grupo.MapPut("/{id:guid}/objetivos", EstablecerObjetivosAsync);
+        grupo.MapPut("/{temaId:guid}/percepcion", ActualizarPercepcionAsync);
+        grupo.MapPut("/{temaId:guid}/planificacion", ActualizarPlanificacionAsync);
+        grupo.MapPut("/{temaId:guid}/intervalo-repaso", ConfigurarIntervaloRepasoAsync);
         grupo.MapPut("/{temaId:guid}/criterios", DefinirCriteriosAsync);
         grupo.MapPut("/{temaId:guid}/criterios/{tipo}/cumplido", MarcarCriterioAsync);
         grupo.MapDelete("/{temaId:guid}/criterios/{tipo}/cumplido", DesmarcarCriterioAsync);
@@ -98,6 +104,84 @@ public static class TemaEndpoints
             return resultado.Encontrado
                 ? Results.NoContent()
                 : Results.NotFound();
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> ActualizarPercepcionAsync(
+        Guid temaId,
+        ActualizarPercepcionTemaHttpRequest request,
+        ActualizarPercepcionTemaCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new ActualizarPercepcionTemaSolicitud(temaId, request.DificultadPercibida, request.Confianza),
+                cancellationToken);
+
+            return resultado.Encontrado
+                ? Results.NoContent()
+                : Results.NotFound();
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> ActualizarPlanificacionAsync(
+        Guid temaId,
+        ActualizarPlanificacionTemaHttpRequest request,
+        ActualizarPlanificacionTemaCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new ActualizarPlanificacionTemaSolicitud(temaId, request.FechaInicio, request.FechaFin),
+                cancellationToken);
+
+            return resultado.Encontrado
+                ? Results.NoContent()
+                : Results.NotFound();
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> ConfigurarIntervaloRepasoAsync(
+        Guid temaId,
+        ConfigurarIntervaloRepasoTemaHttpRequest request,
+        ConfigurarIntervaloRepasoTemaCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new ConfigurarIntervaloRepasoTemaSolicitud(temaId, request.Dias),
+                cancellationToken);
+
+            return resultado.Encontrado
+                ? Results.NoContent()
+                : Results.NotFound();
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
         }
         catch (ArgumentException ex)
         {
@@ -266,6 +350,16 @@ public static class TemaEndpoints
 
     private sealed record EstablecerObjetivosTemaHttpRequest(
         IReadOnlyCollection<string>? Objetivos);
+
+    private sealed record ActualizarPercepcionTemaHttpRequest(
+        int? DificultadPercibida,
+        int? Confianza);
+
+    private sealed record ActualizarPlanificacionTemaHttpRequest(
+        DateOnly? FechaInicio,
+        DateOnly? FechaFin);
+
+    private sealed record ConfigurarIntervaloRepasoTemaHttpRequest(int? Dias);
 
     private sealed record DefinirCriteriosRelevantesTemaHttpRequest(
         IReadOnlyCollection<TipoCriterio>? Criterios);

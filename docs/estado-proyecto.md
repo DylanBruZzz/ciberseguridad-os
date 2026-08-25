@@ -7,12 +7,13 @@ Branch: main
 Ultimo checkpoint:
 
 ```text
-603e62d feat: establish certification evidence flow
+96277a0 feat: complete minimal evidence module
 ```
 
 Checkpoint anterior:
 
 ```text
+603e62d feat: establish certification evidence flow
 f9e452a feat: establish writeup evidence flow
 b1a4d6c feat: establish technical artifact evidence flow
 6805d19 feat: establish project evidence flow
@@ -78,6 +79,9 @@ caf832a feat: establish validated initial persistence
 - OWNERSHIP NOTA-PADRE VALIDADO EN APPLICATION
 - CK_NOTA_UNSOLOPADRE VALIDADO SOBRE SQL SERVER REAL
 - HITO EVIDENCE MINIMO FUNCIONAL CERRADO
+- ROADMAP AVANZADO TEMA PLANIFICACION/PERCEPCION VALIDADO END-TO-END
+- INTERVALO REPASO DE TEMA CONFIGURABLE END-TO-END
+- ROWVERSION DE TEMA VERIFICADA TRAS UPDATE REAL
 
 ## Migraciones Aplicadas
 
@@ -139,6 +143,12 @@ Subtema E2E:
 - Nombre: Modelo OSI
 - TipoConocimiento: Conceptual
 - TemaPadreId: 01A01604-8436-742A-A59B-B756B8FF07B3
+- FechaInicio: 2026-08-25
+- FechaFin: 2026-10-15
+- DificultadPercibida: 4
+- Confianza: 5
+- IntervaloRepasoDias: 21
+- RowVersion: 0x0000000000014053
 - Criterios:
   - Teoria: cumplido
   - Practica: cumplido
@@ -267,6 +277,19 @@ Nota E2E:
 - GET Tema inexistente -> 404
 - PUT /api/temas/{id}/objetivos -> 204
 - PUT objetivos Tema inexistente -> 404
+- PUT /api/temas/{id}/percepcion -> 204
+- PUT percepcion Tema inexistente -> 404
+- PUT percepcion con Guid.Empty -> 400
+- PUT percepcion con NivelPercepcion fuera de rango -> 400
+- PUT /api/temas/{id}/planificacion -> 204
+- PUT planificacion Tema inexistente -> 404
+- PUT planificacion con Guid.Empty -> 400
+- PUT planificacion con fechas invalidas -> 400
+- PUT /api/temas/{id}/intervalo-repaso -> 204
+- PUT intervalo-repaso Tema inexistente -> 404
+- PUT intervalo-repaso con Guid.Empty -> 400
+- PUT intervalo-repaso con dias invalidos -> 400
+- GET /api/temas/{id} devuelve dificultad, confianza, fechas e IntervaloRepasoDias configurados.
 - GET /api/temas?usuarioId={id} -> 200
 - GET /api/temas?usuarioId={id-sin-temas} -> 200 con []
 - GET /api/temas?usuarioId={Guid.Empty} -> 400
@@ -388,9 +411,9 @@ Nota E2E:
 - Microsoft.NET.Test.Sdk: no requerido con la estrategia MTP actual
 - dotnet run del proyecto de tests: validado
 - dotnet test por proyecto: validado
-- dotnet test por solucion: validado con 254 tests correctos
+- dotnet test por solucion: validado con 276 tests correctos
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
-- Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, dominio y TemaDominadoEvento validados.
+- Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, planificacion, percepcion, IntervaloRepaso, dominio y TemaDominadoEvento validados.
 - Tests de Dominio SesionEstudio: registro, invariantes, correccion de duracion y SesionRegistradaEvento validados.
 - Tests de Dominio EntradaBitacora y Herramienta validados.
 - Tests de Dominio Laboratorio validados.
@@ -399,7 +422,7 @@ Nota E2E:
 - Tests de Dominio Writeup validados.
 - Tests de Dominio Certificacion y CertificacionObtenida validados.
 - Tests de Dominio Nota validados.
-- Tests de Application Roadmap: flujos criticos de Tema cubiertos con fakes minimos.
+- Tests de Application Roadmap: flujos criticos de Tema, planificacion, percepcion e IntervaloRepaso cubiertos con fakes minimos.
 - Tests de Application Resource: crear, obtener, listar y vincular cubiertos con fakes minimos.
 - Tests de Application Study: SesionEstudio, EntradaBitacora, Herramienta y SesionHerramienta cubiertos con fakes minimos.
 - Tests de Application Evidence: Laboratorio crear, obtener, listar, vincular a Tema y vincular a Herramienta cubiertos con fakes minimos.
@@ -411,7 +434,7 @@ Nota E2E:
 - Tests de Application Evidence: Nota crear sobre Tema/Proyecto/Laboratorio/Writeup/ArtefactoTecnico, obtener y listar cubiertos con fakes minimos.
 - Tests de integracion/persistencia: SQL Server real .\MSSQLSERVER01 con base exclusiva AprendizajeTestsDb.
 - Guard rail de integracion: rechaza AprendizajeDb, database vacio y cualquier base distinta a AprendizajeTestsDb antes de recrear.
-- Tests de persistencia cubren: Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, idempotencia fisica ProyectoTema, idempotencia fisica ProyectoHerramienta, idempotencia fisica ArtefactoTema, idempotencia fisica ArtefactoHerramienta, idempotencia fisica WriteupTema, RowVersion de Proyecto poblada al insertar y estable al vincular joins, FK real CertificacionObtenida -> Certificacion, valores iniciales de CertificacionObtenida, query filter de CertificacionObtenida, Nota con un padre valido, CHECK CK_Nota_UnSoloPadre para cero y dos padres, query filter de Nota, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
+- Tests de persistencia cubren: Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, planificacion/percepcion/IntervaloRepaso de Tema, RowVersion de Tema tras update, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, idempotencia fisica ProyectoTema, idempotencia fisica ProyectoHerramienta, idempotencia fisica ArtefactoTema, idempotencia fisica ArtefactoHerramienta, idempotencia fisica WriteupTema, RowVersion de Proyecto poblada al insertar y estable al vincular joins, FK real CertificacionObtenida -> Certificacion, valores iniciales de CertificacionObtenida, query filter de CertificacionObtenida, Nota con un padre valido, CHECK CK_Nota_UnSoloPadre para cero y dos padres, query filter de Nota, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
 - Frameworks de mocking: no utilizados.
 - Tests de integracion fundacionales: validados.
 
@@ -421,9 +444,9 @@ Nota E2E:
 
 ## Proxima Area
 
-Slices Evidence funcionales cerrados: Laboratorio, Proyecto, ArtefactoTecnico, Writeup, CertificacionObtenida y Nota con crear/obtener/listar y vinculos/relaciones reales validados.
+Roadmap avanzado iniciado: planificacion/percepcion de Tema e IntervaloRepaso configurables desde Application/API y validados end-to-end.
 
-Proxima area sugerida: auditar Analytics/read side ahora que Evidence minimo funcional quedo cerrado.
+Proxima area sugerida: continuar Roadmap avanzado con Competencia/CompetenciaTema o CertificacionTema antes de Analytics/read side.
 
 ## Pendientes Deliberados
 
@@ -437,7 +460,7 @@ Proxima area sugerida: auditar Analytics/read side ahora que Evidence minimo fun
 - TemaDependencia race;
 - deteccion completa de ciclos profundos en jerarquia de Temas;
 - prueba automatizada directa de TemaDominadoEvento;
-- concurrencia HTTP/ETag/If-Match para Proyecto;
+- concurrencia HTTP/ETag/If-Match para Tema y Proyecto;
 - updates de Proyecto;
 - auth;
 - analytics;

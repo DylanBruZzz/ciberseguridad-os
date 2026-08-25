@@ -1,5 +1,6 @@
 using Aprendizaje.Dominio.Roadmap;
 using Aprendizaje.Dominio.Roadmap.Eventos;
+using Aprendizaje.Dominio.Roadmap.ValueObjects;
 using Xunit;
 
 namespace Aprendizaje.Tests.Dominio.Roadmap;
@@ -205,6 +206,85 @@ public sealed class TemaTests
 
         Assert.Throws<InvalidOperationException>(() =>
             tema.DefinirCriteriosRelevantes([TipoCriterio.Explicacion, TipoCriterio.Ejercicios]));
+    }
+
+    [Fact]
+    public void ActualizarDificultadPercibida_DebeAceptarNivelValido()
+    {
+        var tema = CrearTema();
+
+        tema.ActualizarDificultadPercibida(NivelPercepcion.Crear(4));
+
+        Assert.NotNull(tema.DificultadPercibida);
+        Assert.Equal(4, tema.DificultadPercibida.Valor);
+    }
+
+    [Fact]
+    public void ActualizarConfianza_DebePermitirQuitarValor()
+    {
+        var tema = CrearTema();
+        tema.ActualizarConfianza(NivelPercepcion.Crear(3));
+
+        tema.ActualizarConfianza(null);
+
+        Assert.Null(tema.Confianza);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(6)]
+    public void NivelPercepcion_Crear_DebeRechazarValoresFueraDeRango(int valor)
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => NivelPercepcion.Crear(valor));
+    }
+
+    [Fact]
+    public void IniciarYFinalizarEstudio_DebeRegistrarFechasValidas()
+    {
+        var tema = CrearTema();
+
+        tema.IniciarEstudio(new DateOnly(2026, 8, 25));
+        tema.FinalizarEstudio(new DateOnly(2026, 9, 10));
+
+        Assert.Equal(new DateOnly(2026, 8, 25), tema.FechaInicio);
+        Assert.Equal(new DateOnly(2026, 9, 10), tema.FechaFin);
+    }
+
+    [Fact]
+    public void IniciarEstudio_DebeRechazarInicioPosteriorAFinRegistrado()
+    {
+        var tema = CrearTema();
+        tema.FinalizarEstudio(new DateOnly(2026, 9, 10));
+
+        Assert.Throws<InvalidOperationException>(() => tema.IniciarEstudio(new DateOnly(2026, 9, 11)));
+    }
+
+    [Fact]
+    public void FinalizarEstudio_DebeRechazarFinAnteriorAInicioRegistrado()
+    {
+        var tema = CrearTema();
+        tema.IniciarEstudio(new DateOnly(2026, 8, 25));
+
+        Assert.Throws<InvalidOperationException>(() => tema.FinalizarEstudio(new DateOnly(2026, 8, 24)));
+    }
+
+    [Fact]
+    public void ConfigurarIntervaloRepaso_DebeAceptarIntervaloValidoYNull()
+    {
+        var tema = CrearTema();
+
+        tema.ConfigurarIntervaloRepaso(IntervaloRepaso.Crear(21));
+        Assert.NotNull(tema.IntervaloRepaso);
+        Assert.Equal(21, tema.IntervaloRepaso.Dias);
+
+        tema.ConfigurarIntervaloRepaso(null);
+        Assert.Null(tema.IntervaloRepaso);
+    }
+
+    [Fact]
+    public void IntervaloRepaso_Crear_DebeRechazarDiasNoPositivos()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => IntervaloRepaso.Crear(0));
     }
 
     [Fact]

@@ -112,6 +112,7 @@
 - [x] CrearNotaParaArtefactoTecnico implementado.
 - [x] ObtenerNotaPorId implementado.
 - [x] ListarNotas implementado.
+- [x] ObtenerResumenEstudio implementado.
 - [x] CrearTema implementado.
 - [x] ObtenerTemaPorId implementado.
 - [x] EstablecerObjetivosTema implementado.
@@ -186,6 +187,7 @@
 - [x] POST /api/artefactos-tecnicos/{artefactoTecnicoId}/notas.
 - [x] GET /api/notas/{id}.
 - [x] GET /api/notas?usuarioId={id}.
+- [x] GET /api/analytics/estudio?usuarioId={id}.
 - [x] POST /api/temas.
 - [x] GET /api/temas/{id}.
 - [x] PUT /api/temas/{id}/objetivos.
@@ -346,6 +348,9 @@
 - [x] CertificacionTema permite vincular Certificacion global a Tema con Peso NULL.
 - [x] Roadmap avanzado minimo funcional cerrado.
 - [x] TemaDependencia diferida conscientemente por aciclicidad y concurrencia.
+- [x] Resumen de estudio por Usuario -> 200.
+- [x] Resumen de estudio para Usuario sin sesiones -> 200 con resumen vacio.
+- [x] Resumen de estudio con Guid.Empty -> 400.
 - [ ] Nuevos flujos E2E por vertical slice.
 
 ## 10. Tests
@@ -395,6 +400,8 @@
 - [x] Tests fundacionales de dominio para Nota.
 - [x] Tests fundacionales de Application para Nota y ownership de sus 5 padres.
 - [x] Tests de persistencia para Nota y CK_Nota_UnSoloPadre.
+- [x] Tests de Application para ResumenEstudio.
+- [x] Tests de integracion para ResumenEstudio por Usuario sobre SQL Server real.
 - [ ] Tests E2E automatizados.
 - [ ] Tests de concurrencia donde aplique RowVersion.
 - [ ] Concurrencia HTTP/ETag/If-Match para Tema.
@@ -403,8 +410,10 @@
 
 - [ ] vw_TemaEstado como read side.
 - [ ] Paridad Tema.CalcularEstado() vs vw_TemaEstado.
-- [ ] Consultas de lectura.
-- [ ] Analytics operativos.
+- [x] Consulta on-demand ResumenEstudio por Usuario.
+- [x] Analytics minimo iniciado con metricas directas de Study.
+- [ ] Consultas de lectura adicionales.
+- [ ] SnapshotProgreso operativo.
 
 ## 12. Integraciones
 

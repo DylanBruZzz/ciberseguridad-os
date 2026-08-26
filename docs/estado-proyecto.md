@@ -93,6 +93,9 @@ caf832a feat: establish validated initial persistence
 - PESO DE CERTIFICACION-TEMA PERMANECE NULL Y SEMANTICAMENTE DIFERIDO
 - HITO ROADMAP AVANZADO MINIMO FUNCIONAL CERRADO
 - TEMADEPENDENCIA DIFERIDA POR ACICLICIDAD Y CONCURRENCIA NO RESUELTAS
+- ANALYTICS MINIMO INICIADO
+- RESUMEN DE ESTUDIO POR USUARIO VALIDADO END-TO-END
+- ANALYTICS RESUMEN ESTUDIO FUNCIONA ON-DEMAND SIN SNAPSHOT NI VISTA
 
 ## Migraciones Aplicadas
 
@@ -429,6 +432,9 @@ Nota E2E:
 - GET /api/notas/{id} -> 200
 - GET /api/notas?usuarioId={id} -> 200
 - GET /api/notas?usuarioId={Guid.Empty} -> 400
+- GET /api/analytics/estudio?usuarioId={id} -> 200
+- GET /api/analytics/estudio?usuarioId={id-sin-sesiones} -> 200 con resumen vacio
+- GET /api/analytics/estudio?usuarioId={Guid.Empty} -> 400
 
 ## Build
 
@@ -444,7 +450,7 @@ Nota E2E:
 - Microsoft.NET.Test.Sdk: no requerido con la estrategia MTP actual
 - dotnet run del proyecto de tests: validado
 - dotnet test por proyecto: validado
-- dotnet test por solucion: validado con 299 tests correctos
+- dotnet test por solucion: validado con 304 tests correctos
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
 - Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, planificacion, percepcion, IntervaloRepaso, dominio y TemaDominadoEvento validados.
 - Tests de Dominio Competencia validados.
@@ -466,11 +472,13 @@ Nota E2E:
 - Tests de Application Roadmap: Certificacion crear, obtener, listar y vincular a Tema cubiertos con fake minimo.
 - Tests de Application Evidence: CertificacionObtenida crear, obtener y listar cubiertos con fakes minimos.
 - Tests de Application Evidence: Nota crear sobre Tema/Proyecto/Laboratorio/Writeup/ArtefactoTecnico, obtener y listar cubiertos con fakes minimos.
+- Tests de Application Analytics: ResumenEstudio valida Guid.Empty y contrato del caso de uso.
 - Tests de integracion/persistencia: SQL Server real .\MSSQLSERVER01 con base exclusiva AprendizajeTestsDb.
 - Guard rail de integracion: rechaza AprendizajeDb, database vacio y cualquier base distinta a AprendizajeTestsDb antes de recrear.
 - Tests de persistencia cubren: Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, planificacion/percepcion/IntervaloRepaso de Tema, RowVersion de Tema tras update, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica CompetenciaTema, idempotencia fisica CertificacionTema con Peso NULL, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, idempotencia fisica ProyectoTema, idempotencia fisica ProyectoHerramienta, idempotencia fisica ArtefactoTema, idempotencia fisica ArtefactoHerramienta, idempotencia fisica WriteupTema, RowVersion de Proyecto poblada al insertar y estable al vincular joins, FK real CertificacionObtenida -> Certificacion, valores iniciales de CertificacionObtenida, query filter de CertificacionObtenida, Nota con un padre valido, CHECK CK_Nota_UnSoloPadre para cero y dos padres, query filter de Nota, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
 - Frameworks de mocking: no utilizados.
 - Tests de integracion fundacionales: validados.
+- Tests de integracion Analytics: ResumenEstudio agrega sesiones visibles por usuario, aisla otros usuarios, devuelve resumen vacio y excluye sesiones eliminadas logicamente.
 
 ## Estado Git Esperado
 
@@ -482,7 +490,7 @@ Roadmap avanzado minimo funcional cerrado: Fase, jerarquia Tema padre/hijo, obje
 
 TemaDependencia queda diferida conscientemente: aporta prerequisitos transversales utiles, pero no es necesaria para importacion inicial ni para Analytics minimo. Exponerla ahora dejaria incompleta la garantia de ausencia de ciclos profundos y no resolveria la carrera read -> validate -> insert bajo concurrencia.
 
-Proxima area sugerida: auditar e implementar Analytics/read side minimo sin usar Peso como formula y sin depender de TemaDependencia.
+Proxima area sugerida: continuar Analytics/read side minimo con metricas directas por Tema/Evidence, sin usar Peso como formula y sin depender de TemaDependencia.
 
 ## Pendientes Deliberados
 
@@ -502,7 +510,7 @@ Proxima area sugerida: auditar e implementar Analytics/read side minimo sin usar
 - concurrencia HTTP/ETag/If-Match para Tema y Proyecto;
 - updates de Proyecto;
 - auth;
-- analytics;
+- SnapshotProgreso operativo;
 - integrations;
 - frontend;
 - GitHub remote.

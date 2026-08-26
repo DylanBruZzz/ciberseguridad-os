@@ -1,10 +1,12 @@
 using Aprendizaje.Aplicacion.Comun;
+using Aprendizaje.Aplicacion.Analytics.Estudio;
 using Aprendizaje.Dominio.Evidence.Repositorios;
 using Aprendizaje.Dominio.Nucleo.Repositorios;
 using Aprendizaje.Dominio.Resource.Repositorios;
 using Aprendizaje.Dominio.Roadmap.Repositorios;
 using Aprendizaje.Dominio.Study.Repositorios;
 using Aprendizaje.Infraestructura.Persistencia;
+using Aprendizaje.Infraestructura.Persistencia.Consultas;
 using Aprendizaje.Infraestructura.Persistencia.Interceptores;
 using Aprendizaje.Infraestructura.Persistencia.Repositorios;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +38,7 @@ public static class InyeccionDependencias
         services.AddScoped<IEntradaBitacoraRepository, EntradaBitacoraRepository>();
         services.AddScoped<IHerramientaRepository, HerramientaRepository>();
         services.AddScoped<ISesionEstudioRepository, SesionEstudioRepository>();
+        services.AddScoped<IConsultaResumenEstudio, ConsultaResumenEstudio>();
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<AprendizajeDbContext>());
 
         services.AddDbContext<AprendizajeDbContext>((sp, options) =>

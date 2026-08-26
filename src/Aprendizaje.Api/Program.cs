@@ -4,6 +4,8 @@ using Aprendizaje.Api.Endpoints.Resource;
 using Aprendizaje.Api.Endpoints.Roadmap;
 using Aprendizaje.Api.Endpoints.Study;
 using Aprendizaje.Api.Endpoints;
+using Aprendizaje.Aplicacion.Analytics.Certificaciones;
+using Aprendizaje.Aplicacion.Analytics.Competencias;
 using Aprendizaje.Aplicacion.Analytics.Estudio;
 using Aprendizaje.Aplicacion.Analytics.Temas;
 using Aprendizaje.Aplicacion.Evidence.ArtefactosTecnicos.CrearArtefactoTecnico;
@@ -80,6 +82,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<ObtenerResumenEstudioCasoUso>();
 builder.Services.AddScoped<ObtenerResumenTemaCasoUso>();
+builder.Services.AddScoped<ObtenerResumenCompetenciasCasoUso>();
+builder.Services.AddScoped<ObtenerResumenCertificacionesCasoUso>();
 builder.Services.AddScoped<CrearFaseCasoUso>();
 builder.Services.AddScoped<ListarFasesCasoUso>();
 builder.Services.AddScoped<ActualizarPercepcionTemaCasoUso>();
@@ -157,6 +161,8 @@ var app = builder.Build();
 
 app.MapAnalyticsEstudioEndpoints();
 app.MapAnalyticsTemaEndpoints();
+app.MapAnalyticsCompetenciaEndpoints();
+app.MapAnalyticsCertificacionEndpoints();
 app.MapArtefactoTecnicoEndpoints();
 app.MapCertificacionEndpoints();
 app.MapCertificacionObtenidaEndpoints();

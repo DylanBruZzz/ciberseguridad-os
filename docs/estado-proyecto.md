@@ -7,12 +7,15 @@ Branch: main
 Ultimo checkpoint:
 
 ```text
-a6d52a3 feat: establish certification topic roadmap flow
+c79a747 feat: establish topic analytics read model
 ```
 
 Checkpoint anterior:
 
 ```text
+f1e404e feat: establish study analytics read model
+625d09f docs: close minimal advanced roadmap milestone
+a6d52a3 feat: establish certification topic roadmap flow
 8ec5c93 feat: establish competency roadmap flow
 8940e65 feat: establish advanced topic planning flow
 96277a0 feat: complete minimal evidence module
@@ -98,6 +101,9 @@ caf832a feat: establish validated initial persistence
 - ANALYTICS RESUMEN ESTUDIO FUNCIONA ON-DEMAND SIN SNAPSHOT NI VISTA
 - RESUMEN DIRECTO POR TEMA VALIDADO END-TO-END
 - ANALYTICS RESUMEN TEMA EXPONE METRICAS FACTUALES SIN ESTADO CALCULADO
+- RESUMEN ESTRUCTURAL DE COMPETENCIAS VALIDADO END-TO-END
+- RESUMEN ESTRUCTURAL DE CERTIFICACIONES VALIDADO END-TO-END
+- ANALYTICS DIRECTO MINIMO FUNCIONAL CERRADO
 
 ## Migraciones Aplicadas
 
@@ -441,6 +447,10 @@ Nota E2E:
 - GET /api/analytics/temas/{temaId}?usuarioId={Guid.Empty} -> 400
 - GET /api/analytics/temas/{Guid.Empty}?usuarioId={id} -> 400
 - GET /api/analytics/temas/{tema-inexistente}?usuarioId={id} -> 404
+- GET /api/analytics/competencias?usuarioId={id} -> 200
+- GET /api/analytics/competencias?usuarioId={Guid.Empty} -> 400
+- GET /api/analytics/certificaciones?usuarioId={id} -> 200
+- GET /api/analytics/certificaciones?usuarioId={Guid.Empty} -> 400
 
 ## Build
 
@@ -456,7 +466,7 @@ Nota E2E:
 - Microsoft.NET.Test.Sdk: no requerido con la estrategia MTP actual
 - dotnet run del proyecto de tests: validado
 - dotnet test por proyecto: validado
-- dotnet test por solucion: validado con 311 tests correctos
+- dotnet test por solucion: validado con 320 tests correctos
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
 - Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, planificacion, percepcion, IntervaloRepaso, dominio y TemaDominadoEvento validados.
 - Tests de Dominio Competencia validados.
@@ -480,6 +490,7 @@ Nota E2E:
 - Tests de Application Evidence: Nota crear sobre Tema/Proyecto/Laboratorio/Writeup/ArtefactoTecnico, obtener y listar cubiertos con fakes minimos.
 - Tests de Application Analytics: ResumenEstudio valida Guid.Empty y contrato del caso de uso.
 - Tests de Application Analytics: ResumenTema valida ids vacios, no encontrado y contrato del caso de uso.
+- Tests de Application Analytics: ResumenCompetencia y ResumenCertificacion validan Guid.Empty, lista vacia y contrato de respuesta.
 - Tests de integracion/persistencia: SQL Server real .\MSSQLSERVER01 con base exclusiva AprendizajeTestsDb.
 - Guard rail de integracion: rechaza AprendizajeDb, database vacio y cualquier base distinta a AprendizajeTestsDb antes de recrear.
 - Tests de persistencia cubren: Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, planificacion/percepcion/IntervaloRepaso de Tema, RowVersion de Tema tras update, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica CompetenciaTema, idempotencia fisica CertificacionTema con Peso NULL, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, idempotencia fisica ProyectoTema, idempotencia fisica ProyectoHerramienta, idempotencia fisica ArtefactoTema, idempotencia fisica ArtefactoHerramienta, idempotencia fisica WriteupTema, RowVersion de Proyecto poblada al insertar y estable al vincular joins, FK real CertificacionObtenida -> Certificacion, valores iniciales de CertificacionObtenida, query filter de CertificacionObtenida, Nota con un padre valido, CHECK CK_Nota_UnSoloPadre para cero y dos padres, query filter de Nota, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
@@ -487,6 +498,8 @@ Nota E2E:
 - Tests de integracion fundacionales: validados.
 - Tests de integracion Analytics: ResumenEstudio agrega sesiones visibles por usuario, aisla otros usuarios, devuelve resumen vacio y excluye sesiones eliminadas logicamente.
 - Tests de integracion Analytics: ResumenTema agrega datos directos por tema, criterios cumplidos/total, recursos/evidencias visibles, aislamiento por usuario y exclusion de soft delete.
+- Tests de integracion Analytics: ResumenCompetencia cuenta temas visibles por usuario y excluye temas eliminados logicamente.
+- Tests de integracion Analytics: ResumenCertificacion cuenta temas visibles por usuario, respeta catalogo global, ignora Peso y cuenta CertificacionObtenida visible sin asumir unicidad.
 
 ## Estado Git Esperado
 
@@ -498,7 +511,9 @@ Roadmap avanzado minimo funcional cerrado: Fase, jerarquia Tema padre/hijo, obje
 
 TemaDependencia queda diferida conscientemente: aporta prerequisitos transversales utiles, pero no es necesaria para importacion inicial ni para Analytics minimo. Exponerla ahora dejaria incompleta la garantia de ausencia de ciclos profundos y no resolveria la carrera read -> validate -> insert bajo concurrencia.
 
-Proxima area sugerida: continuar Analytics/read side minimo con metricas directas de Competencia/Certificacion, sin usar Peso como formula y sin depender de TemaDependencia.
+Analytics directo minimo funcional cerrado: ResumenEstudio, ResumenTema, ResumenCompetencia y ResumenCertificacion estan disponibles como consultas on-demand factuales. Esto no equivale a Analytics completo: progreso global, readiness, estado/repaso, SnapshotProgreso y vw_TemaEstado siguen diferidos.
+
+Proxima area sugerida: iniciar Auditoria Global V1 o auditar Analytics semantico/read side avanzado antes de definir formulas.
 
 ## Pendientes Deliberados
 

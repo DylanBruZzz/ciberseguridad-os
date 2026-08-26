@@ -1,4 +1,6 @@
 using Aprendizaje.Aplicacion.Comun;
+using Aprendizaje.Aplicacion.Analytics.Certificaciones;
+using Aprendizaje.Aplicacion.Analytics.Competencias;
 using Aprendizaje.Aplicacion.Analytics.Estudio;
 using Aprendizaje.Aplicacion.Analytics.Temas;
 using Aprendizaje.Dominio.Evidence.Repositorios;
@@ -41,6 +43,8 @@ public static class InyeccionDependencias
         services.AddScoped<ISesionEstudioRepository, SesionEstudioRepository>();
         services.AddScoped<IConsultaResumenEstudio, ConsultaResumenEstudio>();
         services.AddScoped<IConsultaResumenTema, ConsultaResumenTema>();
+        services.AddScoped<IConsultaResumenCompetencias, ConsultaResumenCompetencias>();
+        services.AddScoped<IConsultaResumenCertificaciones, ConsultaResumenCertificaciones>();
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<AprendizajeDbContext>());
 
         services.AddDbContext<AprendizajeDbContext>((sp, options) =>

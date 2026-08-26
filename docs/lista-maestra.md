@@ -114,6 +114,8 @@
 - [x] ListarNotas implementado.
 - [x] ObtenerResumenEstudio implementado.
 - [x] ObtenerResumenTema implementado.
+- [x] ObtenerResumenCompetencias implementado.
+- [x] ObtenerResumenCertificaciones implementado.
 - [x] CrearTema implementado.
 - [x] ObtenerTemaPorId implementado.
 - [x] EstablecerObjetivosTema implementado.
@@ -190,6 +192,8 @@
 - [x] GET /api/notas?usuarioId={id}.
 - [x] GET /api/analytics/estudio?usuarioId={id}.
 - [x] GET /api/analytics/temas/{temaId}?usuarioId={id}.
+- [x] GET /api/analytics/competencias?usuarioId={id}.
+- [x] GET /api/analytics/certificaciones?usuarioId={id}.
 - [x] POST /api/temas.
 - [x] GET /api/temas/{id}.
 - [x] PUT /api/temas/{id}/objetivos.
@@ -356,6 +360,11 @@
 - [x] Resumen directo por Tema -> 200.
 - [x] Resumen directo por Tema inexistente -> 404.
 - [x] Resumen directo por Tema con Guid.Empty -> 400.
+- [x] Resumen estructural de Competencias -> 200.
+- [x] Resumen estructural de Competencias con Guid.Empty -> 400.
+- [x] Resumen estructural de Certificaciones -> 200.
+- [x] Resumen estructural de Certificaciones con Guid.Empty -> 400.
+- [x] Analytics directo minimo funcional cerrado.
 - [ ] Nuevos flujos E2E por vertical slice.
 
 ## 10. Tests
@@ -409,6 +418,8 @@
 - [x] Tests de integracion para ResumenEstudio por Usuario sobre SQL Server real.
 - [x] Tests de Application para ResumenTema.
 - [x] Tests de integracion para ResumenTema sobre SQL Server real.
+- [x] Tests de Application para ResumenCompetencia y ResumenCertificacion.
+- [x] Tests de integracion para ResumenCompetencia y ResumenCertificacion sobre SQL Server real.
 - [ ] Tests E2E automatizados.
 - [ ] Tests de concurrencia donde aplique RowVersion.
 - [ ] Concurrencia HTTP/ETag/If-Match para Tema.
@@ -420,7 +431,10 @@
 - [x] Consulta on-demand ResumenEstudio por Usuario.
 - [x] Analytics minimo iniciado con metricas directas de Study.
 - [x] Consulta on-demand ResumenTema con metricas factuales.
-- [ ] Consultas de lectura adicionales.
+- [x] Consulta on-demand ResumenCompetencia con metricas factuales.
+- [x] Consulta on-demand ResumenCertificacion con metricas factuales.
+- [x] Analytics directo minimo funcional cerrado.
+- [ ] Analytics semantico avanzado.
 - [ ] SnapshotProgreso operativo.
 
 ## 12. Integraciones

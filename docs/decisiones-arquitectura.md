@@ -101,7 +101,9 @@ Soft delete es selectivo y solo aplica a Aggregate Roots que implementan IElimin
 - vw_TemaEstado esta deliberadamente diferida al read side.
 - No crear entidad keyless para vw_TemaEstado hasta fase de lectura.
 - TemaDependencia tiene condicion de carrera read -> validate -> insert diferida.
+- TemaDependencia queda diferida hasta disenar una garantia completa de aciclicidad y concurrencia.
 - Gobernanza de catalogos globales Herramienta/Certificacion diferida.
+- La semantica operativa de CertificacionTema.Peso queda diferida; no se usa para Analytics hasta definir formula.
 - Application-to-Application policy tests diferidos.
 
 ## API y Aplicacion

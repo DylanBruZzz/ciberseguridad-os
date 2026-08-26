@@ -7,12 +7,14 @@ Branch: main
 Ultimo checkpoint:
 
 ```text
-8940e65 feat: establish advanced topic planning flow
+a6d52a3 feat: establish certification topic roadmap flow
 ```
 
 Checkpoint anterior:
 
 ```text
+8ec5c93 feat: establish competency roadmap flow
+8940e65 feat: establish advanced topic planning flow
 96277a0 feat: complete minimal evidence module
 603e62d feat: establish certification evidence flow
 f9e452a feat: establish writeup evidence flow
@@ -89,6 +91,8 @@ caf832a feat: establish validated initial persistence
 - ROADMAP AVANZADO CERTIFICACION-TEMA VALIDADO END-TO-END
 - CERTIFICACION-TEMA VALIDADO COMO VINCULO GLOBAL SIN OWNERSHIP ARTIFICIAL
 - PESO DE CERTIFICACION-TEMA PERMANECE NULL Y SEMANTICAMENTE DIFERIDO
+- HITO ROADMAP AVANZADO MINIMO FUNCIONAL CERRADO
+- TEMADEPENDENCIA DIFERIDA POR ACICLICIDAD Y CONCURRENCIA NO RESUELTAS
 
 ## Migraciones Aplicadas
 
@@ -474,9 +478,11 @@ Nota E2E:
 
 ## Proxima Area
 
-Roadmap avanzado iniciado: planificacion/percepcion de Tema, IntervaloRepaso y Competencia/CompetenciaTema configurables desde Application/API y validados end-to-end.
+Roadmap avanzado minimo funcional cerrado: Fase, jerarquia Tema padre/hijo, objetivos, criterios de dominio, dificultad percibida, confianza, FechaInicio/FechaFin, IntervaloRepaso, Competencia/CompetenciaTema y Certificacion/CertificacionTema estan disponibles y validados.
 
-Proxima area sugerida: continuar Roadmap avanzado con TemaDependencia o auditar Analytics/read side sin usar Peso como formula.
+TemaDependencia queda diferida conscientemente: aporta prerequisitos transversales utiles, pero no es necesaria para importacion inicial ni para Analytics minimo. Exponerla ahora dejaria incompleta la garantia de ausencia de ciclos profundos y no resolveria la carrera read -> validate -> insert bajo concurrencia.
+
+Proxima area sugerida: auditar e implementar Analytics/read side minimo sin usar Peso como formula y sin depender de TemaDependencia.
 
 ## Pendientes Deliberados
 
@@ -489,6 +495,9 @@ Proxima area sugerida: continuar Roadmap avanzado con TemaDependencia o auditar 
 - Application dependency policy tests;
 - TemaDependencia race;
 - deteccion completa de ciclos profundos en jerarquia de Temas;
+- aciclicidad completa de TemaDependencia;
+- estrategia concurrente de TemaDependencia;
+- semantica operativa de CertificacionTema.Peso;
 - prueba automatizada directa de TemaDominadoEvento;
 - concurrencia HTTP/ETag/If-Match para Tema y Proyecto;
 - updates de Proyecto;

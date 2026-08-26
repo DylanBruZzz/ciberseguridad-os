@@ -18,6 +18,7 @@
 - [x] RowVersion selectivo definido.
 - [x] Soft delete selectivo definido.
 - [x] Tema.Objetivos robustecido ante NULL materializado por EF.
+- [x] Roadmap avanzado minimo funcional cerrado sin TemaDependencia.
 - [ ] Nuevos comportamientos de dominio por caso de uso real.
 
 ## 3. Persistencia EF Core
@@ -343,6 +344,8 @@
 - [x] Listar notas con Guid.Empty -> 400.
 - [x] CertificacionObtenida no es padre de Nota.
 - [x] CertificacionTema permite vincular Certificacion global a Tema con Peso NULL.
+- [x] Roadmap avanzado minimo funcional cerrado.
+- [x] TemaDependencia diferida conscientemente por aciclicidad y concurrencia.
 - [ ] Nuevos flujos E2E por vertical slice.
 
 ## 10. Tests
@@ -425,8 +428,11 @@
 ## 15. Pendientes arquitectonicos
 
 - [ ] TemaDependencia race.
+- [ ] Estrategia concurrente de TemaDependencia.
+- [ ] Aciclicidad completa de TemaDependencia.
 - [ ] Deteccion completa de ciclos profundos en jerarquia de Temas.
 - [ ] Gobernanza Herramienta/Certificacion.
+- [ ] Semantica operativa de CertificacionTema.Peso.
 - [ ] Read side de vw_TemaEstado.
 - [ ] Politica de autenticacion/autorizacion.
 - [ ] Estrategia de observabilidad.

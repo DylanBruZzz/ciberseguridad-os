@@ -113,6 +113,7 @@
 - [x] ObtenerNotaPorId implementado.
 - [x] ListarNotas implementado.
 - [x] ObtenerResumenEstudio implementado.
+- [x] ObtenerResumenTema implementado.
 - [x] CrearTema implementado.
 - [x] ObtenerTemaPorId implementado.
 - [x] EstablecerObjetivosTema implementado.
@@ -188,6 +189,7 @@
 - [x] GET /api/notas/{id}.
 - [x] GET /api/notas?usuarioId={id}.
 - [x] GET /api/analytics/estudio?usuarioId={id}.
+- [x] GET /api/analytics/temas/{temaId}?usuarioId={id}.
 - [x] POST /api/temas.
 - [x] GET /api/temas/{id}.
 - [x] PUT /api/temas/{id}/objetivos.
@@ -351,6 +353,9 @@
 - [x] Resumen de estudio por Usuario -> 200.
 - [x] Resumen de estudio para Usuario sin sesiones -> 200 con resumen vacio.
 - [x] Resumen de estudio con Guid.Empty -> 400.
+- [x] Resumen directo por Tema -> 200.
+- [x] Resumen directo por Tema inexistente -> 404.
+- [x] Resumen directo por Tema con Guid.Empty -> 400.
 - [ ] Nuevos flujos E2E por vertical slice.
 
 ## 10. Tests
@@ -402,6 +407,8 @@
 - [x] Tests de persistencia para Nota y CK_Nota_UnSoloPadre.
 - [x] Tests de Application para ResumenEstudio.
 - [x] Tests de integracion para ResumenEstudio por Usuario sobre SQL Server real.
+- [x] Tests de Application para ResumenTema.
+- [x] Tests de integracion para ResumenTema sobre SQL Server real.
 - [ ] Tests E2E automatizados.
 - [ ] Tests de concurrencia donde aplique RowVersion.
 - [ ] Concurrencia HTTP/ETag/If-Match para Tema.
@@ -412,6 +419,7 @@
 - [ ] Paridad Tema.CalcularEstado() vs vw_TemaEstado.
 - [x] Consulta on-demand ResumenEstudio por Usuario.
 - [x] Analytics minimo iniciado con metricas directas de Study.
+- [x] Consulta on-demand ResumenTema con metricas factuales.
 - [ ] Consultas de lectura adicionales.
 - [ ] SnapshotProgreso operativo.
 

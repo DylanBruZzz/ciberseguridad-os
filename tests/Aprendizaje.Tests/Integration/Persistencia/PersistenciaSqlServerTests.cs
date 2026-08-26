@@ -6,6 +6,7 @@ using Aprendizaje.Aplicacion.Evidence.Proyectos.VincularProyectoAHerramienta;
 using Aprendizaje.Aplicacion.Evidence.Proyectos.VincularProyectoATema;
 using Aprendizaje.Aplicacion.Evidence.Writeups.VincularWriteupATema;
 using Aprendizaje.Aplicacion.Resource.Recursos.VincularRecursoATema;
+using Aprendizaje.Aplicacion.Roadmap.Certificaciones.VincularCertificacionATema;
 using Aprendizaje.Aplicacion.Roadmap.Competencias.VincularCompetenciaATema;
 using Aprendizaje.Aplicacion.Study.SesionesEstudio.VincularHerramientaASesionEstudio;
 using Aprendizaje.Dominio.Evidence;
@@ -274,6 +275,60 @@ public sealed class PersistenciaSqlServerTests
                 .SingleAsync(CancellationToken);
 
             Assert.Equal(1, filas);
+        }
+    }
+
+    [Fact]
+    public async Task CertificacionTema_VinculoNoSeDuplica()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+        var tema = Tema.Crear(usuario.Id, "Modelo OSI", TipoConocimiento.Conceptual);
+        var certificacion = Certificacion.Crear($"CompTIA Network+ Integration {Guid.CreateVersion7():N}", TipoCosto.Pago);
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            contexto.Usuarios.Add(usuario);
+            contexto.Temas.Add(tema);
+            contexto.Certificaciones.Add(certificacion);
+            await contexto.GuardarCambiosAsync(CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var casoUso = new VincularCertificacionATemaCasoUso(
+                new CertificacionRepository(contexto),
+                new TemaRepository(contexto),
+                contexto);
+
+            var primerResultado = await casoUso.EjecutarAsync(
+                new VincularCertificacionATemaSolicitud(certificacion.Id, tema.Id),
+                CancellationToken);
+            var segundoResultado = await casoUso.EjecutarAsync(
+                new VincularCertificacionATemaSolicitud(certificacion.Id, tema.Id),
+                CancellationToken);
+
+            Assert.Equal(VincularCertificacionATemaEstado.Actualizado, primerResultado.Estado);
+            Assert.Equal(VincularCertificacionATemaEstado.Actualizado, segundoResultado.Estado);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var filas = await contexto.Database
+                .SqlQueryRaw<int>(
+                    "SELECT COUNT(*) AS [Value] FROM [roadmap].[CertificacionTema] WHERE [CertificacionId] = {0} AND [TemaId] = {1}",
+                    certificacion.Id,
+                    tema.Id)
+                .SingleAsync(CancellationToken);
+            var filasConPesoNull = await contexto.Database
+                .SqlQueryRaw<int>(
+                    "SELECT COUNT(*) AS [Value] FROM [roadmap].[CertificacionTema] WHERE [CertificacionId] = {0} AND [TemaId] = {1} AND [Peso] IS NULL",
+                    certificacion.Id,
+                    tema.Id)
+                .SingleAsync(CancellationToken);
+
+            Assert.Equal(1, filas);
+            Assert.Equal(1, filasConPesoNull);
         }
     }
 

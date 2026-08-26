@@ -1,6 +1,7 @@
 using Aprendizaje.Aplicacion.Roadmap.Certificaciones.CrearCertificacion;
 using Aprendizaje.Aplicacion.Roadmap.Certificaciones.ListarCertificaciones;
 using Aprendizaje.Aplicacion.Roadmap.Certificaciones.ObtenerCertificacionPorId;
+using Aprendizaje.Aplicacion.Roadmap.Certificaciones.VincularCertificacionATema;
 using Aprendizaje.Dominio.Roadmap;
 using Aprendizaje.Tests.Soporte;
 using Xunit;
@@ -87,6 +88,107 @@ public sealed class CertificacionesApplicationTests
         Assert.Equal(certificacion.Id, resumen.Id);
         Assert.Equal(certificacion.Nombre, resumen.Nombre);
         Assert.Equal(certificacion.TipoCosto, resumen.TipoCosto);
+    }
+
+    [Fact]
+    public async Task VincularCertificacionATema_DebeRetornarCertificacionNoEncontradaSinGuardar()
+    {
+        var certificaciones = new FakeCertificacionRepository();
+        var temas = new FakeTemaRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var casoUso = new VincularCertificacionATemaCasoUso(certificaciones, temas, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(
+            new VincularCertificacionATemaSolicitud(Guid.CreateVersion7(), Guid.CreateVersion7()),
+            CancellationToken);
+
+        Assert.Equal(VincularCertificacionATemaEstado.CertificacionNoEncontrada, resultado.Estado);
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task VincularCertificacionATema_DebeRetornarTemaNoEncontradoSinGuardar()
+    {
+        var certificaciones = new FakeCertificacionRepository();
+        var temas = new FakeTemaRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var certificacion = Certificacion.Crear("CompTIA Network+", TipoCosto.Pago);
+        certificaciones.Agregar(certificacion);
+        var casoUso = new VincularCertificacionATemaCasoUso(certificaciones, temas, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(
+            new VincularCertificacionATemaSolicitud(certificacion.Id, Guid.CreateVersion7()),
+            CancellationToken);
+
+        Assert.Equal(VincularCertificacionATemaEstado.TemaNoEncontrado, resultado.Estado);
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task VincularCertificacionATema_DebeVincularYGuardar()
+    {
+        var certificaciones = new FakeCertificacionRepository();
+        var temas = new FakeTemaRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuarioId = Guid.CreateVersion7();
+        var certificacion = Certificacion.Crear("CompTIA Network+", TipoCosto.Pago);
+        var tema = Tema.Crear(usuarioId, "Modelo OSI", TipoConocimiento.Conceptual);
+        certificaciones.Agregar(certificacion);
+        temas.Agregar(tema);
+        var casoUso = new VincularCertificacionATemaCasoUso(certificaciones, temas, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(
+            new VincularCertificacionATemaSolicitud(certificacion.Id, tema.Id),
+            CancellationToken);
+
+        Assert.Equal(VincularCertificacionATemaEstado.Actualizado, resultado.Estado);
+        Assert.True(await certificaciones.ExisteVinculoTemaAsync(certificacion.Id, tema.Id, CancellationToken));
+        Assert.Equal(1, certificaciones.VincularTemaLlamadas);
+        Assert.Equal(1, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task VincularCertificacionATema_NoDebeValidarOwnershipArtificial()
+    {
+        var certificaciones = new FakeCertificacionRepository();
+        var temas = new FakeTemaRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var certificacion = Certificacion.Crear("CompTIA Network+", TipoCosto.Pago);
+        var tema = Tema.Crear(Guid.CreateVersion7(), "Modelo OSI", TipoConocimiento.Conceptual);
+        certificaciones.Agregar(certificacion);
+        temas.Agregar(tema);
+        var casoUso = new VincularCertificacionATemaCasoUso(certificaciones, temas, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(
+            new VincularCertificacionATemaSolicitud(certificacion.Id, tema.Id),
+            CancellationToken);
+
+        Assert.Equal(VincularCertificacionATemaEstado.Actualizado, resultado.Estado);
+        Assert.Equal(1, certificaciones.VincularTemaLlamadas);
+        Assert.Equal(1, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task VincularCertificacionATema_DebeSerIdempotenteSinGuardarDeNuevo()
+    {
+        var certificaciones = new FakeCertificacionRepository();
+        var temas = new FakeTemaRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuarioId = Guid.CreateVersion7();
+        var certificacion = Certificacion.Crear("CompTIA Network+", TipoCosto.Pago);
+        var tema = Tema.Crear(usuarioId, "Modelo OSI", TipoConocimiento.Conceptual);
+        certificaciones.Agregar(certificacion);
+        temas.Agregar(tema);
+        var casoUso = new VincularCertificacionATemaCasoUso(certificaciones, temas, unitOfWork);
+        await casoUso.EjecutarAsync(new VincularCertificacionATemaSolicitud(certificacion.Id, tema.Id), CancellationToken);
+
+        var resultado = await casoUso.EjecutarAsync(
+            new VincularCertificacionATemaSolicitud(certificacion.Id, tema.Id),
+            CancellationToken);
+
+        Assert.Equal(VincularCertificacionATemaEstado.Actualizado, resultado.Estado);
+        Assert.Equal(1, certificaciones.VincularTemaLlamadas);
+        Assert.Equal(1, unitOfWork.GuardarCambiosLlamadas);
     }
 
     private static CancellationToken CancellationToken => TestContext.Current.CancellationToken;

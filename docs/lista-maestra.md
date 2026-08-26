@@ -100,6 +100,7 @@
 - [x] CrearCertificacion implementado.
 - [x] ObtenerCertificacionPorId implementado.
 - [x] ListarCertificaciones implementado.
+- [x] VincularCertificacionATema implementado.
 - [x] CrearCertificacionObtenida implementado.
 - [x] ObtenerCertificacionObtenidaPorId implementado.
 - [x] ListarCertificacionesObtenidas implementado.
@@ -173,6 +174,7 @@
 - [x] POST /api/certificaciones.
 - [x] GET /api/certificaciones/{id}.
 - [x] GET /api/certificaciones.
+- [x] PUT /api/certificaciones/{id}/temas/{temaId}.
 - [x] POST /api/certificaciones-obtenidas.
 - [x] GET /api/certificaciones-obtenidas/{id}.
 - [x] GET /api/certificaciones-obtenidas?usuarioId={id}.
@@ -322,6 +324,8 @@
 - [x] Crear Certificacion -> 201.
 - [x] Obtener Certificacion por Id -> 200.
 - [x] Listar certificaciones -> 200.
+- [x] Vincular Certificacion a Tema -> 204.
+- [x] Vincular Certificacion a Tema es idempotente.
 - [x] Crear CertificacionObtenida -> 201.
 - [x] Obtener CertificacionObtenida por Id -> 200.
 - [x] Listar certificaciones obtenidas por Usuario -> 200.
@@ -338,6 +342,7 @@
 - [x] Listar notas por Usuario -> 200.
 - [x] Listar notas con Guid.Empty -> 400.
 - [x] CertificacionObtenida no es padre de Nota.
+- [x] CertificacionTema permite vincular Certificacion global a Tema con Peso NULL.
 - [ ] Nuevos flujos E2E por vertical slice.
 
 ## 10. Tests
@@ -365,6 +370,7 @@
 - [x] Tests de persistencia para Tema.Objetivos, RowVersion de SesionEstudio, RecursoTema, SesionHerramienta, query filter y FK real.
 - [x] Tests de persistencia para planificacion/percepcion/IntervaloRepaso de Tema y RowVersion de Tema tras update.
 - [x] Tests de persistencia para CompetenciaTema.
+- [x] Tests de persistencia para CertificacionTema con Peso NULL.
 - [x] Tests fundacionales de dominio para EntradaBitacora y Herramienta.
 - [x] Tests fundacionales de Application para EntradaBitacora, Herramienta y SesionHerramienta.
 - [x] Tests fundacionales de dominio para Laboratorio.

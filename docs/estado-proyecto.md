@@ -86,6 +86,9 @@ caf832a feat: establish validated initial persistence
 - ROADMAP AVANZADO COMPETENCIA VALIDADO END-TO-END
 - COMPETENCIA-TEMA VALIDADO END-TO-END
 - OWNERSHIP COMPETENCIA-TEMA VALIDADO EN APPLICATION
+- ROADMAP AVANZADO CERTIFICACION-TEMA VALIDADO END-TO-END
+- CERTIFICACION-TEMA VALIDADO COMO VINCULO GLOBAL SIN OWNERSHIP ARTIFICIAL
+- PESO DE CERTIFICACION-TEMA PERMANECE NULL Y SEMANTICAMENTE DIFERIDO
 
 ## Migraciones Aplicadas
 
@@ -121,6 +124,7 @@ caf832a feat: establish validated initial persistence
 - Writeup: 1
 - WriteupTema: 1
 - Certificacion: 1
+- CertificacionTema: 1
 - CertificacionObtenida: 1
 - Nota: 1
 - Competencia: 1
@@ -259,6 +263,8 @@ Certificacion E2E:
 - TipoCosto: Pago
 - Url: null
 - Catalogo global: si
+- Tema vinculado: 01A016F7-1517-7C35-BAF3-A1BEB648776C
+- CertificacionTema.Peso: null
 
 CertificacionObtenida E2E:
 
@@ -402,6 +408,8 @@ Nota E2E:
 - POST /api/certificaciones -> 201
 - GET /api/certificaciones/{id} -> 200
 - GET /api/certificaciones -> 200
+- PUT /api/certificaciones/{id}/temas/{temaId} -> 204
+- PUT vinculo Certificacion-Tema repetido -> 204 idempotente
 - POST /api/certificaciones-obtenidas -> 201
 - GET /api/certificaciones-obtenidas/{id} -> 200
 - GET /api/certificaciones-obtenidas?usuarioId={id} -> 200
@@ -432,7 +440,7 @@ Nota E2E:
 - Microsoft.NET.Test.Sdk: no requerido con la estrategia MTP actual
 - dotnet run del proyecto de tests: validado
 - dotnet test por proyecto: validado
-- dotnet test por solucion: validado con 293 tests correctos
+- dotnet test por solucion: validado con 299 tests correctos
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
 - Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, planificacion, percepcion, IntervaloRepaso, dominio y TemaDominadoEvento validados.
 - Tests de Dominio Competencia validados.
@@ -451,12 +459,12 @@ Nota E2E:
 - Tests de Application Evidence: Proyecto crear, obtener, listar, vincular a Tema y vincular a Herramienta cubiertos con fakes minimos.
 - Tests de Application Evidence: ArtefactoTecnico crear, obtener, listar, vincular a Tema y vincular a Herramienta cubiertos con fakes minimos.
 - Tests de Application Evidence: Writeup crear, obtener, listar y vincular a Tema cubiertos con fakes minimos.
-- Tests de Application Roadmap: Certificacion crear, obtener y listar cubiertos con fake minimo.
+- Tests de Application Roadmap: Certificacion crear, obtener, listar y vincular a Tema cubiertos con fake minimo.
 - Tests de Application Evidence: CertificacionObtenida crear, obtener y listar cubiertos con fakes minimos.
 - Tests de Application Evidence: Nota crear sobre Tema/Proyecto/Laboratorio/Writeup/ArtefactoTecnico, obtener y listar cubiertos con fakes minimos.
 - Tests de integracion/persistencia: SQL Server real .\MSSQLSERVER01 con base exclusiva AprendizajeTestsDb.
 - Guard rail de integracion: rechaza AprendizajeDb, database vacio y cualquier base distinta a AprendizajeTestsDb antes de recrear.
-- Tests de persistencia cubren: Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, planificacion/percepcion/IntervaloRepaso de Tema, RowVersion de Tema tras update, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica CompetenciaTema, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, idempotencia fisica ProyectoTema, idempotencia fisica ProyectoHerramienta, idempotencia fisica ArtefactoTema, idempotencia fisica ArtefactoHerramienta, idempotencia fisica WriteupTema, RowVersion de Proyecto poblada al insertar y estable al vincular joins, FK real CertificacionObtenida -> Certificacion, valores iniciales de CertificacionObtenida, query filter de CertificacionObtenida, Nota con un padre valido, CHECK CK_Nota_UnSoloPadre para cero y dos padres, query filter de Nota, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
+- Tests de persistencia cubren: Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, planificacion/percepcion/IntervaloRepaso de Tema, RowVersion de Tema tras update, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica CompetenciaTema, idempotencia fisica CertificacionTema con Peso NULL, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, idempotencia fisica ProyectoTema, idempotencia fisica ProyectoHerramienta, idempotencia fisica ArtefactoTema, idempotencia fisica ArtefactoHerramienta, idempotencia fisica WriteupTema, RowVersion de Proyecto poblada al insertar y estable al vincular joins, FK real CertificacionObtenida -> Certificacion, valores iniciales de CertificacionObtenida, query filter de CertificacionObtenida, Nota con un padre valido, CHECK CK_Nota_UnSoloPadre para cero y dos padres, query filter de Nota, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
 - Frameworks de mocking: no utilizados.
 - Tests de integracion fundacionales: validados.
 
@@ -468,7 +476,7 @@ Nota E2E:
 
 Roadmap avanzado iniciado: planificacion/percepcion de Tema, IntervaloRepaso y Competencia/CompetenciaTema configurables desde Application/API y validados end-to-end.
 
-Proxima area sugerida: continuar Roadmap avanzado con CertificacionTema antes de Analytics/read side.
+Proxima area sugerida: continuar Roadmap avanzado con TemaDependencia o auditar Analytics/read side sin usar Peso como formula.
 
 ## Pendientes Deliberados
 

@@ -1,6 +1,7 @@
 using Aprendizaje.Aplicacion.Roadmap.Certificaciones.CrearCertificacion;
 using Aprendizaje.Aplicacion.Roadmap.Certificaciones.ListarCertificaciones;
 using Aprendizaje.Aplicacion.Roadmap.Certificaciones.ObtenerCertificacionPorId;
+using Aprendizaje.Aplicacion.Roadmap.Certificaciones.VincularCertificacionATema;
 using Aprendizaje.Dominio.Roadmap;
 
 namespace Aprendizaje.Api.Endpoints.Roadmap;
@@ -14,6 +15,7 @@ public static class CertificacionEndpoints
         grupo.MapPost("/", CrearCertificacionAsync);
         grupo.MapGet("/", ListarCertificacionesAsync);
         grupo.MapGet("/{id:guid}", ObtenerCertificacionPorIdAsync);
+        grupo.MapPut("/{certificacionId:guid}/temas/{temaId:guid}", VincularTemaAsync);
 
         return app;
     }
@@ -63,6 +65,32 @@ public static class CertificacionEndpoints
         var resultado = await casoUso.EjecutarAsync(cancellationToken);
 
         return Results.Ok(resultado.Certificaciones);
+    }
+
+    private static async Task<IResult> VincularTemaAsync(
+        Guid certificacionId,
+        Guid temaId,
+        VincularCertificacionATemaCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new VincularCertificacionATemaSolicitud(certificacionId, temaId),
+                cancellationToken);
+
+            return resultado.Estado switch
+            {
+                VincularCertificacionATemaEstado.Actualizado => Results.NoContent(),
+                VincularCertificacionATemaEstado.CertificacionNoEncontrada => Results.NotFound(),
+                VincularCertificacionATemaEstado.TemaNoEncontrado => Results.NotFound(),
+                _ => Results.Problem("Estado de vínculo Certificación-Tema no reconocido.")
+            };
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
     }
 
     private sealed record CrearCertificacionHttpRequest(string Nombre, TipoCosto TipoCosto);

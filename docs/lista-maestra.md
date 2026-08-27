@@ -19,6 +19,7 @@
 - [x] Soft delete selectivo definido.
 - [x] Tema.Objetivos robustecido ante NULL materializado por EF.
 - [x] Roadmap avanzado minimo funcional cerrado sin TemaDependencia.
+- [x] Fase.MetadataPedagogica incorporada como metadata descriptiva del roadmap recomendado.
 - [ ] Nuevos comportamientos de dominio por caso de uso real.
 
 ## 3. Persistencia EF Core
@@ -30,6 +31,8 @@
 - [x] FKs directas pre-migracion corregidas.
 - [x] 12 tablas de union puras representadas con modelos tecnicos de Infraestructura.
 - [x] Tema.Objetivos nullable en EF.
+- [x] Fase.Objetivos y Fase.CriteriosAvance nullable en EF con colecciones no-null en dominio/API.
+- [x] Fase.MesInicioRecomendado, Fase.MesFinRecomendado y CargaSemanalRecomendada configurados.
 - [ ] IDespachadorEventos concreto.
 - [ ] Registro de DespachoEventosInterceptor.
 
@@ -41,6 +44,7 @@
 - [x] Primera migracion aplicada a AprendizajeDb.
 - [x] Persistencia fisica inicial validada.
 - [x] Migracion HacerObjetivosTemaNullable aplicada.
+- [x] Migracion AgregarMetadataPedagogicaFase aplicada a AprendizajeDb.
 - [ ] Crear migraciones futuras solo con auditoria previa.
 
 ## 5. Tooling / entorno
@@ -134,6 +138,7 @@
 - [x] ListarTemas implementado.
 - [x] CrearFase implementado.
 - [x] ListarFases implementado.
+- [x] ActualizarMetadataPedagogicaFase implementado.
 - [ ] Nuevos casos de uso por necesidad real.
 - [ ] Manejo de errores transversal evaluado.
 
@@ -378,12 +383,14 @@
 - [x] Tests fundacionales de dominio para Tema.
 - [x] Tests de dominio para planificacion, percepcion e IntervaloRepaso de Tema.
 - [x] Tests de dominio para Competencia.
+- [x] Tests de dominio para metadata pedagogica de Fase.
 - [x] Tests fundacionales de dominio para SesionEstudio.
 - [x] Test automatizado directo de TemaDominadoEvento.
 - [x] Test automatizado directo de SesionRegistradaEvento.
 - [x] Tests fundacionales de Application Roadmap.
 - [x] Tests de Application Roadmap para planificacion, percepcion e IntervaloRepaso de Tema.
 - [x] Tests de Application Roadmap para Competencia y CompetenciaTema.
+- [x] Tests de Application Roadmap para metadata pedagogica de Fase.
 - [x] Tests fundacionales de Application Resource.
 - [x] Tests fundacionales de Application Study.
 - [x] Fakes minimos sin framework de mocking.
@@ -391,6 +398,7 @@
 - [x] Guard rail de tests de integracion contra uso accidental de AprendizajeDb.
 - [x] Tests de persistencia para Tema.Objetivos, RowVersion de SesionEstudio, RecursoTema, SesionHerramienta, query filter y FK real.
 - [x] Tests de persistencia para planificacion/percepcion/IntervaloRepaso de Tema y RowVersion de Tema tras update.
+- [x] Tests de persistencia para metadata pedagogica de Fase, round-trip, update y CHECKs de meses recomendados.
 - [x] Tests de persistencia para CompetenciaTema.
 - [x] Tests de persistencia para CertificacionTema con Peso NULL.
 - [x] Tests fundacionales de dominio para EntradaBitacora y Herramienta.
@@ -452,6 +460,10 @@
 
 ## 14. Importacion Roadmap original
 
+- [x] Gate arquitectonico de importacion resuelto: modelo listo tras metadata pedagogica de Fase.
+- [x] HTML original incorporado como fuente documental inmutable pendiente de checkpoint.
+- [x] Metadata pedagogica de Fase implementada como unico cambio minimo bloqueante.
+- [ ] Crear especificacion normalizada versionada desde HTML original.
 - [ ] Importar Roadmap original al modelo persistente.
 - [ ] Validar datos importados.
 - [ ] Auditar trazabilidad de importacion.
@@ -464,6 +476,8 @@
 - [ ] Deteccion completa de ciclos profundos en jerarquia de Temas.
 - [ ] Gobernanza Herramienta/Certificacion.
 - [ ] Semantica operativa de CertificacionTema.Peso.
+- [ ] FaseHerramienta / prioridad contextual de herramientas.
+- [ ] PlanPortafolio / EntregablePlanificado.
 - [ ] Read side de vw_TemaEstado.
 - [ ] Politica de autenticacion/autorizacion.
 - [ ] Estrategia de observabilidad.

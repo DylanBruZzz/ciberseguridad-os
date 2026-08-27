@@ -20,6 +20,12 @@ public sealed class CrearFaseCasoUso
         CancellationToken cancellationToken = default)
     {
         var fase = Fase.Crear(solicitud.UsuarioId, solicitud.Nombre, solicitud.Orden);
+        fase.ConfigurarMetadataPedagogica(
+            solicitud.Objetivos ?? [],
+            solicitud.CriteriosAvance ?? [],
+            solicitud.MesInicioRecomendado,
+            solicitud.MesFinRecomendado,
+            solicitud.CargaSemanalRecomendada);
 
         _fases.Agregar(fase);
         await _unitOfWork.GuardarCambiosAsync(cancellationToken);
@@ -28,6 +34,11 @@ public sealed class CrearFaseCasoUso
             fase.Id,
             fase.UsuarioId,
             fase.Nombre,
-            fase.Orden);
+            fase.Orden,
+            fase.Objetivos,
+            fase.CriteriosAvance,
+            fase.MesInicioRecomendado,
+            fase.MesFinRecomendado,
+            fase.CargaSemanalRecomendada);
     }
 }

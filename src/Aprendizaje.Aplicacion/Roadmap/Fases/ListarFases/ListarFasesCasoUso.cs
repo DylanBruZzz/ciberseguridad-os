@@ -27,7 +27,12 @@ public sealed class ListarFasesCasoUso
                 f.Nombre,
                 f.Orden,
                 f.Color,
-                f.Descripcion))
+                f.Descripcion,
+                f.Objetivos,
+                f.CriteriosAvance,
+                f.MesInicioRecomendado,
+                f.MesFinRecomendado,
+                f.CargaSemanalRecomendada))
             .ToArray();
 
         return new ListarFasesResultado(resumenes);

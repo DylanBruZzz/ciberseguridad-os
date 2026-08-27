@@ -1,12 +1,8 @@
-namespace Aprendizaje.Aplicacion.Roadmap.Fases.ListarFases;
+namespace Aprendizaje.Aplicacion.Roadmap.Fases.ActualizarMetadataPedagogica;
 
-public sealed record FaseResumen(
-    Guid Id,
+public sealed record ActualizarMetadataPedagogicaFaseSolicitud(
+    Guid FaseId,
     Guid UsuarioId,
-    string Nombre,
-    int Orden,
-    string? Color,
-    string? Descripcion,
     IReadOnlyCollection<string> Objetivos,
     IReadOnlyCollection<string> CriteriosAvance,
     int? MesInicioRecomendado,

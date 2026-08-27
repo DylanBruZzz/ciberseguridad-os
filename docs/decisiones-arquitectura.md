@@ -104,6 +104,7 @@ Soft delete es selectivo y solo aplica a Aggregate Roots que implementan IElimin
 - TemaDependencia queda diferida hasta disenar una garantia completa de aciclicidad y concurrencia.
 - Gobernanza de catalogos globales Herramienta/Certificacion diferida.
 - La semantica operativa de CertificacionTema.Peso queda diferida; no se usa para Analytics hasta definir formula.
+- FaseHerramienta, prioridad contextual de herramientas, PlanPortafolio y EntregablePlanificado quedan diferidos.
 - Application-to-Application policy tests diferidos.
 
 ## API y Aplicacion
@@ -120,3 +121,12 @@ Soft delete es selectivo y solo aplica a Aggregate Roots que implementan IElimin
 - Persistencia: la coleccion vacia se representa actualmente como SQL NULL.
 - TemaConfiguration: Objetivos es nullable.
 - Tema normaliza el backing field cuando EF materializa NULL.
+
+## Fase.MetadataPedagogica
+
+- Fase incorpora metadata pedagogica descriptiva del roadmap recomendado: Objetivos, CriteriosAvance, MesInicioRecomendado, MesFinRecomendado y CargaSemanalRecomendada.
+- Objetivos y CriteriosAvance son listas textuales sin estado; no reutilizan CriterioTema y no representan progreso.
+- MesInicioRecomendado y MesFinRecomendado son meses relativos del programa, no fechas reales de estudio.
+- CargaSemanalRecomendada es texto para preservar expresiones como "~10 hrs/semana" o "Tiempo completo" sin inventar escala numerica.
+- Esta metadata no crea Evidence, no activa Analytics semantico y no modifica Tema.FechaInicio/FechaFin.
+- Se mantiene diferido: Evidence planificada, FaseHerramienta, prioridad contextual de herramientas y PlanPortafolio.

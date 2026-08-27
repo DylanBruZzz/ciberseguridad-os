@@ -375,15 +375,16 @@ Este agregado es, a partir de ahora, el patrón que se replica —no se rediseñ
 
 **Estado: congelado como segundo Aggregate Root de referencia.**
 
-`Fase.cs` y `FaseConfiguration.cs` quedan cerrados, aplicando exactamente la misma disciplina de
-`Tema`: sin `CHECK` porque el script SQL nunca definió ninguno para esta tabla, y sin validación
-de longitud máxima en el dominio (`Nombre`, `Color`, `Descripcion`) porque `Tema` ya estableció
-ese precedente — la longitud se difiere deliberadamente a `HasMaxLength` en Fluent API y al ancho
-de columna en SQL, nunca duplicada como invariante de dominio.
+`Fase.cs` y `FaseConfiguration.cs` quedan cerrados como agrupador curricular con metadata
+pedagogica propia. La metadata nueva (`Objetivos`, `CriteriosAvance`, meses relativos y carga
+semanal recomendada) describe el roadmap recomendado, no progreso real ni evidencia. Los meses
+recomendados tienen invariantes de dominio y `CHECK` SQL porque forman parte del contrato fisico.
+La longitud de `Nombre`, `Color`, `Descripcion` y `CargaSemanalRecomendada` se mantiene en Fluent
+API y SQL, no duplicada como invariante de dominio.
 
-Sin riesgos diferidos pendientes de migración de prueba distintos a los ya registrados para `Tema`
-(mismo mecanismo de Guid v7, mismo patrón de trazabilidad — ningún Value Object ni conversión
-propia que introduzca un riesgo nuevo).
+Sin Value Objects, RowVersion, soft delete ni Domain Events nuevos. Quedan diferidos
+`FaseHerramienta`, prioridad contextual de herramientas, `PlanPortafolio` y cualquier concepto de
+Evidence planificada.
 
 ---
 

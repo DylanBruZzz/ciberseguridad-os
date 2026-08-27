@@ -70,6 +70,11 @@ CREATE TABLE roadmap.Fase (
     Orden       INT              NOT NULL,
     Color       NVARCHAR(20)     NULL,
     Descripcion NVARCHAR(1000)   NULL,
+    Objetivos   NVARCHAR(MAX)    NULL,   -- metadata pedagogica de fase: lista textual, una linea por objetivo
+    CriteriosAvance NVARCHAR(MAX) NULL,  -- criterios descriptivos para avanzar de fase, sin estado de cumplimiento
+    MesInicioRecomendado INT      NULL,   -- mes relativo dentro del programa recomendado, no fecha real de usuario
+    MesFinRecomendado    INT      NULL,
+    CargaSemanalRecomendada NVARCHAR(50) NULL, -- texto: "~10 hrs/semana", "Tiempo completo", etc.
     FechaCreacionUtc     DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
     FechaModificacionUtc DATETIME2 NULL,
     -- Sin FechaEliminacionUtc: Fase no implementa IEliminableLogicamente (metadato
@@ -77,7 +82,14 @@ CREATE TABLE roadmap.Fase (
     CONSTRAINT PK_Fase PRIMARY KEY (Id),
     CONSTRAINT FK_Fase_Usuario FOREIGN KEY (UsuarioId)
         REFERENCES nucleo.Usuario (Id) ON DELETE NO ACTION,
-    CONSTRAINT UQ_Fase_Usuario_Orden UNIQUE (UsuarioId, Orden)
+    CONSTRAINT UQ_Fase_Usuario_Orden UNIQUE (UsuarioId, Orden),
+    CONSTRAINT CK_Fase_MesInicioRecomendado CHECK (MesInicioRecomendado IS NULL OR MesInicioRecomendado >= 1),
+    CONSTRAINT CK_Fase_MesFinRecomendado CHECK (MesFinRecomendado IS NULL OR MesFinRecomendado >= 1),
+    CONSTRAINT CK_Fase_MesesRecomendados CHECK (
+        MesInicioRecomendado IS NULL
+        OR MesFinRecomendado IS NULL
+        OR MesFinRecomendado >= MesInicioRecomendado
+    )
 );
 GO
 CREATE INDEX IX_Fase_UsuarioId ON roadmap.Fase (UsuarioId);

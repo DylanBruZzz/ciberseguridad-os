@@ -1,16 +1,23 @@
 # Estado Proyecto
 
-## Checkpoint Git
+## Checkpoint Funcional Documentado
 
 Branch: main
 
-Ultimo checkpoint:
+Checkpoint funcional base:
 
 ```text
-c79a747 feat: establish topic analytics read model
+352e285 feat: establish competency certification analytics read models
 ```
 
-Checkpoint anterior:
+Politica:
+
+```text
+Este documento registra el checkpoint funcional base conocido, no el hash del commit que lo contiene.
+Asi se evita el desfase autorreferencial producido por el flujo documentar -> commit.
+```
+
+Historial previo:
 
 ```text
 f1e404e feat: establish study analytics read model
@@ -104,11 +111,13 @@ caf832a feat: establish validated initial persistence
 - RESUMEN ESTRUCTURAL DE COMPETENCIAS VALIDADO END-TO-END
 - RESUMEN ESTRUCTURAL DE CERTIFICACIONES VALIDADO END-TO-END
 - ANALYTICS DIRECTO MINIMO FUNCIONAL CERRADO
+- METADATA PEDAGOGICA DE FASE VALIDADA END-TO-END
 
 ## Migraciones Aplicadas
 
 - 20260818153945_Inicial
 - 20260818174900_HacerObjetivosTemaNullable
+- 20260827073704_AgregarMetadataPedagogicaFase
 
 ## Base de Desarrollo
 
@@ -121,7 +130,7 @@ caf832a feat: establish validated initial persistence
 
 - Usuario: 1
 - Tema: 2
-- Fase: 1
+- Fase: 2
 - Recurso: 1
 - SesionEstudio: 1
 - EntradaBitacora: 1
@@ -199,6 +208,19 @@ Fase E2E:
 - Id: 01A016CB-92F1-75B0-B5F6-803F92691273
 - Nombre: Fundamentos
 - Orden: 1
+
+Fase Metadata Pedagogica E2E:
+
+- Id: 01A0422E-2CBA-7D1B-949C-B75FE9CDDA00
+- Nombre: Metadata pedagógica Fase E2E
+- Orden: 2
+- Objetivos:
+  - Validar metadata pedagógica de fase actualizada
+- CriteriosAvance:
+  - Confirmar actualización idempotente para importación
+- MesInicioRecomendado: 49
+- MesFinRecomendado: 52
+- CargaSemanalRecomendada: Tiempo controlado E2E
 
 SesionEstudio E2E:
 
@@ -466,7 +488,7 @@ Nota E2E:
 - Microsoft.NET.Test.Sdk: no requerido con la estrategia MTP actual
 - dotnet run del proyecto de tests: validado
 - dotnet test por proyecto: validado
-- dotnet test por solucion: validado con 320 tests correctos
+- dotnet test por solucion: validado con 339 tests correctos
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
 - Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, planificacion, percepcion, IntervaloRepaso, dominio y TemaDominadoEvento validados.
 - Tests de Dominio Competencia validados.
@@ -493,7 +515,7 @@ Nota E2E:
 - Tests de Application Analytics: ResumenCompetencia y ResumenCertificacion validan Guid.Empty, lista vacia y contrato de respuesta.
 - Tests de integracion/persistencia: SQL Server real .\MSSQLSERVER01 con base exclusiva AprendizajeTestsDb.
 - Guard rail de integracion: rechaza AprendizajeDb, database vacio y cualquier base distinta a AprendizajeTestsDb antes de recrear.
-- Tests de persistencia cubren: Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, planificacion/percepcion/IntervaloRepaso de Tema, RowVersion de Tema tras update, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica CompetenciaTema, idempotencia fisica CertificacionTema con Peso NULL, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, idempotencia fisica ProyectoTema, idempotencia fisica ProyectoHerramienta, idempotencia fisica ArtefactoTema, idempotencia fisica ArtefactoHerramienta, idempotencia fisica WriteupTema, RowVersion de Proyecto poblada al insertar y estable al vincular joins, FK real CertificacionObtenida -> Certificacion, valores iniciales de CertificacionObtenida, query filter de CertificacionObtenida, Nota con un padre valido, CHECK CK_Nota_UnSoloPadre para cero y dos padres, query filter de Nota, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
+- Tests de persistencia cubren: metadata pedagogica de Fase, listas vacias de Fase materializadas no-null, checks SQL de meses recomendados de Fase, Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, planificacion/percepcion/IntervaloRepaso de Tema, RowVersion de Tema tras update, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica CompetenciaTema, idempotencia fisica CertificacionTema con Peso NULL, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, idempotencia fisica ProyectoTema, idempotencia fisica ProyectoHerramienta, idempotencia fisica ArtefactoTema, idempotencia fisica ArtefactoHerramienta, idempotencia fisica WriteupTema, RowVersion de Proyecto poblada al insertar y estable al vincular joins, FK real CertificacionObtenida -> Certificacion, valores iniciales de CertificacionObtenida, query filter de CertificacionObtenida, Nota con un padre valido, CHECK CK_Nota_UnSoloPadre para cero y dos padres, query filter de Nota, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
 - Frameworks de mocking: no utilizados.
 - Tests de integracion fundacionales: validados.
 - Tests de integracion Analytics: ResumenEstudio agrega sesiones visibles por usuario, aisla otros usuarios, devuelve resumen vacio y excluye sesiones eliminadas logicamente.
@@ -513,7 +535,11 @@ TemaDependencia queda diferida conscientemente: aporta prerequisitos transversal
 
 Analytics directo minimo funcional cerrado: ResumenEstudio, ResumenTema, ResumenCompetencia y ResumenCertificacion estan disponibles como consultas on-demand factuales. Esto no equivale a Analytics completo: progreso global, readiness, estado/repaso, SnapshotProgreso y vw_TemaEstado siguen diferidos.
 
-Proxima area sugerida: iniciar Auditoria Global V1 o auditar Analytics semantico/read side avanzado antes de definir formulas.
+Metadata pedagogica de Fase validada: Fase ahora puede describir objetivos, criterios descriptivos de avance, meses relativos recomendados y carga semanal recomendada como texto. Esta metadata pertenece al roadmap recomendado; no representa progreso real del usuario, no reemplaza Tema.FechaInicio/FechaFin y no crea evidencia.
+
+Importacion Roadmap original: el modelo queda listo para preparar una especificacion normalizada versionada a partir de docs/roadmap-original/cybersecurity_roadmap_dylan.html. La importacion todavia no esta implementada.
+
+Proxima area sugerida: especificacion normalizada del Roadmap original.
 
 ## Pendientes Deliberados
 
@@ -529,6 +555,9 @@ Proxima area sugerida: iniciar Auditoria Global V1 o auditar Analytics semantico
 - aciclicidad completa de TemaDependencia;
 - estrategia concurrente de TemaDependencia;
 - semantica operativa de CertificacionTema.Peso;
+- FaseHerramienta y metadata contextual de prioridad de herramientas;
+- PlanPortafolio / EntregablePlanificado;
+- Evidence planificada excluida de la importacion;
 - prueba automatizada directa de TemaDominadoEvento;
 - concurrencia HTTP/ETag/If-Match para Tema y Proyecto;
 - updates de Proyecto;

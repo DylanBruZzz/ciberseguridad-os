@@ -26,6 +26,166 @@ namespace Aprendizaje.Tests.Integration.Persistencia;
 public sealed class PersistenciaSqlServerTests
 {
     [Fact]
+    public async Task Fase_MetadataPedagogica_PersisteYMaterializaCorrectamente()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+        var fase = Fase.Crear(usuario.Id, "Fundamentos de Informática y Redes", 1);
+        fase.ConfigurarMetadataPedagogica(
+            ["Dominar el modelo OSI/TCP-IP", "Administrar Linux con fluidez"],
+            ["Configurar subnetting sin calculadora", "Completar módulos NetAcad CCNA 1 y 2"],
+            1,
+            4,
+            "~10 hrs/semana");
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            contexto.Usuarios.Add(usuario);
+            contexto.Fases.Add(fase);
+            await contexto.GuardarCambiosAsync(CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var fila = await contexto.Database
+                .SqlQueryRaw<FaseMetadataSql>(
+                    """
+                    SELECT
+                        [Objetivos],
+                        [CriteriosAvance],
+                        [MesInicioRecomendado],
+                        [MesFinRecomendado],
+                        [CargaSemanalRecomendada]
+                    FROM [roadmap].[Fase]
+                    WHERE [Id] = {0}
+                    """,
+                    fase.Id)
+                .SingleAsync(CancellationToken);
+
+            Assert.Equal("Dominar el modelo OSI/TCP-IP\nAdministrar Linux con fluidez", fila.Objetivos);
+            Assert.Equal("Configurar subnetting sin calculadora\nCompletar módulos NetAcad CCNA 1 y 2", fila.CriteriosAvance);
+            Assert.Equal(1, fila.MesInicioRecomendado);
+            Assert.Equal(4, fila.MesFinRecomendado);
+            Assert.Equal("~10 hrs/semana", fila.CargaSemanalRecomendada);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var rematerializada = await contexto.Fases.AsNoTracking().SingleAsync(f => f.Id == fase.Id, CancellationToken);
+
+            Assert.Equal(["Dominar el modelo OSI/TCP-IP", "Administrar Linux con fluidez"], rematerializada.Objetivos);
+            Assert.Equal(["Configurar subnetting sin calculadora", "Completar módulos NetAcad CCNA 1 y 2"], rematerializada.CriteriosAvance);
+            Assert.Equal(1, rematerializada.MesInicioRecomendado);
+            Assert.Equal(4, rematerializada.MesFinRecomendado);
+            Assert.Equal("~10 hrs/semana", rematerializada.CargaSemanalRecomendada);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var persistida = await contexto.Fases.SingleAsync(f => f.Id == fase.Id, CancellationToken);
+            persistida.ConfigurarMetadataPedagogica(
+                ["Montar y operar un SIEM"],
+                ["Completar laboratorio Blue Team"],
+                9,
+                14,
+                "~15 hrs/semana");
+            await contexto.GuardarCambiosAsync(CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var actualizada = await contexto.Fases.AsNoTracking().SingleAsync(f => f.Id == fase.Id, CancellationToken);
+
+            Assert.Equal(["Montar y operar un SIEM"], actualizada.Objetivos);
+            Assert.Equal(["Completar laboratorio Blue Team"], actualizada.CriteriosAvance);
+            Assert.Equal(9, actualizada.MesInicioRecomendado);
+            Assert.Equal(14, actualizada.MesFinRecomendado);
+            Assert.Equal("~15 hrs/semana", actualizada.CargaSemanalRecomendada);
+        }
+    }
+
+    [Fact]
+    public async Task Fase_MetadataPedagogica_ListasVacias_MaterializanColeccionesNoNull()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+        var fase = Fase.Crear(usuario.Id, "Fundamentos", 1);
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            contexto.Usuarios.Add(usuario);
+            contexto.Fases.Add(fase);
+            await contexto.GuardarCambiosAsync(CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var fila = await contexto.Database
+                .SqlQueryRaw<FaseMetadataSql>(
+                    """
+                    SELECT
+                        [Objetivos],
+                        [CriteriosAvance],
+                        [MesInicioRecomendado],
+                        [MesFinRecomendado],
+                        [CargaSemanalRecomendada]
+                    FROM [roadmap].[Fase]
+                    WHERE [Id] = {0}
+                    """,
+                    fase.Id)
+                .SingleAsync(CancellationToken);
+
+            Assert.Null(fila.Objetivos);
+            Assert.Null(fila.CriteriosAvance);
+            Assert.Null(fila.MesInicioRecomendado);
+            Assert.Null(fila.MesFinRecomendado);
+            Assert.Null(fila.CargaSemanalRecomendada);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var rematerializada = await contexto.Fases.SingleAsync(f => f.Id == fase.Id, CancellationToken);
+
+            Assert.NotNull(rematerializada.Objetivos);
+            Assert.Empty(rematerializada.Objetivos);
+            Assert.NotNull(rematerializada.CriteriosAvance);
+            Assert.Empty(rematerializada.CriteriosAvance);
+        }
+    }
+
+    [Fact]
+    public async Task Fase_MetadataPedagogica_ChecksRechazanMesesInvalidos()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Dylan Tests", EmailUnico());
+
+        await using var contexto = ambiente.CrearNuevoContexto();
+        contexto.Usuarios.Add(usuario);
+        await contexto.GuardarCambiosAsync(CancellationToken);
+
+        await Assert.ThrowsAsync<SqlException>(() => contexto.Database.ExecuteSqlInterpolatedAsync(
+            $"""
+             INSERT INTO [roadmap].[Fase] ([Id], [UsuarioId], [Nombre], [Orden], [MesInicioRecomendado])
+             VALUES ({Guid.CreateVersion7()}, {usuario.Id}, {"Mes inicio inválido"}, {1}, {0})
+             """,
+            CancellationToken));
+
+        await Assert.ThrowsAsync<SqlException>(() => contexto.Database.ExecuteSqlInterpolatedAsync(
+            $"""
+             INSERT INTO [roadmap].[Fase] ([Id], [UsuarioId], [Nombre], [Orden], [MesFinRecomendado])
+             VALUES ({Guid.CreateVersion7()}, {usuario.Id}, {"Mes fin inválido"}, {2}, {0})
+             """,
+            CancellationToken));
+
+        await Assert.ThrowsAsync<SqlException>(() => contexto.Database.ExecuteSqlInterpolatedAsync(
+            $"""
+             INSERT INTO [roadmap].[Fase] ([Id], [UsuarioId], [Nombre], [Orden], [MesInicioRecomendado], [MesFinRecomendado])
+             VALUES ({Guid.CreateVersion7()}, {usuario.Id}, {"Rango inválido"}, {3}, {5}, {4})
+             """,
+            CancellationToken));
+    }
+
+    [Fact]
     public async Task Tema_ObjetivosVacios_PersistenYMaterializanCorrectamente()
     {
         await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
@@ -1070,6 +1230,15 @@ public sealed class PersistenciaSqlServerTests
         contexto.SesionesEstudio.Add(sesion);
 
         await Assert.ThrowsAsync<DbUpdateException>(() => contexto.GuardarCambiosAsync(CancellationToken));
+    }
+
+    private sealed class FaseMetadataSql
+    {
+        public string? Objetivos { get; init; }
+        public string? CriteriosAvance { get; init; }
+        public int? MesInicioRecomendado { get; init; }
+        public int? MesFinRecomendado { get; init; }
+        public string? CargaSemanalRecomendada { get; init; }
     }
 
     private static string EmailUnico() => $"integracion-{Guid.CreateVersion7():N}@local.test";

@@ -98,7 +98,8 @@ internal sealed class AmbientePersistenciaSqlServer : IAsyncDisposable
             new[]
             {
                 "20260818153945_Inicial",
-                "20260818174900_HacerObjetivosTemaNullable"
+                "20260818174900_HacerObjetivosTemaNullable",
+                "20260827073704_AgregarMetadataPedagogicaFase"
             },
             migraciones);
     }

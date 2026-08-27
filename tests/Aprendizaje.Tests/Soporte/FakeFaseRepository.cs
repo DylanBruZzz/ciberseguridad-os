@@ -7,6 +7,8 @@ internal sealed class FakeFaseRepository : IFaseRepository
 {
     private readonly Dictionary<Guid, Fase> _fases = [];
 
+    public int AgregarLlamadas { get; private set; }
+
     public Task<Fase?> ObtenerPorIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         Task.FromResult(_fases.GetValueOrDefault(id));
 
@@ -15,5 +17,9 @@ internal sealed class FakeFaseRepository : IFaseRepository
         CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyCollection<Fase>>(_fases.Values.Where(f => f.UsuarioId == usuarioId).ToArray());
 
-    public void Agregar(Fase fase) => _fases[fase.Id] = fase;
+    public void Agregar(Fase fase)
+    {
+        AgregarLlamadas++;
+        _fases[fase.Id] = fase;
+    }
 }

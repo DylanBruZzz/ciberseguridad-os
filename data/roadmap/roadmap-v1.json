@@ -1,0 +1,436 @@
+{
+  "version": "1",
+  "fuente": {
+    "archivo": "docs/roadmap-original/cybersecurity_roadmap_dylan.html",
+    "tipo": "html-original-inmutable",
+    "idioma": "es",
+    "titulo": "Ruta Completa de Ciberseguridad",
+    "personaOriginal": "Dylan Flores · UNJFSC 6.º Ciclo",
+    "resumenOriginal": {
+      "anios": 4,
+      "fases": 7,
+      "certificacionesEtiqueta": "15+",
+      "proyectosEtiqueta": "25+",
+      "herramientasEtiqueta": "100+"
+    }
+  },
+  "politica": {
+    "usuarioIdIncluido": false,
+    "usarGuidFijos": false,
+    "normalizacionTemas": "selectiva-conservadora",
+    "parsearHtmlEnRuntime": false,
+    "persistirEvidencePlanificada": false,
+    "persistirMercadoLaboral": false,
+    "pesoCertificacionTema": null,
+    "temaDependenciaDiferida": true,
+    "competenciasDiferidas": true
+  },
+  "fases": [
+    {
+      "sourceKey": "fase-01",
+      "sourceSection": "phase1",
+      "orden": 1,
+      "anioEtiqueta": "AÑO 1",
+      "nombre": "Fundamentos de Informática y Redes",
+      "descripcion": "Fundamentos Sólidos",
+      "mesInicioRecomendado": 1,
+      "mesFinRecomendado": 4,
+      "cargaSemanalRecomendada": "~10 hrs/semana",
+      "objetivos": [
+        "Dominar el modelo OSI/TCP-IP a nivel profundo",
+        "Administrar Linux con fluidez desde terminal",
+        "Entender cómo funciona el tráfico de red",
+        "Configurar y usar Wireshark para análisis",
+        "Virtualización con VirtualBox/VMware"
+      ],
+      "criteriosAvance": [
+        "Configurar subnetting sin calculadora en menos de 2 minutos",
+        "Navegar completamente por Linux sin GUI (terminal only)",
+        "Identificar tipos de tráfico en capturas de Wireshark",
+        "Escribir scripts Bash funcionales de 50+ líneas",
+        "Completar módulos NetAcad CCNA 1 y 2"
+      ],
+      "temas": [
+        { "sourceKey": "tema-f01-modelo-osi-tcpip", "nombre": "Modelo OSI / TCP-IP", "tipoConocimiento": "Conceptual", "objetivos": [] },
+        { "sourceKey": "tema-f01-subnetting-cidr", "nombre": "Subnetting / CIDR", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f01-dns-dhcp-https", "nombre": "DNS, DHCP, HTTP/S", "tipoConocimiento": "Conceptual", "objetivos": [] },
+        { "sourceKey": "tema-f01-bash-scripting", "nombre": "Bash scripting", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f01-permisos-linux", "nombre": "Permisos Linux", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f01-virtualizacion", "nombre": "Virtualización", "tipoConocimiento": "Herramienta", "objetivos": [] },
+        { "sourceKey": "tema-f01-wireshark-basics", "nombre": "Wireshark basics", "tipoConocimiento": "Herramienta", "objetivos": [] },
+        { "sourceKey": "tema-f01-ssh-ftp-smb", "nombre": "SSH, FTP, SMB", "tipoConocimiento": "Conceptual", "objetivos": [] },
+        { "sourceKey": "tema-f01-routing-switching", "nombre": "Routing & Switching", "tipoConocimiento": "Conceptual", "objetivos": [] },
+        { "sourceKey": "tema-f01-firewall-basico", "nombre": "Firewall básico", "tipoConocimiento": "Conceptual", "objetivos": [] }
+      ],
+      "metadataDocumental": {
+        "tags": ["Principiante", "Networking", "Linux"],
+        "notas": ["Prerequisito: Ya tienes conocimientos universitarios de redes y programación. Usa esta fase para estandarizar y profundizar conceptos, no para aprenderlos desde cero."]
+      }
+    },
+    {
+      "sourceKey": "fase-02",
+      "sourceSection": "phase2",
+      "orden": 2,
+      "anioEtiqueta": "AÑO 1",
+      "nombre": "Sistemas Operativos, Scripting y Virtualización",
+      "descripcion": "Fundamentos Sólidos",
+      "mesInicioRecomendado": 5,
+      "mesFinRecomendado": 8,
+      "cargaSemanalRecomendada": "~12 hrs/semana",
+      "objetivos": [
+        "Administrar Windows Server y Active Directory",
+        "Automatizar tareas con Python y PowerShell",
+        "Crear entornos de laboratorio con VMware/Proxmox",
+        "Entender registros del sistema (logs) de Windows y Linux",
+        "Seguridad de configuración de SSOO"
+      ],
+      "criteriosAvance": [],
+      "temas": [
+        { "sourceKey": "tema-f02-active-directory", "nombre": "Active Directory", "tipoConocimiento": "Conceptual", "objetivos": [] },
+        { "sourceKey": "tema-f02-group-policy-gpo", "nombre": "Group Policy (GPO)", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f02-powershell-scripting", "nombre": "PowerShell scripting", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f02-python-seguridad", "nombre": "Python para seguridad", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f02-event-viewer-syslog", "nombre": "Event Viewer / Syslog", "tipoConocimiento": "Herramienta", "objetivos": [] },
+        { "sourceKey": "tema-f02-hardening-ssoo", "nombre": "Hardening SSOO", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f02-cron-jobs", "nombre": "Cron jobs", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f02-vmware-workstation", "nombre": "VMware Workstation", "tipoConocimiento": "Herramienta", "objetivos": [] },
+        { "sourceKey": "tema-f02-kali-linux-intro", "nombre": "Kali Linux intro", "tipoConocimiento": "Herramienta", "objetivos": [] },
+        { "sourceKey": "tema-f02-gestion-usuarios", "nombre": "Gestión de usuarios", "tipoConocimiento": "Procedimental", "objetivos": [] }
+      ],
+      "metadataDocumental": {
+        "tags": ["Windows Server", "Python", "Active Directory"],
+        "notas": ["En esta fase instala Kali Linux como VM secundaria y empieza a familiarizarte con las herramientas. No profundices aún en hacking; construye la base primero."]
+      }
+    },
+    {
+      "sourceKey": "fase-03",
+      "sourceSection": "phase3",
+      "orden": 3,
+      "anioEtiqueta": "AÑO 1",
+      "nombre": "Fundamentos de Ciberseguridad y Blue Team",
+      "descripcion": "Fundamentos Sólidos",
+      "mesInicioRecomendado": 9,
+      "mesFinRecomendado": 14,
+      "cargaSemanalRecomendada": "~15 hrs/semana",
+      "objetivos": [
+        "Comprender el ciclo de vida de un ataque (Kill Chain, MITRE ATT&CK)",
+        "Montar y operar un SIEM (Splunk/Wazuh)",
+        "Respuesta a incidentes básica (IR)",
+        "Gestión de vulnerabilidades con Nessus/OpenVAS",
+        "Criptografía aplicada y PKI"
+      ],
+      "criteriosAvance": [],
+      "temas": [
+        { "sourceKey": "tema-f03-mitre-attack-framework", "nombre": "MITRE ATT&CK Framework", "tipoConocimiento": "Conceptual", "objetivos": [] },
+        { "sourceKey": "tema-f03-cyber-kill-chain", "nombre": "Cyber Kill Chain", "tipoConocimiento": "Conceptual", "objetivos": [] },
+        { "sourceKey": "tema-f03-splunk-wazuh", "nombre": "Splunk / Wazuh", "tipoConocimiento": "Herramienta", "objetivos": [] },
+        { "sourceKey": "tema-f03-ids-ips-snort-suricata", "nombre": "IDS/IPS (Snort/Suricata)", "tipoConocimiento": "Herramienta", "objetivos": [] },
+        { "sourceKey": "tema-f03-threat-intelligence", "nombre": "Threat Intelligence", "tipoConocimiento": "Conceptual", "objetivos": [] },
+        { "sourceKey": "tema-f03-criptografia-simetrica-asimetrica", "nombre": "Criptografía simétrica/asimétrica", "tipoConocimiento": "Conceptual", "objetivos": [] },
+        { "sourceKey": "tema-f03-pki-certificados-tls", "nombre": "PKI y certificados TLS", "tipoConocimiento": "Conceptual", "objetivos": [] },
+        { "sourceKey": "tema-f03-osint-basico", "nombre": "OSINT básico", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f03-analisis-logs", "nombre": "Análisis de logs", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f03-nessus-openvas", "nombre": "Nessus / OpenVAS", "tipoConocimiento": "Herramienta", "objetivos": [] }
+      ],
+      "metadataDocumental": {
+        "tags": ["Blue Team", "SOC", "SIEM"],
+        "notas": ["Certificación objetivo: CompTIA Security+ (SY0-701) al finalizar esta fase."]
+      }
+    },
+    {
+      "sourceKey": "fase-04",
+      "sourceSection": "phase4",
+      "orden": 4,
+      "anioEtiqueta": "AÑO 2",
+      "nombre": "Red Team · Ethical Hacking · Pentesting",
+      "descripcion": "Seguridad Ofensiva y Especialización",
+      "mesInicioRecomendado": 15,
+      "mesFinRecomendado": 22,
+      "cargaSemanalRecomendada": "~20 hrs/semana",
+      "objetivos": [
+        "Ejecutar pentesting completo (reconocimiento → explotación → post-expl.)",
+        "Dominar Metasploit, Burp Suite, Nmap",
+        "Seguridad web: OWASP Top 10 con explotación real",
+        "AD attacks: Kerberoasting, Pass-the-Hash, DCSync",
+        "Escribir informes de pentesting profesionales"
+      ],
+      "criteriosAvance": [],
+      "temas": [
+        { "sourceKey": "tema-f04-nmap-nessus-avanzado", "nombre": "Nmap / Nessus avanzado", "tipoConocimiento": "Herramienta", "objetivos": [] },
+        { "sourceKey": "tema-f04-metasploit-framework", "nombre": "Metasploit Framework", "tipoConocimiento": "Herramienta", "objetivos": [] },
+        { "sourceKey": "tema-f04-burp-suite-pro", "nombre": "Burp Suite Pro", "tipoConocimiento": "Herramienta", "objetivos": [] },
+        { "sourceKey": "tema-f04-sqli-xss-ssrf", "nombre": "SQLi / XSS / SSRF", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f04-owasp-top-10", "nombre": "OWASP Top 10", "tipoConocimiento": "Conceptual", "objetivos": [] },
+        { "sourceKey": "tema-f04-buffer-overflow-basico", "nombre": "Buffer Overflow básico", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f04-ad-attacks", "nombre": "AD Attacks", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f04-bloodhound-mimikatz", "nombre": "BloodHound / Mimikatz", "tipoConocimiento": "Herramienta", "objetivos": [] },
+        { "sourceKey": "tema-f04-c2-frameworks", "nombre": "C2 Frameworks (Cobalt Strike/Havoc)", "tipoConocimiento": "Herramienta", "objetivos": [] },
+        { "sourceKey": "tema-f04-pivoting-tunneling", "nombre": "Pivoting & Tunneling", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f04-escritura-reportes", "nombre": "Escritura de reportes", "tipoConocimiento": "Procedimental", "objetivos": [] }
+      ],
+      "metadataDocumental": {
+        "tags": ["Red Team", "Pentesting", "Web Security"],
+        "notas": ["Certificaciones objetivo: eJPT como primer paso, luego CEH o PNPT."]
+      }
+    },
+    {
+      "sourceKey": "fase-05",
+      "sourceSection": "phase5",
+      "orden": 5,
+      "anioEtiqueta": "AÑO 2",
+      "nombre": "Cloud Security · DevSecOps · Seguridad Web Avanzada",
+      "descripcion": "Seguridad Ofensiva y Especialización",
+      "mesInicioRecomendado": 23,
+      "mesFinRecomendado": 30,
+      "cargaSemanalRecomendada": "~20 hrs/semana",
+      "objetivos": [
+        "Securizar infraestructura AWS/Azure/GCP",
+        "Implementar pipelines CI/CD con seguridad integrada",
+        "SAST/DAST en aplicaciones reales",
+        "Containers y Kubernetes security",
+        "IAM avanzado y políticas de acceso mínimo"
+      ],
+      "criteriosAvance": [],
+      "temas": [
+        { "sourceKey": "tema-f05-aws-security", "nombre": "AWS Security (IAM, WAF, GuardDuty)", "tipoConocimiento": "Conceptual", "objetivos": [] },
+        { "sourceKey": "tema-f05-docker-kubernetes-security", "nombre": "Docker / Kubernetes security", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f05-terraform-security-policies", "nombre": "Terraform + security policies", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f05-sast-dast-sca", "nombre": "SAST / DAST / SCA", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f05-github-actions-cicd", "nombre": "GitHub Actions CI/CD", "tipoConocimiento": "Herramienta", "objetivos": [] },
+        { "sourceKey": "tema-f05-secrets-management-vault", "nombre": "Secrets management (Vault)", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f05-api-security", "nombre": "API Security (REST/GraphQL)", "tipoConocimiento": "Conceptual", "objetivos": [] },
+        { "sourceKey": "tema-f05-cloud-pentesting", "nombre": "Cloud pentesting (Pacu/ScoutSuite)", "tipoConocimiento": "Procedimental", "objetivos": [] }
+      ],
+      "metadataDocumental": {
+        "tags": ["Cloud", "DevSecOps", "AppSec"],
+        "notas": []
+      }
+    },
+    {
+      "sourceKey": "fase-06",
+      "sourceSection": "phase6",
+      "orden": 6,
+      "anioEtiqueta": "AÑO 3–4",
+      "nombre": "Forense Digital · Análisis de Malware · DFIR · Gestión de Riesgos",
+      "descripcion": "Especialización Avanzada y Posicionamiento Profesional",
+      "mesInicioRecomendado": 31,
+      "mesFinRecomendado": 40,
+      "cargaSemanalRecomendada": "~20 hrs/semana",
+      "objetivos": [
+        "Análisis estático y dinámico de malware",
+        "Forense de memoria, disco y red",
+        "Gestión de riesgos según ISO 27001/NIST",
+        "Threat hunting proactivo",
+        "Elaborar planes de respuesta a incidentes"
+      ],
+      "criteriosAvance": [],
+      "temas": [
+        { "sourceKey": "tema-f06-volatility-framework", "nombre": "Volatility Framework", "tipoConocimiento": "Herramienta", "objetivos": [] },
+        { "sourceKey": "tema-f06-autopsy-ftk", "nombre": "Autopsy / FTK", "tipoConocimiento": "Herramienta", "objetivos": [] },
+        { "sourceKey": "tema-f06-analisis-pe-elf", "nombre": "Análisis de PE/ELF", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f06-reverse-engineering-basico", "nombre": "Reverse Engineering básico", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f06-ghidra-x64dbg", "nombre": "Ghidra / x64dbg", "tipoConocimiento": "Herramienta", "objetivos": [] },
+        { "sourceKey": "tema-f06-analisis-sandbox-anyrun", "nombre": "Análisis de sandbox (AnyRun)", "tipoConocimiento": "Herramienta", "objetivos": [] },
+        { "sourceKey": "tema-f06-iso27001-nist-csf", "nombre": "ISO 27001 / NIST CSF", "tipoConocimiento": "Conceptual", "objetivos": [] },
+        { "sourceKey": "tema-f06-gdpr-compliance", "nombre": "GDPR / Compliance", "tipoConocimiento": "Conceptual", "objetivos": [] },
+        { "sourceKey": "tema-f06-threat-hunting-sigma", "nombre": "Threat Hunting (Sigma rules)", "tipoConocimiento": "Procedimental", "objetivos": [] }
+      ],
+      "metadataDocumental": {
+        "tags": ["DFIR", "Malware", "GRC"],
+        "notas": []
+      }
+    },
+    {
+      "sourceKey": "fase-07",
+      "sourceSection": "phase7",
+      "orden": 7,
+      "anioEtiqueta": "AÑO 3–4",
+      "nombre": "Nivel Profesional: Certificaciones Avanzadas y Mercado Laboral",
+      "descripcion": "Especialización Avanzada y Posicionamiento Profesional",
+      "mesInicioRecomendado": 41,
+      "mesFinRecomendado": 48,
+      "cargaSemanalRecomendada": "Tiempo completo",
+      "objetivos": [
+        "OSCP o eCPPT (penetration testing avanzado)",
+        "AWS/Azure Security Specialty",
+        "Contribuir a proyectos open source de seguridad",
+        "Publicar CVEs o investigaciones originales",
+        "Hablar en eventos / escribir blog técnico activo"
+      ],
+      "criteriosAvance": [],
+      "temas": [
+        { "sourceKey": "tema-f07-bug-bounty-activo", "nombre": "Bug Bounty activo (HackerOne / Bugcrowd)", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f07-ctf-competitions", "nombre": "CTF competitions (Hack The Box, PicoCTF)", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f07-networking-comunidades", "nombre": "Networking en comunidades: BSides, DEF CON", "tipoConocimiento": "Conceptual", "objetivos": [] },
+        { "sourceKey": "tema-f07-mentoria-inversa", "nombre": "Mentoría inversa: enseñar lo aprendido", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f07-linkedin-github", "nombre": "LinkedIn/GitHub optimizados con proyectos", "tipoConocimiento": "Procedimental", "objetivos": [] }
+      ],
+      "metadataDocumental": {
+        "tags": ["OSCP", "Senior Level", "Empleable"],
+        "notas": ["Al llegar aquí tendrás 2-3 años de experiencia práctica real, un portafolio sólido y probablemente ya tengas tu primer empleo."]
+      }
+    }
+  ],
+  "recursos": [
+    { "sourceKey": "recurso-f01-cisco-netacad-it-essentials-ccna", "sourceSection": "phase1", "titulo": "Cisco NetAcad: IT Essentials + CCNA", "tipo": "Curso", "url": null, "notas": "tienes acceso", "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f01-tryhackme-pre-security-path", "sourceSection": "phase1", "titulo": "TryHackMe: Pre-Security Path", "tipo": "Laboratorio", "url": null, "notas": "gratis", "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f01-computer-networking-tanenbaum", "sourceSection": "phase1", "titulo": "Computer Networking - Tanenbaum", "tipo": "Libro", "url": null, "notas": null, "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f01-youtube-networkchuck-david-bombal", "sourceSection": "phase1", "titulo": "YouTube: NetworkChuck, David Bombal", "tipo": "Video", "url": null, "notas": null, "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f01-overthewire-bandit", "sourceSection": "phase1", "titulo": "OverTheWire: Bandit", "tipo": "Laboratorio", "url": null, "notas": "wargame", "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f02-tcm-practical-ethical-hacking-inicio", "sourceSection": "phase2", "titulo": "TCM Security: Practical Ethical Hacking", "tipo": "Curso", "url": null, "notas": "inicio", "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f02-tryhackme-soc-level-1", "sourceSection": "phase2", "titulo": "TryHackMe: SOC Level 1 Path", "tipo": "Laboratorio", "url": null, "notas": null, "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f02-learn-python-hard-way", "sourceSection": "phase2", "titulo": "Learn Python the Hard Way", "tipo": "Libro", "url": null, "notas": null, "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f02-microsoft-learn-windows-server", "sourceSection": "phase2", "titulo": "Microsoft Learn: Windows Server free modules", "tipo": "Curso", "url": null, "notas": null, "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f02-youtube-john-hammond-ippsec", "sourceSection": "phase2", "titulo": "YouTube: John Hammond, IppSec", "tipo": "Video", "url": null, "notas": null, "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f03-splunk-free-training-bots", "sourceSection": "phase3", "titulo": "Splunk Free Training + BOTS", "tipo": "Curso", "url": null, "notas": null, "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f03-tryhackme-soc-blue-team", "sourceSection": "phase3", "titulo": "TryHackMe: SOC Level 1 + Blue Team Path", "tipo": "Laboratorio", "url": null, "notas": null, "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f03-blue-team-labs-online", "sourceSection": "phase3", "titulo": "Blue Team Labs Online", "tipo": "Laboratorio", "url": null, "notas": "gratis", "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f03-network-security-monitoring", "sourceSection": "phase3", "titulo": "The Practice of Network Security Monitoring", "tipo": "Libro", "url": null, "notas": null, "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f03-cisco-netacad-cyberops", "sourceSection": "phase3", "titulo": "Cisco NetAcad: CyberOps Associate", "tipo": "Curso", "url": null, "notas": null, "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f04-tcm-practical-ethical-hacking", "sourceSection": "phase4", "titulo": "TCM Security: Practical Ethical Hacking", "tipo": "Curso", "url": null, "notas": "$30", "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f04-hackthebox-starting-point-labs", "sourceSection": "phase4", "titulo": "HackTheBox: Starting Point + Labs", "tipo": "Laboratorio", "url": null, "notas": null, "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f04-portswigger-web-academy", "sourceSection": "phase4", "titulo": "PortSwigger Web Academy", "tipo": "Laboratorio", "url": null, "notas": "gratis", "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f04-penetration-testing-georgia-weidman", "sourceSection": "phase4", "titulo": "Penetration Testing - Georgia Weidman", "tipo": "Libro", "url": null, "notas": null, "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f04-tcm-ad-attacks-defense", "sourceSection": "phase4", "titulo": "TCM: AD Attacks & Defense", "tipo": "Curso", "url": null, "notas": null, "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f04-vulnhub-maquinas-vulnerables", "sourceSection": "phase4", "titulo": "VulnHub: Máquinas vulnerables", "tipo": "Laboratorio", "url": null, "notas": null, "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f05-aws-security-specialty-study-guide", "sourceSection": "phase5", "titulo": "AWS: Security Specialty Study Guide", "tipo": "Documentacion", "url": null, "notas": null, "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f05-cloudgoat-vulnerable-aws", "sourceSection": "phase5", "titulo": "CloudGoat: Vulnerable AWS scenarios", "tipo": "Laboratorio", "url": null, "notas": "gratis", "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f05-flaws-cloud", "sourceSection": "phase5", "titulo": "flaws.cloud", "tipo": "Laboratorio", "url": null, "notas": "gratis, labs AWS", "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f05-hacking-the-cloud", "sourceSection": "phase5", "titulo": "Hacking the Cloud - Nick Frichette", "tipo": "Libro", "url": null, "notas": null, "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f05-snyk-learn-devsecops", "sourceSection": "phase5", "titulo": "Snyk Learn: DevSecOps gratuito", "tipo": "Curso", "url": null, "notas": null, "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f06-anyrun-sandbox", "sourceSection": "phase6", "titulo": "ANY.RUN: Plataforma de sandbox gratis", "tipo": "Laboratorio", "url": null, "notas": null, "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f06-malware-traffic-analysis", "sourceSection": "phase6", "titulo": "Malware Traffic Analysis", "tipo": "Laboratorio", "url": null, "notas": "laboratorios pcap", "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f06-art-memory-forensics", "sourceSection": "phase6", "titulo": "The Art of Memory Forensics", "tipo": "Libro", "url": null, "notas": null, "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f06-tcm-practical-malware-analysis", "sourceSection": "phase6", "titulo": "TCM Security: Practical Malware Analysis", "tipo": "Curso", "url": null, "notas": null, "temaSourceKeys": [] },
+    { "sourceKey": "recurso-f06-sans-reading-room", "sourceSection": "phase6", "titulo": "SANS Reading Room", "tipo": "Documentacion", "url": null, "notas": "papers gratuitos", "temaSourceKeys": [] }
+  ],
+  "herramientas": [
+    { "sourceKey": "herramienta-wireshark", "nombre": "Wireshark", "categoria": "Análisis de Red", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-01", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-tcpdump", "nombre": "tcpdump", "categoria": "Análisis de Red", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-01", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-nmap", "nombre": "Nmap", "categoria": "Análisis de Red", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-01", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-bash", "nombre": "Bash", "categoria": "Linux", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-01", "prioridad": "Crítica" }, { "faseSourceKey": "fase-02", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-sed", "nombre": "sed", "categoria": "Linux", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-01", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-awk", "nombre": "awk", "categoria": "Linux", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-01", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-grep", "nombre": "grep", "categoria": "Linux", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-01", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-curl", "nombre": "curl", "categoria": "Linux", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-01", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-virtualbox", "nombre": "VirtualBox", "categoria": "Virtualización", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-01", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-vmware", "nombre": "VMware", "categoria": "Virtualización", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-01", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-proxmox", "nombre": "Proxmox", "categoria": "Virtualización", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-01", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-python-3", "nombre": "Python 3", "categoria": "Scripting", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-02", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-powershell", "nombre": "PowerShell", "categoria": "Scripting", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-02", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-splunk", "nombre": "Splunk", "categoria": "SIEM", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-03", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-wazuh", "nombre": "Wazuh", "categoria": "SIEM", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-03", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-elastic-stack", "nombre": "Elastic Stack", "categoria": "SIEM", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-03", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-snort", "nombre": "Snort", "categoria": "IDS/IPS", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-03", "prioridad": "Alta" }] } },
+    { "sourceKey": "herramienta-suricata", "nombre": "Suricata", "categoria": "IDS/IPS", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-03", "prioridad": "Alta" }] } },
+    { "sourceKey": "herramienta-zeek", "nombre": "Zeek", "categoria": "IDS/IPS", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-03", "prioridad": "Alta" }] } },
+    { "sourceKey": "herramienta-nessus", "nombre": "Nessus", "categoria": "Vuln Scanner", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-03", "prioridad": "Alta" }] } },
+    { "sourceKey": "herramienta-openvas", "nombre": "OpenVAS", "categoria": "Vuln Scanner", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-03", "prioridad": "Alta" }] } },
+    { "sourceKey": "herramienta-nuclei", "nombre": "Nuclei", "categoria": "Vuln Scanner", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-03", "prioridad": "Alta" }] } },
+    { "sourceKey": "herramienta-metasploit", "nombre": "Metasploit", "categoria": "Pentesting", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-04", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-burp-suite", "nombre": "Burp Suite", "categoria": "Pentesting", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-04", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-sqlmap", "nombre": "SQLmap", "categoria": "Pentesting", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-04", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-bloodhound", "nombre": "BloodHound", "categoria": "AD Attacks", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-04", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-mimikatz", "nombre": "Mimikatz", "categoria": "AD Attacks", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-04", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-responder", "nombre": "Responder", "categoria": "AD Attacks", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-04", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-burp-suite-pro", "nombre": "Burp Suite Pro", "categoria": "Web Security", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-04", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-owasp-zap", "nombre": "OWASP ZAP", "categoria": "Web Security", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-04", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-ffuf", "nombre": "ffuf", "categoria": "Web Security", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-04", "prioridad": "Crítica" }] } },
+    { "sourceKey": "herramienta-maltego", "nombre": "Maltego", "categoria": "OSINT", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-04", "prioridad": "Alta" }] } },
+    { "sourceKey": "herramienta-shodan", "nombre": "Shodan", "categoria": "OSINT", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-04", "prioridad": "Alta" }] } },
+    { "sourceKey": "herramienta-theharvester", "nombre": "theHarvester", "categoria": "OSINT", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-04", "prioridad": "Alta" }] } },
+    { "sourceKey": "herramienta-scoutsuite", "nombre": "ScoutSuite", "categoria": "Cloud Security", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-05", "prioridad": "Alta" }] } },
+    { "sourceKey": "herramienta-pacu", "nombre": "Pacu", "categoria": "Cloud Security", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-05", "prioridad": "Alta" }] } },
+    { "sourceKey": "herramienta-prowler", "nombre": "Prowler", "categoria": "Cloud Security", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-05", "prioridad": "Alta" }] } },
+    { "sourceKey": "herramienta-semgrep", "nombre": "Semgrep", "categoria": "DevSecOps", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-05", "prioridad": "Alta" }] } },
+    { "sourceKey": "herramienta-trivy", "nombre": "Trivy", "categoria": "DevSecOps", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-05", "prioridad": "Alta" }] } },
+    { "sourceKey": "herramienta-snyk", "nombre": "Snyk", "categoria": "DevSecOps", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-05", "prioridad": "Alta" }] } },
+    { "sourceKey": "herramienta-hashicorp-vault", "nombre": "HashiCorp Vault", "categoria": "DevSecOps", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-05", "prioridad": "Alta" }] } },
+    { "sourceKey": "herramienta-autopsy", "nombre": "Autopsy", "categoria": "Forense", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-06", "prioridad": "Media" }] } },
+    { "sourceKey": "herramienta-ftk-imager", "nombre": "FTK Imager", "categoria": "Forense", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-06", "prioridad": "Media" }] } },
+    { "sourceKey": "herramienta-volatility-3", "nombre": "Volatility 3", "categoria": "Forense", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-06", "prioridad": "Media" }] } },
+    { "sourceKey": "herramienta-ghidra", "nombre": "Ghidra", "categoria": "Malware", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-06", "prioridad": "Media" }, { "faseSourceKey": "fase-06", "prioridad": "Especializ." }] } },
+    { "sourceKey": "herramienta-x64dbg", "nombre": "x64dbg", "categoria": "Malware", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-06", "prioridad": "Media" }] } },
+    { "sourceKey": "herramienta-peid", "nombre": "PEiD", "categoria": "Malware", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-06", "prioridad": "Media" }] } },
+    { "sourceKey": "herramienta-remnux-tools", "nombre": "REMnux tools", "categoria": "Malware", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-06", "prioridad": "Media" }] } },
+    { "sourceKey": "herramienta-ida-free", "nombre": "IDA Free", "categoria": "Reverse Eng.", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-06", "prioridad": "Especializ." }] } },
+    { "sourceKey": "herramienta-radare2", "nombre": "radare2", "categoria": "Reverse Eng.", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-06", "prioridad": "Especializ." }] } },
+    { "sourceKey": "herramienta-cobalt-strike", "nombre": "Cobalt Strike", "categoria": "Red Team Avanz.", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-07", "prioridad": "Especializ." }] } },
+    { "sourceKey": "herramienta-havoc-c2", "nombre": "Havoc C2", "categoria": "Red Team Avanz.", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-07", "prioridad": "Especializ." }] } },
+    { "sourceKey": "herramienta-sliver", "nombre": "Sliver", "categoria": "Red Team Avanz.", "metadataDocumental": { "contextos": [{ "faseSourceKey": "fase-07", "prioridad": "Especializ." }] } },
+    { "sourceKey": "herramienta-kali-linux", "nombre": "Kali Linux", "categoria": "Distribución Linux", "metadataDocumental": { "contextos": [{ "sourceSection": "tab-lab", "prioridad": "obligatorio" }] } },
+    { "sourceKey": "herramienta-parrot-os-security", "nombre": "Parrot OS Security", "categoria": "Distribución Linux", "metadataDocumental": { "contextos": [{ "sourceSection": "tab-lab", "prioridad": "alternativa" }] } },
+    { "sourceKey": "herramienta-blackarch", "nombre": "BlackArch", "categoria": "Distribución Linux", "metadataDocumental": { "contextos": [{ "sourceSection": "tab-lab", "prioridad": "avanzada" }] } },
+    { "sourceKey": "herramienta-ubuntu-server-lts", "nombre": "Ubuntu Server LTS", "categoria": "Distribución Linux", "metadataDocumental": { "contextos": [{ "sourceSection": "tab-lab", "prioridad": "defensa/analisis" }] } },
+    { "sourceKey": "herramienta-security-onion", "nombre": "Security Onion", "categoria": "Distribución Linux", "metadataDocumental": { "contextos": [{ "sourceSection": "tab-lab", "prioridad": "defensa/analisis" }] } },
+    { "sourceKey": "herramienta-metasploitable", "nombre": "Metasploitable 2/3", "categoria": "Objetivo vulnerable", "metadataDocumental": { "contextos": [{ "sourceSection": "tab-lab", "prioridad": "practica basica" }] } },
+    { "sourceKey": "herramienta-dvwa", "nombre": "DVWA", "categoria": "Objetivo vulnerable", "metadataDocumental": { "contextos": [{ "sourceSection": "tab-lab", "prioridad": "web vulnerabilities" }] } },
+    { "sourceKey": "herramienta-vulnhub-vms", "nombre": "VulnHub VMs", "categoria": "Objetivo vulnerable", "metadataDocumental": { "contextos": [{ "sourceSection": "tab-lab", "prioridad": "labs gratuitos" }] } },
+    { "sourceKey": "herramienta-flarevm", "nombre": "FlareVM", "categoria": "Malware", "metadataDocumental": { "contextos": [{ "sourceSection": "tab-lab", "prioridad": "malware lab" }] } },
+    { "sourceKey": "herramienta-fakenet-ng", "nombre": "FakeNet-NG", "categoria": "Malware", "metadataDocumental": { "contextos": [{ "sourceSection": "tab-lab", "prioridad": "malware lab" }] } }
+  ],
+  "certificaciones": [
+    { "sourceKey": "cert-comptia-a-plus", "nombre": "CompTIA A+", "proveedor": "CompTIA", "tipoCosto": "Pago", "url": null, "metadataDocumental": { "sourceSection": "tab-certs", "faseEtiqueta": "FASE 1–3 (Año 1)", "nivelFuente": "Fundacional", "descripcionFuente": "Fundamentos de hardware y SO. Opcional si ya tienes base universitaria sólida.", "costoFuente": "~$239 USD por examen" } },
+    { "sourceKey": "cert-cisco-cyberops-associate", "nombre": "Cisco CyberOps Associate", "proveedor": "Cisco Networking Academy", "tipoCosto": "Pago", "url": null, "metadataDocumental": { "sourceSection": "tab-certs", "faseEtiqueta": "FASE 1–3 (Año 1)", "nivelFuente": "Entrada", "descripcionFuente": "Ideal para SOC y Blue Team. Tienes acceso via NetAcad. Examen: 200-201 CBROPS.", "costoFuente": "~$330 USD · Prep gratis via NetAcad" } },
+    { "sourceKey": "cert-comptia-security-plus", "nombre": "CompTIA Security+", "proveedor": "CompTIA", "tipoCosto": "Pago", "url": null, "metadataDocumental": { "sourceSection": "tab-certs", "faseEtiqueta": "FASE 1–3 (Año 1)", "nivelFuente": "★ MUY RECOMENDADA", "descripcionFuente": "El estándar DoD 8570. Piso mínimo para la mayoría de empleos en seguridad. Obligatoria.", "costoFuente": "~$392 USD · Vouchers con descuento disponibles", "faseObjetivoFuente": "fase-03" } },
+    { "sourceKey": "cert-ejpt", "nombre": "eJPT", "proveedor": "iNEi / eLearnSecurity", "tipoCosto": "Pago", "url": null, "metadataDocumental": { "sourceSection": "tab-certs", "faseEtiqueta": "FASE 1–3 (Año 1)", "nivelFuente": "Práctica", "descripcionFuente": "Primera cert. ofensiva. 100% práctica, examen de 72h. Ideal para iniciar en pentesting.", "costoFuente": "~$200 USD · Muy asequible", "faseObjetivoFuente": "fase-04" } },
+    { "sourceKey": "cert-pnpt", "nombre": "PNPT", "proveedor": "TCM Security", "tipoCosto": "Pago", "url": null, "metadataDocumental": { "sourceSection": "tab-certs", "faseEtiqueta": "FASE 4–5 (Año 2)", "nivelFuente": "★ TOP RECOMENDADA", "descripcionFuente": "Examen de pentesting de 5 días + reporte profesional. Muy valorada por empleadores. Práctica real.", "costoFuente": "~$400 USD · Incluye cursos de prep", "faseObjetivoFuente": "fase-04" } },
+    { "sourceKey": "cert-comptia-pentest-plus", "nombre": "CompTIA PenTest+", "proveedor": "CompTIA", "tipoCosto": "Pago", "url": null, "metadataDocumental": { "sourceSection": "tab-certs", "faseEtiqueta": "FASE 4–5 (Año 2)", "nivelFuente": "Intermedia", "descripcionFuente": "Reconocida en sector corporativo. Menos técnica que OSCP pero bien valorada en LATAM.", "costoFuente": "~$392 USD" } },
+    { "sourceKey": "cert-aws-security-specialty", "nombre": "AWS Security Specialty", "proveedor": "Amazon Web Services", "tipoCosto": "Pago", "url": null, "metadataDocumental": { "sourceSection": "tab-certs", "faseEtiqueta": "FASE 4–5 (Año 2)", "nivelFuente": "Cloud", "descripcionFuente": "La cert. de cloud security más demandada del mercado. Salarios premium. Requiere base AWS.", "costoFuente": "~$300 USD", "faseObjetivoFuente": "fase-07" } },
+    { "sourceKey": "cert-ceh", "nombre": "CEH", "proveedor": "EC-Council", "tipoCosto": "Pago", "url": null, "metadataDocumental": { "sourceSection": "tab-certs", "faseEtiqueta": "FASE 4–5 (Año 2)", "nivelFuente": "Corporativa", "descripcionFuente": "Reconocida en empresas grandes y gobierno. Más teórica pero muy solicitada en LATAM/gobierno.", "costoFuente": "~$950 USD", "faseObjetivoFuente": "fase-04" } },
+    { "sourceKey": "cert-oscp", "nombre": "OSCP", "proveedor": "Offensive Security", "tipoCosto": "Pago", "url": null, "metadataDocumental": { "sourceSection": "tab-certs", "faseEtiqueta": "FASE 6–7 (Año 3–4)", "nivelFuente": "★ GOLD STANDARD", "descripcionFuente": "La certificación más respetada en pentesting. Examen de 24h. Cambia carreras. Exige dedicación total.", "costoFuente": "~$1,499 USD (con PWK labs)", "faseObjetivoFuente": "fase-07" } },
+    { "sourceKey": "cert-cissp", "nombre": "CISSP", "proveedor": "ISC²", "tipoCosto": "Pago", "url": null, "metadataDocumental": { "sourceSection": "tab-certs", "faseEtiqueta": "FASE 6–7 (Año 3–4)", "nivelFuente": "Management", "descripcionFuente": "Para roles de gestión y arquitectura. Requiere 5 años de experiencia. Meta a largo plazo.", "costoFuente": "~$699 USD" } },
+    { "sourceKey": "cert-grem-gcfe", "nombre": "GREM / GCFE", "proveedor": "SANS / GIAC", "tipoCosto": "Pago", "url": null, "metadataDocumental": { "sourceSection": "tab-certs", "faseEtiqueta": "FASE 6–7 (Año 3–4)", "nivelFuente": "Forense/Malware", "descripcionFuente": "Gold standard en análisis de malware (GREM) y forense (GCFE). Muy costosas, alto retorno.", "costoFuente": "$849–$999 USD" } },
+    { "sourceKey": "cert-ecppt-ecptx", "nombre": "eCPPT / eCPTX", "proveedor": "iNEi / eLearnSecurity", "tipoCosto": "Pago", "url": null, "metadataDocumental": { "sourceSection": "tab-certs", "faseEtiqueta": "FASE 6–7 (Año 3–4)", "nivelFuente": "Avanzada Práctica", "descripcionFuente": "Alternativa más accesible al OSCP. Excelente relación precio/valor. Muy práctica.", "costoFuente": "~$400 USD", "faseObjetivoFuente": "fase-07" } }
+  ],
+  "relacionesCertificacionTema": [],
+  "competencias": [],
+  "temaDependencias": [],
+  "documental": {
+    "proyectosPlanificadosPorFase": [
+      { "faseSourceKey": "fase-01", "persistirV1": false, "items": ["Capturar y analizar tráfico HTTP/DNS con Wireshark", "Montar red virtual (3 VMs) con VirtualBox", "Script Bash para inventario de red automático", "Completar OverTheWire Bandit (25 niveles)"] },
+      { "faseSourceKey": "fase-02", "persistirV1": false, "items": ["Laboratorio AD con Windows Server 2022 + 2 clientes", "Script Python: escáner de puertos básico", "Herramienta PowerShell: auditoría de usuarios AD", "Configurar Syslog centralizado con Graylog"] },
+      { "faseSourceKey": "fase-03", "persistirV1": false, "items": ["SIEM casero: Wazuh + ELK Stack con alertas personalizadas", "Dashboard de Threat Intelligence con feeds públicos", "Playbook de IR para ransomware (documento + simulación)", "Escaneo y remediación de vulnerabilidades en lab"] },
+      { "faseSourceKey": "fase-04", "persistirV1": false, "items": ["Laboratorio AD completo + ataques documentados", "Reporte de pentest profesional (lab propio)", "Resolver 30+ máquinas en HackTheBox", "Bug Bounty: primera vulnerabilidad reportada", "Writeups técnicos de CTFs publicados en blog"] },
+      { "faseSourceKey": "fase-05", "persistirV1": false, "items": ["Pipeline CI/CD con SAST (Semgrep) + DAST (ZAP)", "Auditoría de seguridad AWS con ScoutSuite", "App vulnerable en contenedor con exploit documentado", "Dashboard de postura de seguridad en la nube"] },
+      { "faseSourceKey": "fase-06", "persistirV1": false, "items": ["Análisis completo de muestra de ransomware real", "Informe de forense digital post-incidente", "Gap analysis ISO 27001 para empresa ficticia", "Reglas Sigma/YARA para detección de amenazas"] },
+      { "faseSourceKey": "fase-07", "persistirV1": false, "items": ["Bug Bounty activo (HackerOne / Bugcrowd)", "CTF competitions (Hack The Box, PicoCTF)", "Networking en comunidades: BSides, DEF CON", "Mentoría inversa: enseñar lo aprendido", "LinkedIn/GitHub optimizados con proyectos"] }
+    ],
+    "homeLab": {
+      "persistirV1": false,
+      "hardwareRecomendado": "PC/laptop con 16 GB RAM (32 GB ideal), 500 GB SSD",
+      "pasos": [
+        "Hypervisor Base (Mes 1–2): Instala VirtualBox o VMware Workstation Player; luego VMware Pro o Proxmox.",
+        "VMs Esenciales – Fase 1: Kali Linux 2024, Ubuntu Server 22.04, Windows 10, Metasploitable 3 en red NAT aislada.",
+        "Red de Active Directory (Mes 5–8): Windows Server 2022 como Domain Controller y 1-2 Windows 10 clients.",
+        "Stack de Defensa – SIEM (Mes 9–14): Wazuh o Elastic Stack; Splunk gratuito como alternativa.",
+        "Laboratorio de Malware (Mes 31+): Windows aislado, REMnux, FlareVM, snapshots y FakeNet-NG.",
+        "Cloud Lab Gratuito (Mes 23+): AWS Free Tier, Azure for Students, Google Cloud y CloudGoat."
+      ]
+    },
+    "portafolioFuturo": {
+      "persistirV1": false,
+      "secciones": [
+        { "etiqueta": "Proyectos Año 1", "items": ["Home Lab documentado", "Escáner de red Python", "Análisis de tráfico", "Blog técnico"] },
+        { "etiqueta": "Proyectos Año 2", "items": ["Laboratorio AD", "SIEM Casero", "HTB Writeups", "Pentest Report"] },
+        { "etiqueta": "Proyectos Año 3", "items": ["Vulnerabilidad Bug Bounty", "Herramienta de seguridad", "Análisis de malware", "Pipeline DevSecOps"] },
+        { "etiqueta": "Año 4+", "items": ["Investigación original", "Talk/presentación", "Contribuciones OS", "Perfil HackerOne"] }
+      ],
+      "githubRecomendado": ["security-homelab", "ctf-writeups", "pentest-tools", "malware-analysis", "devsecops-demo", "blog"]
+    },
+    "mercadoLaboral": {
+      "copiadoAlJsonV1": false,
+      "sourceSection": "tab-market",
+      "motivo": "Salarios, porcentajes de demanda y proyecciones son datos temporales/documentales. Permanecen en el HTML original."
+    }
+  },
+  "validacionesEsperadas": {
+    "fases": 7,
+    "ordenFases": [1, 2, 3, 4, 5, 6, 7],
+    "evidencePersistiblePlanificada": 0,
+    "certificacionTemaPesoNoNull": 0,
+    "relacionesCertificacionTemaV1": 0,
+    "competenciasV1": 0,
+    "temaDependenciasV1": 0
+  }
+}

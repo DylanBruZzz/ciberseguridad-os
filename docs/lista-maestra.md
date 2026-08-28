@@ -45,6 +45,8 @@
 - [x] Persistencia fisica inicial validada.
 - [x] Migracion HacerObjetivosTemaNullable aplicada.
 - [x] Migracion AgregarMetadataPedagogicaFase aplicada a AprendizajeDb.
+- [x] AprendizajePersonalDb creada mediante migrations existentes para uso personal V1.
+- [x] AprendizajePersonalDb validada con migrations Inicial, HacerObjetivosTemaNullable y AgregarMetadataPedagogicaFase.
 - [ ] Crear migraciones futuras solo con auditoria previa.
 
 ## 5. Tooling / entorno
@@ -53,6 +55,7 @@
 - [x] Microsoft.EntityFrameworkCore.Design 10.0.9 disponible.
 - [x] appsettings.Development.json configurado para SQL Server local.
 - [x] DbContext design-time validado.
+- [ ] Configuracion runtime permanente para operar contra AprendizajePersonalDb.
 
 ## 6. Git
 
@@ -472,8 +475,10 @@
 - [x] Implementar importador CLI Roadmap V1 como bootstrap idempotente, no sincronizador.
 - [x] Validar que la importacion CLI no crea Evidence, sesiones, snapshots ni conectores.
 - [x] Validar que 31 entradas documentales de Recurso se materializan como 30 recursos fisicos unicos por clave natural.
-- [ ] Ejecutar importacion real controlada sobre base/usuario personal.
-- [ ] Validar datos importados.
+- [x] Ejecutar importacion real controlada sobre AprendizajePersonalDb y Usuario personal.
+- [x] Validar datos importados: 7 Fases, 63 Temas, 30 Recursos, 63 Herramientas y 12 Certificaciones.
+- [x] Confirmar Evidence 0, Study 0, Analytics Snapshot 0 e Integration 0 tras importacion real.
+- [x] Confirmar idempotencia real: segunda ejecucion del importador no duplica registros.
 - [ ] Auditar trazabilidad de importacion.
 
 ## 15. Pendientes arquitectonicos

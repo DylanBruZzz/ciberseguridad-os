@@ -116,6 +116,10 @@ caf832a feat: establish validated initial persistence
 - IMPORTADOR CLI ROADMAP V1 VALIDADO END-TO-END
 - IMPORTADOR ROADMAP V1 ES BOOTSTRAP IDEMPOTENTE, NO MOTOR DE SINCRONIZACION
 - IMPORTADOR ROADMAP V1 NO CREA EVIDENCE NI SESIONES
+- APRENDIZAJEPERSONALDB CREADA Y MIGRADA PARA USO PERSONAL V1
+- USUARIO PERSONAL CREADO MEDIANTE FLUJO PRODUCTIVO
+- ROADMAP REAL V1 IMPORTADO EN APRENDIZAJEPERSONALDB
+- IMPORTACION REAL ROADMAP V1 VALIDADA CON IDEMPOTENCIA FISICA
 
 ## Migraciones Aplicadas
 
@@ -129,6 +133,44 @@ caf832a feat: establish validated initial persistence
 - Base: AprendizajeDb
 - Environment: Development
 - Secretos: ninguno documentado aqui.
+
+## Bases Operativas
+
+- AprendizajeDb: base de desarrollo/E2E.
+- AprendizajeTestsDb: base exclusiva de pruebas automatizadas.
+- AprendizajePersonalDb: base personal real V1.
+- La configuracion runtime permanente de la aplicacion personal todavia no fue cambiada.
+
+## Datos Roadmap V1 Personal
+
+- Base: AprendizajePersonalDb
+- Usuario personal:
+  - Id: 01A046D5-9BF3-7CEC-AA05-10C93459FA16
+  - Nombre: Dylan
+  - Email: dylan@aprendizaje.local
+  - Email de uso local interno; no representa cuenta operativa ni habilita envio de correo.
+- Migrations aplicadas:
+  - 20260818153945_Inicial
+  - 20260818174900_HacerObjetivosTemaNullable
+  - 20260827073704_AgregarMetadataPedagogicaFase
+- Roadmap importado:
+  - Fase: 7
+  - Tema: 63
+  - Recurso: 30 recursos fisicos unicos
+  - Herramienta: 63
+  - Certificacion: 12
+  - Competencia: 0
+  - TemaDependencia: 0
+  - CertificacionTema: 0
+  - Evidence: 0
+  - SesionEstudio: 0
+  - EntradaBitacora: 0
+  - SnapshotProgreso: 0
+  - Conector: 0
+  - LogSincronizacion: 0
+- Idempotencia real confirmada: segunda ejecucion del importador no creo nuevas Fases, Temas, Recursos, Herramientas ni Certificaciones.
+- Dataset: 31 entradas documentales de Recurso -> 30 recursos fisicos unicos por deduplicacion de clave natural UsuarioId + Titulo + Tipo + Url.
+- Backup inicial verificado: C:\Program Files\Microsoft SQL Server\MSSQL17.MSSQLSERVER01\MSSQL\Backup\AprendizajePersonalDb_20260828_002927.bak
 
 ## Datos E2E Actuales
 
@@ -543,11 +585,11 @@ Analytics directo minimo funcional cerrado: ResumenEstudio, ResumenTema, Resumen
 
 Metadata pedagogica de Fase validada: Fase ahora puede describir objetivos, criterios descriptivos de avance, meses relativos recomendados y carga semanal recomendada como texto. Esta metadata pertenece al roadmap recomendado; no representa progreso real del usuario, no reemplaza Tema.FechaInicio/FechaFin y no crea evidencia.
 
-Importacion Roadmap original: la especificacion normalizada versionada existe en data/roadmap/roadmap-v1.json y el importador CLI V1 esta validado. La importacion real definitiva sobre una base/usuario personal todavia queda pendiente y debe ejecutarse manualmente de forma controlada.
+Importacion Roadmap original: la especificacion normalizada versionada existe en data/roadmap/roadmap-v1.json, el importador CLI V1 esta validado y la importacion real fue ejecutada sobre AprendizajePersonalDb con idempotencia fisica confirmada. AprendizajeDb permanece como desarrollo/E2E y AprendizajeTestsDb como testing.
 
 Importador Roadmap V1: consume data/roadmap/roadmap-v1.json, no parsea HTML, no expone endpoint HTTP, no usa SnapshotProgreso/vw_TemaEstado/eventos y no crea Evidence planificada. SourceKey se usa solo en memoria. La importacion es transaccional e idempotente para el mismo dataset. El dataset contiene 31 entradas documentales de Recurso, que se materializan como 30 recursos fisicos por deduplicacion de clave natural UsuarioId + Titulo + Tipo + Url.
 
-Proxima area sugerida: importacion real controlada del Roadmap V1 en base/usuario personal limpio, seguida de auditoria de datos importados.
+Proxima area sugerida: operacion V1 local, incluyendo configuracion runtime permanente hacia AprendizajePersonalDb y verificacion de uso desde la API sin cambiar Auth ni Frontend todavia.
 
 ## Pendientes Deliberados
 

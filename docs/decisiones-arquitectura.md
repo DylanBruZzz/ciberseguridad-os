@@ -69,6 +69,11 @@ Este documento registra decisiones congeladas. No es historial de conversacion.
 - Unit of Work controla la persistencia del caso de uso.
 - Enums persistidos como string donde ya esta definido.
 - Json enums HTTP configurados como strings.
+- Separacion de bases para V1 personal:
+  - AprendizajeDb = desarrollo/E2E.
+  - AprendizajeTestsDb = pruebas automatizadas.
+  - AprendizajePersonalDb = uso personal real V1.
+- La configuracion runtime permanente hacia AprendizajePersonalDb se hara en un bloque operativo posterior; appsettings.Development.json sigue apuntando a AprendizajeDb.
 
 ## RowVersion
 
@@ -143,3 +148,4 @@ Soft delete es selectivo y solo aplica a Aggregate Roots que implementan IElimin
 - Certificacion con TipoCosto divergente es conflicto. Metadata global divergente no se sobrescribe silenciosamente.
 - El importador no crea SesionEstudio, EntradaBitacora, Proyecto, Laboratorio, Writeup, ArtefactoTecnico, CertificacionObtenida, Nota, SnapshotProgreso, Conector ni LogSincronizacion.
 - El dataset conserva 31 entradas documentales de Recurso, pero V1 materializa 30 recursos fisicos por deduplicacion de clave natural. No se inventan relaciones RecursoTema cuando el JSON no las expresa.
+- La importacion real V1 fue ejecutada sobre AprendizajePersonalDb con Usuario personal creado mediante flujo productivo. La segunda ejecucion confirmo idempotencia fisica sin duplicar Fase, Tema, Recurso, Herramienta ni Certificacion.

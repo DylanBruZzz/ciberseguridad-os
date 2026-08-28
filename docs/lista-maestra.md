@@ -73,6 +73,8 @@
 - [x] ITransaccionAplicacion definido para importaciones atomicas controladas.
 - [x] CrearUsuario implementado.
 - [x] CrearRecurso implementado.
+- [x] ActualizarRecurso implementado.
+- [x] EliminarRecurso implementado como soft delete.
 - [x] ObtenerRecursoPorId implementado.
 - [x] ListarRecursos implementado.
 - [x] VincularRecursoATema implementado.
@@ -155,6 +157,8 @@
 - [x] POST /api/recursos.
 - [x] GET /api/recursos/{id}.
 - [x] GET /api/recursos?usuarioId={id}.
+- [x] PUT /api/recursos/{id}.
+- [x] DELETE /api/recursos/{id}?usuarioId={id}.
 - [x] PUT /api/recursos/{id}/temas/{temaId}.
 - [x] POST /api/sesiones-estudio.
 - [x] GET /api/sesiones-estudio/{id}.
@@ -275,6 +279,16 @@
 - [x] Listar recursos por Usuario -> 200.
 - [x] Listar recursos para Usuario sin recursos -> 200 con [].
 - [x] Listar recursos con Guid.Empty -> 400.
+- [x] Actualizar Recurso -> 204.
+- [x] Actualizar Recurso inexistente -> 404.
+- [x] Actualizar Recurso con Usuario inexistente -> 404.
+- [x] Actualizar Recurso de otro Usuario -> 409.
+- [x] Actualizar Recurso con Guid.Empty -> 400.
+- [x] Actualizar Recurso con Rating invalido -> 400.
+- [x] Eliminar Recurso logicamente -> 204.
+- [x] Eliminar Recurso inexistente -> 404.
+- [x] Eliminar Recurso de otro Usuario -> 409.
+- [x] Eliminar Recurso ya eliminado logicamente -> 404 por query filter.
 - [x] Vincular Recurso a Tema -> 204.
 - [x] Vincular Recurso a Tema es idempotente.
 - [x] Vincular Recurso inexistente a Tema -> 404.
@@ -387,6 +401,7 @@
 - [x] dotnet test por proyecto validado.
 - [x] dotnet test por solucion validado.
 - [x] Tests fundacionales de dominio para Tema.
+- [x] Tests fundacionales de dominio para Recurso.
 - [x] Tests de dominio para planificacion, percepcion e IntervaloRepaso de Tema.
 - [x] Tests de dominio para Competencia.
 - [x] Tests de dominio para metadata pedagogica de Fase.
@@ -398,11 +413,13 @@
 - [x] Tests de Application Roadmap para Competencia y CompetenciaTema.
 - [x] Tests de Application Roadmap para metadata pedagogica de Fase.
 - [x] Tests fundacionales de Application Resource.
+- [x] Tests de Application Resource Editable V1.
 - [x] Tests fundacionales de Application Study.
 - [x] Fakes minimos sin framework de mocking.
 - [x] Tests fundacionales de persistencia sobre SQL Server real y AprendizajeTestsDb exclusiva.
 - [x] Guard rail de tests de integracion contra uso accidental de AprendizajeDb.
 - [x] Tests de persistencia para Tema.Objetivos, RowVersion de SesionEstudio, RecursoTema, SesionHerramienta, query filter y FK real.
+- [x] Tests de persistencia para Resource Editable V1: update, ownership, soft delete y preservacion de RecursoTema.
 - [x] Tests de persistencia para planificacion/percepcion/IntervaloRepaso de Tema y RowVersion de Tema tras update.
 - [x] Tests de persistencia para metadata pedagogica de Fase, round-trip, update y CHECKs de meses recomendados.
 - [x] Tests de persistencia para CompetenciaTema.
@@ -481,7 +498,17 @@
 - [x] Confirmar idempotencia real: segunda ejecucion del importador no duplica registros.
 - [ ] Auditar trazabilidad de importacion.
 
-## 15. Pendientes arquitectonicos
+## 15. Editabilidad V1
+
+- [x] Resource editable V1: actualizacion de Titulo, Url, Estado, Rating, Notas, HerramientaIA y PromptsUtilizados.
+- [x] Resource soft delete V1 expuesto por API.
+- [x] Ownership explicito de Resource validado en Application e Integration.
+- [x] TipoRecurso permanece no editable en V1 inicial.
+- [ ] Filtros Resource por tema/tipo/estado/texto.
+- [ ] Study corrections V1.
+- [ ] Evidence editable + maturity V1.
+
+## 16. Pendientes arquitectonicos
 
 - [ ] TemaDependencia race.
 - [ ] Estrategia concurrente de TemaDependencia.

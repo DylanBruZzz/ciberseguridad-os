@@ -1,7 +1,10 @@
+using Aprendizaje.Aplicacion.Resource.Recursos.ActualizarRecurso;
 using Aprendizaje.Aplicacion.Resource.Recursos.CrearRecurso;
+using Aprendizaje.Aplicacion.Resource.Recursos.EliminarRecurso;
 using Aprendizaje.Aplicacion.Resource.Recursos.ListarRecursos;
 using Aprendizaje.Aplicacion.Resource.Recursos.ObtenerRecursoPorId;
 using Aprendizaje.Aplicacion.Resource.Recursos.VincularRecursoATema;
+using Aprendizaje.Dominio.Nucleo;
 using Aprendizaje.Dominio.Resource;
 using Aprendizaje.Dominio.Roadmap;
 using Aprendizaje.Tests.Soporte;
@@ -176,8 +179,228 @@ public sealed class RecursosApplicationTests
         Assert.Equal(1, unitOfWork.GuardarCambiosLlamadas);
     }
 
+    [Fact]
+    public async Task ActualizarRecurso_DebeRetornarUsuarioNoEncontradoSinGuardar()
+    {
+        var recursos = new FakeRecursoRepository();
+        var usuarios = new FakeUsuarioRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var casoUso = new ActualizarRecursoCasoUso(recursos, usuarios, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(SolicitudActualizar(
+            Guid.CreateVersion7(),
+            Guid.CreateVersion7()), CancellationToken);
+
+        Assert.Equal(ActualizarRecursoEstado.UsuarioNoEncontrado, resultado.Estado);
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task ActualizarRecurso_DebeRetornarRecursoNoEncontradoSinGuardar()
+    {
+        var recursos = new FakeRecursoRepository();
+        var usuarios = new FakeUsuarioRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuario = Usuario.Registrar("Dylan", EmailUnico());
+        usuarios.Agregar(usuario);
+        var casoUso = new ActualizarRecursoCasoUso(recursos, usuarios, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(SolicitudActualizar(
+            Guid.CreateVersion7(),
+            usuario.Id), CancellationToken);
+
+        Assert.Equal(ActualizarRecursoEstado.RecursoNoEncontrado, resultado.Estado);
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task ActualizarRecurso_DebeRetornarUsuarioNoCoincideSinGuardar()
+    {
+        var recursos = new FakeRecursoRepository();
+        var usuarios = new FakeUsuarioRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuarioA = Usuario.Registrar("Usuario A", EmailUnico());
+        var usuarioB = Usuario.Registrar("Usuario B", EmailUnico());
+        var recurso = CrearRecurso(usuarioA.Id);
+        usuarios.Agregar(usuarioA);
+        usuarios.Agregar(usuarioB);
+        recursos.Agregar(recurso);
+        var casoUso = new ActualizarRecursoCasoUso(recursos, usuarios, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(SolicitudActualizar(recurso.Id, usuarioB.Id), CancellationToken);
+
+        Assert.Equal(ActualizarRecursoEstado.UsuarioNoCoincide, resultado.Estado);
+        Assert.Equal("Documentación modelo OSI", recurso.Titulo);
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task ActualizarRecurso_DebeActualizarCamposYGuardar()
+    {
+        var recursos = new FakeRecursoRepository();
+        var usuarios = new FakeUsuarioRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuario = Usuario.Registrar("Dylan", EmailUnico());
+        var recurso = CrearRecurso(usuario.Id);
+        usuarios.Agregar(usuario);
+        recursos.Agregar(recurso);
+        var casoUso = new ActualizarRecursoCasoUso(recursos, usuarios, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(new ActualizarRecursoSolicitud(
+            recurso.Id,
+            usuario.Id,
+            " Curso actualizado ",
+            "https://example.local/recurso",
+            EstadoRecurso.Consultado,
+            5,
+            "Notas nuevas",
+            "ChatGPT",
+            "Prompt utilizado"), CancellationToken);
+
+        Assert.Equal(ActualizarRecursoEstado.Actualizado, resultado.Estado);
+        Assert.Equal("Curso actualizado", recurso.Titulo);
+        Assert.Equal("https://example.local/recurso", recurso.Url);
+        Assert.Equal(EstadoRecurso.Consultado, recurso.Estado);
+        Assert.Equal(5, recurso.Rating?.Valor);
+        Assert.Equal("Notas nuevas", recurso.Notas);
+        Assert.Equal("ChatGPT", recurso.HerramientaIA);
+        Assert.Equal("Prompt utilizado", recurso.PromptsUtilizados);
+        Assert.Equal(1, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task ActualizarRecurso_DebePermitirCamposOpcionalesNulos()
+    {
+        var recursos = new FakeRecursoRepository();
+        var usuarios = new FakeUsuarioRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuario = Usuario.Registrar("Dylan", EmailUnico());
+        var recurso = CrearRecurso(usuario.Id);
+        recurso.ActualizarUrl("https://example.local/recurso");
+        usuarios.Agregar(usuario);
+        recursos.Agregar(recurso);
+        var casoUso = new ActualizarRecursoCasoUso(recursos, usuarios, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(new ActualizarRecursoSolicitud(
+            recurso.Id,
+            usuario.Id,
+            "Documentación actualizada",
+            null,
+            EstadoRecurso.PorRevisar,
+            null,
+            null,
+            null,
+            null), CancellationToken);
+
+        Assert.Equal(ActualizarRecursoEstado.Actualizado, resultado.Estado);
+        Assert.Null(recurso.Url);
+        Assert.Null(recurso.Rating);
+        Assert.Null(recurso.Notas);
+        Assert.Null(recurso.HerramientaIA);
+        Assert.Null(recurso.PromptsUtilizados);
+        Assert.Equal(1, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task ActualizarRecurso_DebePropagarErrorDeDominioSinGuardar()
+    {
+        var recursos = new FakeRecursoRepository();
+        var usuarios = new FakeUsuarioRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuario = Usuario.Registrar("Dylan", EmailUnico());
+        var recurso = CrearRecurso(usuario.Id);
+        usuarios.Agregar(usuario);
+        recursos.Agregar(recurso);
+        var casoUso = new ActualizarRecursoCasoUso(recursos, usuarios, unitOfWork);
+
+        await Assert.ThrowsAsync<ArgumentException>(() => casoUso.EjecutarAsync(
+            SolicitudActualizar(recurso.Id, usuario.Id, titulo: " "),
+            CancellationToken));
+
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task EliminarRecurso_DebeRetornarRecursoNoEncontradoSinGuardar()
+    {
+        var recursos = new FakeRecursoRepository();
+        var usuarios = new FakeUsuarioRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuario = Usuario.Registrar("Dylan", EmailUnico());
+        usuarios.Agregar(usuario);
+        var casoUso = new EliminarRecursoCasoUso(recursos, usuarios, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(
+            new EliminarRecursoSolicitud(Guid.CreateVersion7(), usuario.Id),
+            CancellationToken);
+
+        Assert.Equal(EliminarRecursoEstado.RecursoNoEncontrado, resultado.Estado);
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task EliminarRecurso_DebeRetornarUsuarioNoCoincideSinGuardar()
+    {
+        var recursos = new FakeRecursoRepository();
+        var usuarios = new FakeUsuarioRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuarioA = Usuario.Registrar("Usuario A", EmailUnico());
+        var usuarioB = Usuario.Registrar("Usuario B", EmailUnico());
+        var recurso = CrearRecurso(usuarioA.Id);
+        usuarios.Agregar(usuarioA);
+        usuarios.Agregar(usuarioB);
+        recursos.Agregar(recurso);
+        var casoUso = new EliminarRecursoCasoUso(recursos, usuarios, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(
+            new EliminarRecursoSolicitud(recurso.Id, usuarioB.Id),
+            CancellationToken);
+
+        Assert.Equal(EliminarRecursoEstado.UsuarioNoCoincide, resultado.Estado);
+        Assert.Null(recurso.FechaEliminacionUtc);
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task EliminarRecurso_DebeMarcarEliminadoYGuardar()
+    {
+        var recursos = new FakeRecursoRepository();
+        var usuarios = new FakeUsuarioRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuario = Usuario.Registrar("Dylan", EmailUnico());
+        var recurso = CrearRecurso(usuario.Id);
+        usuarios.Agregar(usuario);
+        recursos.Agregar(recurso);
+        var casoUso = new EliminarRecursoCasoUso(recursos, usuarios, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(
+            new EliminarRecursoSolicitud(recurso.Id, usuario.Id),
+            CancellationToken);
+
+        Assert.Equal(EliminarRecursoEstado.Eliminado, resultado.Estado);
+        Assert.NotNull(recurso.FechaEliminacionUtc);
+        Assert.Equal(1, unitOfWork.GuardarCambiosLlamadas);
+    }
+
     private static Recurso CrearRecurso(Guid? usuarioId = null) =>
         Recurso.Guardar(usuarioId ?? Guid.CreateVersion7(), TipoRecurso.Documentacion, "Documentación modelo OSI");
+
+    private static ActualizarRecursoSolicitud SolicitudActualizar(
+        Guid recursoId,
+        Guid usuarioId,
+        string titulo = "Recurso actualizado") =>
+        new(
+            recursoId,
+            usuarioId,
+            titulo,
+            "https://example.local/recurso",
+            EstadoRecurso.EnUso,
+            4,
+            "Notas",
+            "ChatGPT",
+            "Prompt");
+
+    private static string EmailUnico() => $"resource-{Guid.CreateVersion7():N}@local.test";
 
     private static CancellationToken CancellationToken => TestContext.Current.CancellationToken;
 }

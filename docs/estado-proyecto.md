@@ -120,6 +120,9 @@ caf832a feat: establish validated initial persistence
 - USUARIO PERSONAL CREADO MEDIANTE FLUJO PRODUCTIVO
 - ROADMAP REAL V1 IMPORTADO EN APRENDIZAJEPERSONALDB
 - IMPORTACION REAL ROADMAP V1 VALIDADA CON IDEMPOTENCIA FISICA
+- RESOURCE EDITABLE V1 VALIDADO END-TO-END
+- RECURSO ACTUALIZABLE CON OWNERSHIP EXPLICITO
+- SOFT DELETE DE RECURSO EXPUESTO Y VALIDADO SOBRE SQL SERVER REAL
 
 ## Migraciones Aplicadas
 
@@ -431,6 +434,16 @@ Nota E2E:
 - GET /api/recursos?usuarioId={id} -> 200
 - GET /api/recursos?usuarioId={id-sin-recursos} -> 200 con []
 - GET /api/recursos?usuarioId={Guid.Empty} -> 400
+- PUT /api/recursos/{id} -> 204
+- PUT Recurso inexistente -> 404
+- PUT Recurso con Usuario inexistente -> 404
+- PUT Recurso de otro Usuario -> 409
+- PUT Recurso con Guid.Empty -> 400
+- PUT Recurso con Rating fuera de rango -> 400
+- DELETE /api/recursos/{id}?usuarioId={id} -> 204
+- DELETE Recurso inexistente -> 404
+- DELETE Recurso de otro Usuario -> 409
+- DELETE Recurso ya eliminado logicamente -> 404 por query filter
 - PUT /api/recursos/{id}/temas/{temaId} -> 204
 - PUT vínculo Recurso-Tema repetido -> 204 idempotente
 - PUT vínculo con Recurso inexistente -> 404
@@ -534,12 +547,13 @@ Nota E2E:
 - Microsoft.NET.Test.Sdk: no requerido con la estrategia MTP actual
 - dotnet run del proyecto de tests: validado
 - dotnet test por proyecto: validado
-- dotnet test por solucion: validado con 351 tests correctos
+- dotnet test por solucion: validado con 368 tests correctos
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
 - Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, planificacion, percepcion, IntervaloRepaso, dominio y TemaDominadoEvento validados.
 - Tests de Dominio Competencia validados.
 - Tests de Dominio SesionEstudio: registro, invariantes, correccion de duracion y SesionRegistradaEvento validados.
 - Tests de Dominio EntradaBitacora y Herramienta validados.
+- Tests de Dominio Recurso: edicion, campos opcionales, rating y soft delete validados.
 - Tests de Dominio Laboratorio validados.
 - Tests de Dominio Proyecto validados.
 - Tests de Dominio ArtefactoTecnico validados.
@@ -547,7 +561,7 @@ Nota E2E:
 - Tests de Dominio Certificacion y CertificacionObtenida validados.
 - Tests de Dominio Nota validados.
 - Tests de Application Roadmap: flujos criticos de Tema, planificacion, percepcion, IntervaloRepaso y Competencia/CompetenciaTema cubiertos con fakes minimos.
-- Tests de Application Resource: crear, obtener, listar y vincular cubiertos con fakes minimos.
+- Tests de Application Resource: crear, obtener, listar, actualizar, eliminar logicamente y vincular cubiertos con fakes minimos.
 - Tests de Application Study: SesionEstudio, EntradaBitacora, Herramienta y SesionHerramienta cubiertos con fakes minimos.
 - Tests de Application Evidence: Laboratorio crear, obtener, listar, vincular a Tema y vincular a Herramienta cubiertos con fakes minimos.
 - Tests de Application Evidence: Proyecto crear, obtener, listar, vincular a Tema y vincular a Herramienta cubiertos con fakes minimos.
@@ -570,6 +584,7 @@ Nota E2E:
 - Tests de integracion Analytics: ResumenCertificacion cuenta temas visibles por usuario, respeta catalogo global, ignora Peso y cuenta CertificacionObtenida visible sin asumir unicidad.
 - Tests de Application Importacion Roadmap V1: validan argumentos, Usuario inexistente, dataset invalido, sourceKey duplicado, idempotencia logica y conflictos de Fase/Certificacion.
 - Tests de integracion Importacion Roadmap V1: importan roadmap-v1.json real en AprendizajeTestsDb, validan idempotencia SQL, rollback ante conflicto, reutilizacion de catalogos globales, metadata de Fase, no Evidence creada y ejecucion CLI controlada.
+- Tests de integracion Resource Editable V1: actualizacion persistida, RecursoTema preservado, ownership incorrecto sin mutacion y soft delete oculto por query filter con fila fisica preservada.
 
 ## Estado Git Esperado
 
@@ -589,7 +604,7 @@ Importacion Roadmap original: la especificacion normalizada versionada existe en
 
 Importador Roadmap V1: consume data/roadmap/roadmap-v1.json, no parsea HTML, no expone endpoint HTTP, no usa SnapshotProgreso/vw_TemaEstado/eventos y no crea Evidence planificada. SourceKey se usa solo en memoria. La importacion es transaccional e idempotente para el mismo dataset. El dataset contiene 31 entradas documentales de Recurso, que se materializan como 30 recursos fisicos por deduplicacion de clave natural UsuarioId + Titulo + Tipo + Url.
 
-Proxima area sugerida: operacion V1 local, incluyendo configuracion runtime permanente hacia AprendizajePersonalDb y verificacion de uso desde la API sin cambiar Auth ni Frontend todavia.
+Proxima area sugerida: Study corrections V1, incluyendo correcciones minimas de SesionEstudio necesarias para uso diario antes del Frontend V1.
 
 ## Pendientes Deliberados
 
@@ -615,4 +630,6 @@ Proxima area sugerida: operacion V1 local, incluyendo configuracion runtime perm
 - SnapshotProgreso operativo;
 - integrations;
 - frontend;
+- filtros Resource;
+- TipoRecurso editable;
 - GitHub remote.

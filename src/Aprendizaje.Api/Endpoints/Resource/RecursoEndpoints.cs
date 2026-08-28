@@ -1,4 +1,6 @@
+using Aprendizaje.Aplicacion.Resource.Recursos.ActualizarRecurso;
 using Aprendizaje.Aplicacion.Resource.Recursos.CrearRecurso;
+using Aprendizaje.Aplicacion.Resource.Recursos.EliminarRecurso;
 using Aprendizaje.Aplicacion.Resource.Recursos.ListarRecursos;
 using Aprendizaje.Aplicacion.Resource.Recursos.ObtenerRecursoPorId;
 using Aprendizaje.Aplicacion.Resource.Recursos.VincularRecursoATema;
@@ -15,6 +17,8 @@ public static class RecursoEndpoints
         grupo.MapPost("/", CrearRecursoAsync);
         grupo.MapGet("/", ListarRecursosAsync);
         grupo.MapGet("/{id:guid}", ObtenerRecursoPorIdAsync);
+        grupo.MapPut("/{id:guid}", ActualizarRecursoAsync);
+        grupo.MapDelete("/{id:guid}", EliminarRecursoAsync);
         grupo.MapPut("/{recursoId:guid}/temas/{temaId:guid}", VincularTemaAsync);
 
         return app;
@@ -100,9 +104,88 @@ public static class RecursoEndpoints
         }
     }
 
+    private static async Task<IResult> ActualizarRecursoAsync(
+        Guid id,
+        ActualizarRecursoHttpRequest request,
+        ActualizarRecursoCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new ActualizarRecursoSolicitud(
+                    id,
+                    request.UsuarioId,
+                    request.Titulo,
+                    request.Url,
+                    request.Estado,
+                    request.Rating,
+                    request.Notas,
+                    request.HerramientaIA,
+                    request.PromptsUtilizados),
+                cancellationToken);
+
+            return resultado.Estado switch
+            {
+                ActualizarRecursoEstado.Actualizado => Results.NoContent(),
+                ActualizarRecursoEstado.UsuarioNoEncontrado => Results.NotFound(),
+                ActualizarRecursoEstado.RecursoNoEncontrado => Results.NotFound(),
+                ActualizarRecursoEstado.UsuarioNoCoincide => Results.Conflict(new
+                {
+                    error = "El Recurso no pertenece al usuario indicado."
+                }),
+                _ => Results.Problem("Estado de actualización de Recurso no reconocido.")
+            };
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> EliminarRecursoAsync(
+        Guid id,
+        Guid usuarioId,
+        EliminarRecursoCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new EliminarRecursoSolicitud(id, usuarioId),
+                cancellationToken);
+
+            return resultado.Estado switch
+            {
+                EliminarRecursoEstado.Eliminado => Results.NoContent(),
+                EliminarRecursoEstado.UsuarioNoEncontrado => Results.NotFound(),
+                EliminarRecursoEstado.RecursoNoEncontrado => Results.NotFound(),
+                EliminarRecursoEstado.UsuarioNoCoincide => Results.Conflict(new
+                {
+                    error = "El Recurso no pertenece al usuario indicado."
+                }),
+                _ => Results.Problem("Estado de eliminación de Recurso no reconocido.")
+            };
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
     private sealed record CrearRecursoHttpRequest(
         Guid UsuarioId,
         TipoRecurso Tipo,
         string Titulo,
         string? Url);
+
+    private sealed record ActualizarRecursoHttpRequest(
+        Guid UsuarioId,
+        string Titulo,
+        string? Url,
+        EstadoRecurso Estado,
+        int? Rating,
+        string? Notas,
+        string? HerramientaIA,
+        string? PromptsUtilizados);
 }

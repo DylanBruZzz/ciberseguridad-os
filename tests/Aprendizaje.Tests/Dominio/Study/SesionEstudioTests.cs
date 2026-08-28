@@ -102,6 +102,66 @@ public sealed class SesionEstudioTests
     }
 
     [Fact]
+    public void CambiarTema_DebeActualizarTema()
+    {
+        var sesion = CrearSesion();
+        var nuevoTemaId = Guid.CreateVersion7();
+
+        sesion.CambiarTema(nuevoTemaId);
+
+        Assert.Equal(nuevoTemaId, sesion.TemaId);
+    }
+
+    [Fact]
+    public void CambiarTema_DebeRechazarTemaIdVacio()
+    {
+        var sesion = CrearSesion();
+
+        Assert.Throws<ArgumentException>(() => sesion.CambiarTema(Guid.Empty));
+    }
+
+    [Fact]
+    public void CambiarFecha_DebeActualizarFecha()
+    {
+        var sesion = CrearSesion();
+        var nuevaFecha = new DateOnly(2026, 9, 1);
+
+        sesion.CambiarFecha(nuevaFecha);
+
+        Assert.Equal(nuevaFecha, sesion.Fecha);
+    }
+
+    [Fact]
+    public void CambiarTipo_DebeActualizarTipo()
+    {
+        var sesion = CrearSesion();
+
+        sesion.CambiarTipo(TipoSesion.Laboratorio);
+
+        Assert.Equal(TipoSesion.Laboratorio, sesion.Tipo);
+    }
+
+    [Fact]
+    public void ActualizarNotas_DebeActualizarNotas()
+    {
+        var sesion = CrearSesion();
+
+        sesion.ActualizarNotas("Notas corregidas");
+
+        Assert.Equal("Notas corregidas", sesion.Notas);
+    }
+
+    [Fact]
+    public void MarcarComoEliminado_DebeRegistrarFechaEliminacion()
+    {
+        var sesion = CrearSesion();
+
+        sesion.MarcarComoEliminado();
+
+        Assert.NotNull(sesion.FechaEliminacionUtc);
+    }
+
+    [Fact]
     public void Registrar_DebeGenerarSesionRegistradaEvento()
     {
         var temaId = Guid.CreateVersion7();

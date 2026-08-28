@@ -123,6 +123,9 @@ caf832a feat: establish validated initial persistence
 - RESOURCE EDITABLE V1 VALIDADO END-TO-END
 - RECURSO ACTUALIZABLE CON OWNERSHIP EXPLICITO
 - SOFT DELETE DE RECURSO EXPUESTO Y VALIDADO SOBRE SQL SERVER REAL
+- STUDY CORRECTIONS V1 VALIDADO END-TO-END
+- SESIONESTUDIO CORREGIBLE CON OWNERSHIP EXPLICITO
+- SOFT DELETE DE SESIONESTUDIO EXPUESTO Y VALIDADO SOBRE SQL SERVER REAL
 
 ## Migraciones Aplicadas
 
@@ -459,6 +462,18 @@ Nota E2E:
 - PUT duracion SesionEstudio inexistente -> 404
 - PUT duracion con Guid.Empty -> 400
 - PUT duracion invalida -> 400
+- PUT /api/sesiones-estudio/{id} -> 204
+- PUT SesionEstudio con Usuario inexistente -> 404
+- PUT SesionEstudio inexistente -> 404
+- PUT SesionEstudio con Tema inexistente -> 404
+- PUT SesionEstudio de otro Usuario -> 409
+- PUT SesionEstudio hacia Tema de otro Usuario -> 409
+- PUT SesionEstudio con Guid.Empty -> 400
+- PUT SesionEstudio con duracion invalida -> 400
+- DELETE /api/sesiones-estudio/{id}?usuarioId={id} -> 204
+- DELETE SesionEstudio inexistente -> 404
+- DELETE SesionEstudio de otro Usuario -> 409
+- DELETE SesionEstudio ya eliminada logicamente -> 404 por query filter
 - SesionRegistradaEvento confirmado por codigo; despacho sigue diferido.
 - POST /api/entradas-bitacora -> 201
 - GET /api/entradas-bitacora/{id} -> 200
@@ -547,11 +562,11 @@ Nota E2E:
 - Microsoft.NET.Test.Sdk: no requerido con la estrategia MTP actual
 - dotnet run del proyecto de tests: validado
 - dotnet test por proyecto: validado
-- dotnet test por solucion: validado con 368 tests correctos
+- dotnet test por solucion: validado con 392 tests correctos
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
 - Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, planificacion, percepcion, IntervaloRepaso, dominio y TemaDominadoEvento validados.
 - Tests de Dominio Competencia validados.
-- Tests de Dominio SesionEstudio: registro, invariantes, correccion de duracion y SesionRegistradaEvento validados.
+- Tests de Dominio SesionEstudio: registro, invariantes, correccion de duracion, cambio de Tema/Fecha/Tipo/Notas, soft delete y SesionRegistradaEvento validados.
 - Tests de Dominio EntradaBitacora y Herramienta validados.
 - Tests de Dominio Recurso: edicion, campos opcionales, rating y soft delete validados.
 - Tests de Dominio Laboratorio validados.
@@ -562,7 +577,7 @@ Nota E2E:
 - Tests de Dominio Nota validados.
 - Tests de Application Roadmap: flujos criticos de Tema, planificacion, percepcion, IntervaloRepaso y Competencia/CompetenciaTema cubiertos con fakes minimos.
 - Tests de Application Resource: crear, obtener, listar, actualizar, eliminar logicamente y vincular cubiertos con fakes minimos.
-- Tests de Application Study: SesionEstudio, EntradaBitacora, Herramienta y SesionHerramienta cubiertos con fakes minimos.
+- Tests de Application Study: SesionEstudio crear/obtener/listar/corregir duracion/actualizar/eliminar, EntradaBitacora, Herramienta y SesionHerramienta cubiertos con fakes minimos.
 - Tests de Application Evidence: Laboratorio crear, obtener, listar, vincular a Tema y vincular a Herramienta cubiertos con fakes minimos.
 - Tests de Application Evidence: Proyecto crear, obtener, listar, vincular a Tema y vincular a Herramienta cubiertos con fakes minimos.
 - Tests de Application Evidence: ArtefactoTecnico crear, obtener, listar, vincular a Tema y vincular a Herramienta cubiertos con fakes minimos.
@@ -585,6 +600,7 @@ Nota E2E:
 - Tests de Application Importacion Roadmap V1: validan argumentos, Usuario inexistente, dataset invalido, sourceKey duplicado, idempotencia logica y conflictos de Fase/Certificacion.
 - Tests de integracion Importacion Roadmap V1: importan roadmap-v1.json real en AprendizajeTestsDb, validan idempotencia SQL, rollback ante conflicto, reutilizacion de catalogos globales, metadata de Fase, no Evidence creada y ejecucion CLI controlada.
 - Tests de integracion Resource Editable V1: actualizacion persistida, RecursoTema preservado, ownership incorrecto sin mutacion y soft delete oculto por query filter con fila fisica preservada.
+- Tests de integracion Study Corrections V1: actualizacion de SesionEstudio persistida, cambio de Tema con ownership, SesionHerramienta preservada, ownership incorrecto sin mutacion, soft delete oculto por query filter con fila fisica preservada y ResumenEstudio excluyendo sesiones eliminadas.
 
 ## Estado Git Esperado
 
@@ -604,7 +620,7 @@ Importacion Roadmap original: la especificacion normalizada versionada existe en
 
 Importador Roadmap V1: consume data/roadmap/roadmap-v1.json, no parsea HTML, no expone endpoint HTTP, no usa SnapshotProgreso/vw_TemaEstado/eventos y no crea Evidence planificada. SourceKey se usa solo en memoria. La importacion es transaccional e idempotente para el mismo dataset. El dataset contiene 31 entradas documentales de Recurso, que se materializan como 30 recursos fisicos por deduplicacion de clave natural UsuarioId + Titulo + Tipo + Url.
 
-Proxima area sugerida: Study corrections V1, incluyendo correcciones minimas de SesionEstudio necesarias para uso diario antes del Frontend V1.
+Proxima area sugerida: Evidence editable + maturity V1, para permitir corregir evidencia real y llevar su EstadoMadurez hacia Portafolio V1.
 
 ## Pendientes Deliberados
 
@@ -631,5 +647,7 @@ Proxima area sugerida: Study corrections V1, incluyendo correcciones minimas de 
 - integrations;
 - frontend;
 - filtros Resource;
+- filtros Study;
+- edicion EntradaBitacora;
 - TipoRecurso editable;
 - GitHub remote.

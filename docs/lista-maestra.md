@@ -82,6 +82,8 @@
 - [x] ObtenerSesionEstudio implementado.
 - [x] ListarSesionesEstudio implementado.
 - [x] CorregirDuracionSesionEstudio implementado.
+- [x] ActualizarSesionEstudio implementado.
+- [x] EliminarSesionEstudio implementado como soft delete.
 - [x] CrearEntradaBitacora implementado.
 - [x] ObtenerEntradaBitacoraPorId implementado.
 - [x] ListarEntradasBitacora implementado.
@@ -163,6 +165,8 @@
 - [x] POST /api/sesiones-estudio.
 - [x] GET /api/sesiones-estudio/{id}.
 - [x] GET /api/sesiones-estudio?usuarioId={id}.
+- [x] PUT /api/sesiones-estudio/{id}.
+- [x] DELETE /api/sesiones-estudio/{id}?usuarioId={id}.
 - [x] PUT /api/sesiones-estudio/{id}/duracion.
 - [x] PUT /api/sesiones-estudio/{id}/herramientas/{herramientaId}.
 - [x] POST /api/entradas-bitacora.
@@ -304,6 +308,18 @@
 - [x] Corregir duracion de SesionEstudio inexistente -> 404.
 - [x] Corregir duracion con Guid.Empty -> 400.
 - [x] Corregir duracion invalida -> 400.
+- [x] Actualizar SesionEstudio -> 204.
+- [x] Actualizar SesionEstudio con Usuario inexistente -> 404.
+- [x] Actualizar SesionEstudio inexistente -> 404.
+- [x] Actualizar SesionEstudio con Tema inexistente -> 404.
+- [x] Actualizar SesionEstudio de otro Usuario -> 409.
+- [x] Actualizar SesionEstudio hacia Tema de otro Usuario -> 409.
+- [x] Actualizar SesionEstudio con Guid.Empty -> 400.
+- [x] Actualizar SesionEstudio con duracion invalida -> 400.
+- [x] Eliminar SesionEstudio logicamente -> 204.
+- [x] Eliminar SesionEstudio inexistente -> 404.
+- [x] Eliminar SesionEstudio de otro Usuario -> 409.
+- [x] Eliminar SesionEstudio ya eliminada logicamente -> 404 por query filter.
 - [x] RowVersion de SesionEstudio verificada fisicamente.
 - [x] SesionRegistradaEvento confirmado por codigo.
 - [x] Crear EntradaBitacora -> 201.
@@ -406,6 +422,7 @@
 - [x] Tests de dominio para Competencia.
 - [x] Tests de dominio para metadata pedagogica de Fase.
 - [x] Tests fundacionales de dominio para SesionEstudio.
+- [x] Tests de Dominio Study Corrections V1 para cambio de Tema/Fecha/Tipo/Notas y soft delete.
 - [x] Test automatizado directo de TemaDominadoEvento.
 - [x] Test automatizado directo de SesionRegistradaEvento.
 - [x] Tests fundacionales de Application Roadmap.
@@ -415,11 +432,13 @@
 - [x] Tests fundacionales de Application Resource.
 - [x] Tests de Application Resource Editable V1.
 - [x] Tests fundacionales de Application Study.
+- [x] Tests de Application Study Corrections V1 para actualizar/eliminar SesionEstudio, ownership y errores de dominio.
 - [x] Fakes minimos sin framework de mocking.
 - [x] Tests fundacionales de persistencia sobre SQL Server real y AprendizajeTestsDb exclusiva.
 - [x] Guard rail de tests de integracion contra uso accidental de AprendizajeDb.
 - [x] Tests de persistencia para Tema.Objetivos, RowVersion de SesionEstudio, RecursoTema, SesionHerramienta, query filter y FK real.
 - [x] Tests de persistencia para Resource Editable V1: update, ownership, soft delete y preservacion de RecursoTema.
+- [x] Tests de persistencia para Study Corrections V1: update, cambio de Tema, ownership, soft delete, preservacion de SesionHerramienta y exclusion en Analytics factual.
 - [x] Tests de persistencia para planificacion/percepcion/IntervaloRepaso de Tema y RowVersion de Tema tras update.
 - [x] Tests de persistencia para metadata pedagogica de Fase, round-trip, update y CHECKs de meses recomendados.
 - [x] Tests de persistencia para CompetenciaTema.
@@ -505,7 +524,10 @@
 - [x] Ownership explicito de Resource validado en Application e Integration.
 - [x] TipoRecurso permanece no editable en V1 inicial.
 - [ ] Filtros Resource por tema/tipo/estado/texto.
-- [ ] Study corrections V1.
+- [x] Study corrections V1: actualizacion de Fecha, DuracionMinutos, Tipo, Notas y TemaId con ownership.
+- [x] Study soft delete V1 expuesto por API.
+- [ ] Filtros Study por fecha/tema/tipo.
+- [ ] Edicion EntradaBitacora.
 - [ ] Evidence editable + maturity V1.
 
 ## 16. Pendientes arquitectonicos

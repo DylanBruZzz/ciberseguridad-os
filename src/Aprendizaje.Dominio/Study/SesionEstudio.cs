@@ -67,6 +67,14 @@ public sealed class SesionEstudio : AggregateRoot, IEliminableLogicamente
 
     public void CambiarFecha(DateOnly fecha) => Fecha = fecha;
 
+    public void CambiarTema(Guid temaId)
+    {
+        if (temaId == Guid.Empty)
+            throw new ArgumentException("La Sesión de estudio debe estar vinculada a un Tema válido.", nameof(temaId));
+
+        TemaId = temaId;
+    }
+
     public void CambiarTipo(TipoSesion tipo) => Tipo = tipo;
 
     public void ActualizarNotas(string? notas) => Notas = notas;

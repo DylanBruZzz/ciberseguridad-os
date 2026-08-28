@@ -24,6 +24,20 @@ public sealed class CertificacionRepository : ICertificacionRepository
             .ThenBy(c => c.Id)
             .ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyCollection<Certificacion>> ListarPorNombresParaImportacionAsync(
+        IReadOnlyCollection<string> nombres,
+        CancellationToken cancellationToken = default)
+    {
+        if (nombres.Count == 0)
+            return [];
+
+        return await _context.Certificaciones
+            .Where(c => nombres.Contains(c.Nombre))
+            .OrderBy(c => c.Nombre)
+            .ThenBy(c => c.Id)
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<bool> ExisteVinculoTemaAsync(
         Guid certificacionId,
         Guid temaId,

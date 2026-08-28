@@ -26,5 +26,14 @@ public sealed class FaseRepository : IFaseRepository
             .ThenBy(f => f.Id)
             .ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyCollection<Fase>> ListarPorUsuarioParaImportacionAsync(
+        Guid usuarioId,
+        CancellationToken cancellationToken = default) =>
+        await _context.Fases
+            .Where(f => f.UsuarioId == usuarioId)
+            .OrderBy(f => f.Orden)
+            .ThenBy(f => f.Id)
+            .ToListAsync(cancellationToken);
+
     public void Agregar(Fase fase) => _context.Fases.Add(fase);
 }

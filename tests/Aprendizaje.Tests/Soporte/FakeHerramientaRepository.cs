@@ -19,6 +19,14 @@ internal sealed class FakeHerramientaRepository : IHerramientaRepository
                 .ThenBy(h => h.Id)
                 .ToArray());
 
+    public Task<IReadOnlyCollection<Herramienta>> ListarPorNombresParaImportacionAsync(
+        IReadOnlyCollection<string> nombres,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyCollection<Herramienta>>(
+            _herramientas.Values
+                .Where(h => nombres.Contains(h.Nombre, StringComparer.OrdinalIgnoreCase))
+                .ToArray());
+
     public void Agregar(Herramienta herramienta)
     {
         AgregarLlamadas++;

@@ -46,6 +46,7 @@ public static class InyeccionDependencias
         services.AddScoped<IConsultaResumenCompetencias, ConsultaResumenCompetencias>();
         services.AddScoped<IConsultaResumenCertificaciones, ConsultaResumenCertificaciones>();
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<AprendizajeDbContext>());
+        services.AddScoped<ITransaccionAplicacion, TransaccionAplicacion>();
 
         services.AddDbContext<AprendizajeDbContext>((sp, options) =>
         {

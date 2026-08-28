@@ -17,6 +17,14 @@ internal sealed class FakeCertificacionRepository : ICertificacionRepository
     public Task<IReadOnlyCollection<Certificacion>> ListarAsync(CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyCollection<Certificacion>>(_certificaciones.Values.ToArray());
 
+    public Task<IReadOnlyCollection<Certificacion>> ListarPorNombresParaImportacionAsync(
+        IReadOnlyCollection<string> nombres,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyCollection<Certificacion>>(
+            _certificaciones.Values
+                .Where(c => nombres.Contains(c.Nombre, StringComparer.OrdinalIgnoreCase))
+                .ToArray());
+
     public Task<bool> ExisteVinculoTemaAsync(
         Guid certificacionId,
         Guid temaId,

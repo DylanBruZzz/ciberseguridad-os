@@ -28,5 +28,14 @@ public sealed class TemaRepository : ITemaRepository
             .ThenBy(t => t.Id)
             .ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyCollection<Tema>> ListarPorUsuarioParaImportacionAsync(
+        Guid usuarioId,
+        CancellationToken cancellationToken = default) =>
+        await _context.Temas
+            .Where(t => t.UsuarioId == usuarioId)
+            .OrderBy(t => t.Nombre)
+            .ThenBy(t => t.Id)
+            .ToListAsync(cancellationToken);
+
     public void Agregar(Tema tema) => _context.Temas.Add(tema);
 }

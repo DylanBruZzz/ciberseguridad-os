@@ -130,3 +130,16 @@ Soft delete es selectivo y solo aplica a Aggregate Roots que implementan IElimin
 - CargaSemanalRecomendada es texto para preservar expresiones como "~10 hrs/semana" o "Tiempo completo" sin inventar escala numerica.
 - Esta metadata no crea Evidence, no activa Analytics semantico y no modifica Tema.FechaInicio/FechaFin.
 - Se mantiene diferido: Evidence planificada, FaseHerramienta, prioridad contextual de herramientas y PlanPortafolio.
+
+## Importador Roadmap V1
+
+- El importador Roadmap V1 es un bootstrap CLI idempotente y controlado, no un seed automatico, no EF HasData, no migracion de datos, no endpoint HTTP y no BackgroundService.
+- El importador consume data/roadmap/roadmap-v1.json. El HTML original sigue siendo fuente humana inmutable y no se parsea en runtime.
+- SourceKey es identificador del dataset solo durante la ejecucion. No se persiste en entidades, no hay tabla de historial de importacion y V1 no intenta sincronizar renames/deletes futuros.
+- La importacion usa una transaccion unica por Usuario destino: si hay conflicto o error de persistencia, no debe quedar un Roadmap parcial.
+- El Usuario destino se especifica explicitamente antes de Auth. El importador valida que exista y no crea Usuario automaticamente.
+- Fase se resuelve por UsuarioId + Orden; mismo orden con nombre distinto es conflicto. Tema se resuelve por UsuarioId + FaseId + TemaPadreId + Nombre. Recurso se resuelve por UsuarioId + Titulo + Tipo + Url.
+- Herramienta y Certificacion permanecen catalogos globales. Se reutilizan por Nombre y no reciben UsuarioId artificial.
+- Certificacion con TipoCosto divergente es conflicto. Metadata global divergente no se sobrescribe silenciosamente.
+- El importador no crea SesionEstudio, EntradaBitacora, Proyecto, Laboratorio, Writeup, ArtefactoTecnico, CertificacionObtenida, Nota, SnapshotProgreso, Conector ni LogSincronizacion.
+- El dataset conserva 31 entradas documentales de Recurso, pero V1 materializa 30 recursos fisicos por deduplicacion de clave natural. No se inventan relaciones RecursoTema cuando el JSON no las expresa.

@@ -23,5 +23,19 @@ public sealed class HerramientaRepository : IHerramientaRepository
             .ThenBy(h => h.Id)
             .ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyCollection<Herramienta>> ListarPorNombresParaImportacionAsync(
+        IReadOnlyCollection<string> nombres,
+        CancellationToken cancellationToken = default)
+    {
+        if (nombres.Count == 0)
+            return [];
+
+        return await _context.Herramientas
+            .Where(h => nombres.Contains(h.Nombre))
+            .OrderBy(h => h.Nombre)
+            .ThenBy(h => h.Id)
+            .ToListAsync(cancellationToken);
+    }
+
     public void Agregar(Herramienta herramienta) => _context.Herramientas.Add(herramienta);
 }

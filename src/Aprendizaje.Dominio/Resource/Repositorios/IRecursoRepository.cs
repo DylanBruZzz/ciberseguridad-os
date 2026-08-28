@@ -8,6 +8,10 @@ public interface IRecursoRepository
         Guid usuarioId,
         CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyCollection<Recurso>> ListarPorUsuarioParaImportacionAsync(
+        Guid usuarioId,
+        CancellationToken cancellationToken = default);
+
     Task<bool> ExisteVinculoTemaAsync(
         Guid recursoId,
         Guid temaId,

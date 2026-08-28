@@ -8,5 +8,9 @@ public interface IFaseRepository
 
     Task<IReadOnlyCollection<Fase>> ListarPorUsuarioAsync(Guid usuarioId, CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyCollection<Fase>> ListarPorUsuarioParaImportacionAsync(
+        Guid usuarioId,
+        CancellationToken cancellationToken = default);
+
     void Agregar(Fase fase);
 }

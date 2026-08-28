@@ -112,6 +112,10 @@ caf832a feat: establish validated initial persistence
 - RESUMEN ESTRUCTURAL DE CERTIFICACIONES VALIDADO END-TO-END
 - ANALYTICS DIRECTO MINIMO FUNCIONAL CERRADO
 - METADATA PEDAGOGICA DE FASE VALIDADA END-TO-END
+- ESPECIFICACION NORMALIZADA ROADMAP V1 VERSIONADA
+- IMPORTADOR CLI ROADMAP V1 VALIDADO END-TO-END
+- IMPORTADOR ROADMAP V1 ES BOOTSTRAP IDEMPOTENTE, NO MOTOR DE SINCRONIZACION
+- IMPORTADOR ROADMAP V1 NO CREA EVIDENCE NI SESIONES
 
 ## Migraciones Aplicadas
 
@@ -488,7 +492,7 @@ Nota E2E:
 - Microsoft.NET.Test.Sdk: no requerido con la estrategia MTP actual
 - dotnet run del proyecto de tests: validado
 - dotnet test por proyecto: validado
-- dotnet test por solucion: validado con 339 tests correctos
+- dotnet test por solucion: validado con 351 tests correctos
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
 - Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, planificacion, percepcion, IntervaloRepaso, dominio y TemaDominadoEvento validados.
 - Tests de Dominio Competencia validados.
@@ -522,6 +526,8 @@ Nota E2E:
 - Tests de integracion Analytics: ResumenTema agrega datos directos por tema, criterios cumplidos/total, recursos/evidencias visibles, aislamiento por usuario y exclusion de soft delete.
 - Tests de integracion Analytics: ResumenCompetencia cuenta temas visibles por usuario y excluye temas eliminados logicamente.
 - Tests de integracion Analytics: ResumenCertificacion cuenta temas visibles por usuario, respeta catalogo global, ignora Peso y cuenta CertificacionObtenida visible sin asumir unicidad.
+- Tests de Application Importacion Roadmap V1: validan argumentos, Usuario inexistente, dataset invalido, sourceKey duplicado, idempotencia logica y conflictos de Fase/Certificacion.
+- Tests de integracion Importacion Roadmap V1: importan roadmap-v1.json real en AprendizajeTestsDb, validan idempotencia SQL, rollback ante conflicto, reutilizacion de catalogos globales, metadata de Fase, no Evidence creada y ejecucion CLI controlada.
 
 ## Estado Git Esperado
 
@@ -537,9 +543,11 @@ Analytics directo minimo funcional cerrado: ResumenEstudio, ResumenTema, Resumen
 
 Metadata pedagogica de Fase validada: Fase ahora puede describir objetivos, criterios descriptivos de avance, meses relativos recomendados y carga semanal recomendada como texto. Esta metadata pertenece al roadmap recomendado; no representa progreso real del usuario, no reemplaza Tema.FechaInicio/FechaFin y no crea evidencia.
 
-Importacion Roadmap original: el modelo queda listo para preparar una especificacion normalizada versionada a partir de docs/roadmap-original/cybersecurity_roadmap_dylan.html. La importacion todavia no esta implementada.
+Importacion Roadmap original: la especificacion normalizada versionada existe en data/roadmap/roadmap-v1.json y el importador CLI V1 esta validado. La importacion real definitiva sobre una base/usuario personal todavia queda pendiente y debe ejecutarse manualmente de forma controlada.
 
-Proxima area sugerida: especificacion normalizada del Roadmap original.
+Importador Roadmap V1: consume data/roadmap/roadmap-v1.json, no parsea HTML, no expone endpoint HTTP, no usa SnapshotProgreso/vw_TemaEstado/eventos y no crea Evidence planificada. SourceKey se usa solo en memoria. La importacion es transaccional e idempotente para el mismo dataset. El dataset contiene 31 entradas documentales de Recurso, que se materializan como 30 recursos fisicos por deduplicacion de clave natural UsuarioId + Titulo + Tipo + Url.
+
+Proxima area sugerida: importacion real controlada del Roadmap V1 en base/usuario personal limpio, seguida de auditoria de datos importados.
 
 ## Pendientes Deliberados
 

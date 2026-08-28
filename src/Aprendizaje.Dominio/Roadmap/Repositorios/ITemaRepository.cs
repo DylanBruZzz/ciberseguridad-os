@@ -8,5 +8,9 @@ public interface ITemaRepository
 
     Task<IReadOnlyCollection<Tema>> ListarPorUsuarioAsync(Guid usuarioId, CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyCollection<Tema>> ListarPorUsuarioParaImportacionAsync(
+        Guid usuarioId,
+        CancellationToken cancellationToken = default);
+
     void Agregar(Tema tema);
 }

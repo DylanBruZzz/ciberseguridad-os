@@ -18,6 +18,11 @@ internal sealed class FakeRecursoRepository : IRecursoRepository
         CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyCollection<Recurso>>(_recursos.Values.Where(r => r.UsuarioId == usuarioId).ToArray());
 
+    public Task<IReadOnlyCollection<Recurso>> ListarPorUsuarioParaImportacionAsync(
+        Guid usuarioId,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyCollection<Recurso>>(_recursos.Values.Where(r => r.UsuarioId == usuarioId).ToArray());
+
     public Task<bool> ExisteVinculoTemaAsync(
         Guid recursoId,
         Guid temaId,

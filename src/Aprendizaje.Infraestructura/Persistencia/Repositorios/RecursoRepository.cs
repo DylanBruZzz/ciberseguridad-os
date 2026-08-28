@@ -27,6 +27,15 @@ public sealed class RecursoRepository : IRecursoRepository
             .ThenBy(r => r.Id)
             .ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyCollection<Recurso>> ListarPorUsuarioParaImportacionAsync(
+        Guid usuarioId,
+        CancellationToken cancellationToken = default) =>
+        await _context.Recursos
+            .Where(r => r.UsuarioId == usuarioId)
+            .OrderBy(r => r.Titulo)
+            .ThenBy(r => r.Id)
+            .ToListAsync(cancellationToken);
+
     public Task<bool> ExisteVinculoTemaAsync(
         Guid recursoId,
         Guid temaId,

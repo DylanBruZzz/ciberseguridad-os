@@ -67,6 +67,7 @@
 ## 7. Application
 
 - [x] IUnitOfWork definido.
+- [x] ITransaccionAplicacion definido para importaciones atomicas controladas.
 - [x] CrearUsuario implementado.
 - [x] CrearRecurso implementado.
 - [x] ObtenerRecursoPorId implementado.
@@ -120,6 +121,7 @@
 - [x] ObtenerResumenTema implementado.
 - [x] ObtenerResumenCompetencias implementado.
 - [x] ObtenerResumenCertificaciones implementado.
+- [x] ImportarRoadmapV1 implementado como bootstrap CLI idempotente.
 - [x] CrearTema implementado.
 - [x] ObtenerTemaPorId implementado.
 - [x] EstablecerObjetivosTema implementado.
@@ -370,6 +372,7 @@
 - [x] Resumen estructural de Certificaciones -> 200.
 - [x] Resumen estructural de Certificaciones con Guid.Empty -> 400.
 - [x] Analytics directo minimo funcional cerrado.
+- [x] Importador CLI Roadmap V1 validado contra AprendizajeTestsDb.
 - [ ] Nuevos flujos E2E por vertical slice.
 
 ## 10. Tests
@@ -428,6 +431,8 @@
 - [x] Tests de integracion para ResumenTema sobre SQL Server real.
 - [x] Tests de Application para ResumenCompetencia y ResumenCertificacion.
 - [x] Tests de integracion para ResumenCompetencia y ResumenCertificacion sobre SQL Server real.
+- [x] Tests de Application para ImportarRoadmapV1: validacion, usuario inexistente, idempotencia y conflictos.
+- [x] Tests de integracion para ImportarRoadmapV1: dataset real, idempotencia SQL, rollback, no Evidence y CLI controlado.
 - [ ] Tests E2E automatizados.
 - [ ] Tests de concurrencia donde aplique RowVersion.
 - [ ] Concurrencia HTTP/ETag/If-Match para Tema.
@@ -461,10 +466,13 @@
 ## 14. Importacion Roadmap original
 
 - [x] Gate arquitectonico de importacion resuelto: modelo listo tras metadata pedagogica de Fase.
-- [x] HTML original incorporado como fuente documental inmutable pendiente de checkpoint.
+- [x] HTML original incorporado como fuente documental inmutable.
 - [x] Metadata pedagogica de Fase implementada como unico cambio minimo bloqueante.
-- [ ] Crear especificacion normalizada versionada desde HTML original.
-- [ ] Importar Roadmap original al modelo persistente.
+- [x] Crear especificacion normalizada versionada desde HTML original.
+- [x] Implementar importador CLI Roadmap V1 como bootstrap idempotente, no sincronizador.
+- [x] Validar que la importacion CLI no crea Evidence, sesiones, snapshots ni conectores.
+- [x] Validar que 31 entradas documentales de Recurso se materializan como 30 recursos fisicos unicos por clave natural.
+- [ ] Ejecutar importacion real controlada sobre base/usuario personal.
 - [ ] Validar datos importados.
 - [ ] Auditar trazabilidad de importacion.
 

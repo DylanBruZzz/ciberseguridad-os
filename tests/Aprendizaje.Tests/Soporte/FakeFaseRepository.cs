@@ -17,6 +17,11 @@ internal sealed class FakeFaseRepository : IFaseRepository
         CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyCollection<Fase>>(_fases.Values.Where(f => f.UsuarioId == usuarioId).ToArray());
 
+    public Task<IReadOnlyCollection<Fase>> ListarPorUsuarioParaImportacionAsync(
+        Guid usuarioId,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyCollection<Fase>>(_fases.Values.Where(f => f.UsuarioId == usuarioId).ToArray());
+
     public void Agregar(Fase fase)
     {
         AgregarLlamadas++;

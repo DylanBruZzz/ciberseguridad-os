@@ -8,6 +8,10 @@ public interface ICertificacionRepository
 
     Task<IReadOnlyCollection<Certificacion>> ListarAsync(CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyCollection<Certificacion>> ListarPorNombresParaImportacionAsync(
+        IReadOnlyCollection<string> nombres,
+        CancellationToken cancellationToken = default);
+
     Task<bool> ExisteVinculoTemaAsync(
         Guid certificacionId,
         Guid temaId,

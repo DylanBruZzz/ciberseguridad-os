@@ -15,5 +15,10 @@ internal sealed class FakeTemaRepository : ITemaRepository
         CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyCollection<Tema>>(_temas.Values.Where(t => t.UsuarioId == usuarioId).ToArray());
 
+    public Task<IReadOnlyCollection<Tema>> ListarPorUsuarioParaImportacionAsync(
+        Guid usuarioId,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyCollection<Tema>>(_temas.Values.Where(t => t.UsuarioId == usuarioId).ToArray());
+
     public void Agregar(Tema tema) => _temas[tema.Id] = tema;
 }

@@ -6,5 +6,9 @@ public interface IHerramientaRepository
 
     Task<IReadOnlyCollection<Herramienta>> ListarAsync(CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyCollection<Herramienta>> ListarPorNombresParaImportacionAsync(
+        IReadOnlyCollection<string> nombres,
+        CancellationToken cancellationToken = default);
+
     void Agregar(Herramienta herramienta);
 }

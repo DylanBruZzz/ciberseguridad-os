@@ -1,4 +1,6 @@
+using Aprendizaje.Aplicacion.Evidence.ArtefactosTecnicos.ActualizarArtefactoTecnico;
 using Aprendizaje.Aplicacion.Evidence.ArtefactosTecnicos.CrearArtefactoTecnico;
+using Aprendizaje.Aplicacion.Evidence.ArtefactosTecnicos.EliminarArtefactoTecnico;
 using Aprendizaje.Aplicacion.Evidence.ArtefactosTecnicos.ListarArtefactosTecnicos;
 using Aprendizaje.Aplicacion.Evidence.ArtefactosTecnicos.ObtenerArtefactoTecnicoPorId;
 using Aprendizaje.Aplicacion.Evidence.ArtefactosTecnicos.VincularArtefactoAHerramienta;
@@ -16,6 +18,8 @@ public static class ArtefactoTecnicoEndpoints
         grupo.MapPost("/", CrearArtefactoTecnicoAsync);
         grupo.MapGet("/", ListarArtefactosTecnicosAsync);
         grupo.MapGet("/{id:guid}", ObtenerArtefactoTecnicoPorIdAsync);
+        grupo.MapPut("/{id:guid}", ActualizarArtefactoTecnicoAsync);
+        grupo.MapDelete("/{id:guid}", EliminarArtefactoTecnicoAsync);
         grupo.MapPut("/{artefactoTecnicoId:guid}/temas/{temaId:guid}", VincularTemaAsync);
         grupo.MapPut("/{artefactoTecnicoId:guid}/herramientas/{herramientaId:guid}", VincularHerramientaAsync);
 
@@ -135,8 +139,83 @@ public static class ArtefactoTecnicoEndpoints
         }
     }
 
+    private static async Task<IResult> ActualizarArtefactoTecnicoAsync(
+        Guid id,
+        ActualizarArtefactoTecnicoHttpRequest request,
+        ActualizarArtefactoTecnicoCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new ActualizarArtefactoTecnicoSolicitud(
+                    id,
+                    request.UsuarioId,
+                    request.TipoArtefacto,
+                    request.Nombre,
+                    request.ContenidoOUrl,
+                    request.LenguajeTecnologia,
+                    request.EstadoMadurez),
+                cancellationToken);
+
+            return resultado.Estado switch
+            {
+                ActualizarArtefactoTecnicoEstado.Actualizado => Results.NoContent(),
+                ActualizarArtefactoTecnicoEstado.UsuarioNoEncontrado => Results.NotFound(),
+                ActualizarArtefactoTecnicoEstado.ArtefactoTecnicoNoEncontrado => Results.NotFound(),
+                ActualizarArtefactoTecnicoEstado.UsuarioNoCoincide => Results.Conflict(new
+                {
+                    error = "El Artefacto Técnico no pertenece al usuario indicado."
+                }),
+                _ => Results.Problem("Estado de actualización de Artefacto Técnico no reconocido.")
+            };
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> EliminarArtefactoTecnicoAsync(
+        Guid id,
+        Guid usuarioId,
+        EliminarArtefactoTecnicoCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new EliminarArtefactoTecnicoSolicitud(id, usuarioId),
+                cancellationToken);
+
+            return resultado.Estado switch
+            {
+                EliminarArtefactoTecnicoEstado.Eliminado => Results.NoContent(),
+                EliminarArtefactoTecnicoEstado.UsuarioNoEncontrado => Results.NotFound(),
+                EliminarArtefactoTecnicoEstado.ArtefactoTecnicoNoEncontrado => Results.NotFound(),
+                EliminarArtefactoTecnicoEstado.UsuarioNoCoincide => Results.Conflict(new
+                {
+                    error = "El Artefacto Técnico no pertenece al usuario indicado."
+                }),
+                _ => Results.Problem("Estado de eliminación de Artefacto Técnico no reconocido.")
+            };
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
     private sealed record CrearArtefactoTecnicoHttpRequest(
         Guid UsuarioId,
         TipoArtefacto TipoArtefacto,
         string Nombre);
+
+    private sealed record ActualizarArtefactoTecnicoHttpRequest(
+        Guid UsuarioId,
+        TipoArtefacto TipoArtefacto,
+        string Nombre,
+        string? ContenidoOUrl,
+        string? LenguajeTecnologia,
+        EstadoMadurez EstadoMadurez);
 }

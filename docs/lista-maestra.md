@@ -92,21 +92,29 @@
 - [x] ListarHerramientas implementado.
 - [x] VincularHerramientaASesionEstudio implementado.
 - [x] CrearLaboratorio implementado.
+- [x] ActualizarLaboratorio implementado.
+- [x] EliminarLaboratorio implementado como soft delete.
 - [x] ObtenerLaboratorioPorId implementado.
 - [x] ListarLaboratorios implementado.
 - [x] VincularLaboratorioATema implementado.
 - [x] VincularLaboratorioAHerramienta implementado.
 - [x] CrearProyecto implementado.
+- [x] ActualizarProyecto implementado.
+- [x] EliminarProyecto implementado como soft delete.
 - [x] ObtenerProyectoPorId implementado.
 - [x] ListarProyectos implementado.
 - [x] VincularProyectoATema implementado.
 - [x] VincularProyectoAHerramienta implementado.
 - [x] CrearArtefactoTecnico implementado.
+- [x] ActualizarArtefactoTecnico implementado.
+- [x] EliminarArtefactoTecnico implementado como soft delete.
 - [x] ObtenerArtefactoTecnicoPorId implementado.
 - [x] ListarArtefactosTecnicos implementado.
 - [x] VincularArtefactoATema implementado.
 - [x] VincularArtefactoAHerramienta implementado.
 - [x] CrearWriteup implementado.
+- [x] ActualizarWriteup implementado.
+- [x] EliminarWriteup implementado como soft delete.
 - [x] ObtenerWriteupPorId implementado.
 - [x] ListarWriteups implementado.
 - [x] VincularWriteupATema implementado.
@@ -115,6 +123,8 @@
 - [x] ListarCertificaciones implementado.
 - [x] VincularCertificacionATema implementado.
 - [x] CrearCertificacionObtenida implementado.
+- [x] ActualizarCertificacionObtenida implementado para EvidenciaUrl y EstadoMadurez.
+- [x] EliminarCertificacionObtenida implementado como soft delete.
 - [x] ObtenerCertificacionObtenidaPorId implementado.
 - [x] ListarCertificacionesObtenidas implementado.
 - [x] CrearNotaParaTema implementado.
@@ -178,21 +188,29 @@
 - [x] POST /api/laboratorios.
 - [x] GET /api/laboratorios/{id}.
 - [x] GET /api/laboratorios?usuarioId={id}.
+- [x] PUT /api/laboratorios/{id}.
+- [x] DELETE /api/laboratorios/{id}?usuarioId={id}.
 - [x] PUT /api/laboratorios/{id}/temas/{temaId}.
 - [x] PUT /api/laboratorios/{id}/herramientas/{herramientaId}.
 - [x] POST /api/proyectos.
 - [x] GET /api/proyectos/{id}.
 - [x] GET /api/proyectos?usuarioId={id}.
+- [x] PUT /api/proyectos/{id}.
+- [x] DELETE /api/proyectos/{id}?usuarioId={id}.
 - [x] PUT /api/proyectos/{id}/temas/{temaId}.
 - [x] PUT /api/proyectos/{id}/herramientas/{herramientaId}.
 - [x] POST /api/artefactos-tecnicos.
 - [x] GET /api/artefactos-tecnicos/{id}.
 - [x] GET /api/artefactos-tecnicos?usuarioId={id}.
+- [x] PUT /api/artefactos-tecnicos/{id}.
+- [x] DELETE /api/artefactos-tecnicos/{id}?usuarioId={id}.
 - [x] PUT /api/artefactos-tecnicos/{id}/temas/{temaId}.
 - [x] PUT /api/artefactos-tecnicos/{id}/herramientas/{herramientaId}.
 - [x] POST /api/writeups.
 - [x] GET /api/writeups/{id}.
 - [x] GET /api/writeups?usuarioId={id}.
+- [x] PUT /api/writeups/{id}.
+- [x] DELETE /api/writeups/{id}?usuarioId={id}.
 - [x] PUT /api/writeups/{id}/temas/{temaId}.
 - [x] POST /api/certificaciones.
 - [x] GET /api/certificaciones/{id}.
@@ -201,6 +219,8 @@
 - [x] POST /api/certificaciones-obtenidas.
 - [x] GET /api/certificaciones-obtenidas/{id}.
 - [x] GET /api/certificaciones-obtenidas?usuarioId={id}.
+- [x] PUT /api/certificaciones-obtenidas/{id}.
+- [x] DELETE /api/certificaciones-obtenidas/{id}?usuarioId={id}.
 - [x] POST /api/temas/{temaId}/notas.
 - [x] POST /api/proyectos/{proyectoId}/notas.
 - [x] POST /api/laboratorios/{laboratorioId}/notas.
@@ -433,12 +453,14 @@
 - [x] Tests de Application Resource Editable V1.
 - [x] Tests fundacionales de Application Study.
 - [x] Tests de Application Study Corrections V1 para actualizar/eliminar SesionEstudio, ownership y errores de dominio.
+- [x] Tests de Application Evidence Editable + Maturity V1 para actualizar/eliminar Proyecto, Laboratorio, Writeup, ArtefactoTecnico y CertificacionObtenida con ownership.
 - [x] Fakes minimos sin framework de mocking.
 - [x] Tests fundacionales de persistencia sobre SQL Server real y AprendizajeTestsDb exclusiva.
 - [x] Guard rail de tests de integracion contra uso accidental de AprendizajeDb.
 - [x] Tests de persistencia para Tema.Objetivos, RowVersion de SesionEstudio, RecursoTema, SesionHerramienta, query filter y FK real.
 - [x] Tests de persistencia para Resource Editable V1: update, ownership, soft delete y preservacion de RecursoTema.
 - [x] Tests de persistencia para Study Corrections V1: update, cambio de Tema, ownership, soft delete, preservacion de SesionHerramienta y exclusion en Analytics factual.
+- [x] Tests de persistencia para Evidence Editable + Maturity V1: update, EstadoMadurez, ownership, soft delete y preservacion de relaciones representativas.
 - [x] Tests de persistencia para planificacion/percepcion/IntervaloRepaso de Tema y RowVersion de Tema tras update.
 - [x] Tests de persistencia para metadata pedagogica de Fase, round-trip, update y CHECKs de meses recomendados.
 - [x] Tests de persistencia para CompetenciaTema.
@@ -528,7 +550,15 @@
 - [x] Study soft delete V1 expuesto por API.
 - [ ] Filtros Study por fecha/tema/tipo.
 - [ ] Edicion EntradaBitacora.
-- [ ] Evidence editable + maturity V1.
+- [x] Evidence editable + maturity V1.
+- [x] Proyecto editable V1: Nombre, Descripcion, Estado, EstadoMadurez, RepositorioUrl y fechas opcionales.
+- [x] Laboratorio editable V1: Nombre, Objetivo, EntornoVms, Hallazgos, TiempoInvertidoMinutos, Fecha y EstadoMadurez.
+- [x] Writeup editable V1: Titulo, PlataformaOrigen, Url, Fecha y EstadoMadurez.
+- [x] ArtefactoTecnico editable V1: TipoArtefacto, Nombre, ContenidoOUrl, LenguajeTecnologia y EstadoMadurez.
+- [x] CertificacionObtenida editable V1: EvidenciaUrl y EstadoMadurez; Certificacion global y FechaObtencion no se modifican en este bloque.
+- [x] Soft delete Evidence V1 expuesto para Proyecto, Laboratorio, Writeup, ArtefactoTecnico y CertificacionObtenida.
+- [x] Nota permanece append-only.
+- [ ] Portafolio read side V1.
 
 ## 16. Pendientes arquitectonicos
 

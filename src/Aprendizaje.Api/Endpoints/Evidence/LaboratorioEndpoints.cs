@@ -1,8 +1,11 @@
+using Aprendizaje.Aplicacion.Evidence.Laboratorios.ActualizarLaboratorio;
 using Aprendizaje.Aplicacion.Evidence.Laboratorios.CrearLaboratorio;
+using Aprendizaje.Aplicacion.Evidence.Laboratorios.EliminarLaboratorio;
 using Aprendizaje.Aplicacion.Evidence.Laboratorios.ListarLaboratorios;
 using Aprendizaje.Aplicacion.Evidence.Laboratorios.ObtenerLaboratorioPorId;
 using Aprendizaje.Aplicacion.Evidence.Laboratorios.VincularLaboratorioAHerramienta;
 using Aprendizaje.Aplicacion.Evidence.Laboratorios.VincularLaboratorioATema;
+using Aprendizaje.Dominio.Evidence;
 
 namespace Aprendizaje.Api.Endpoints.Evidence;
 
@@ -15,6 +18,8 @@ public static class LaboratorioEndpoints
         grupo.MapPost("/", CrearLaboratorioAsync);
         grupo.MapGet("/", ListarLaboratoriosAsync);
         grupo.MapGet("/{id:guid}", ObtenerLaboratorioPorIdAsync);
+        grupo.MapPut("/{id:guid}", ActualizarLaboratorioAsync);
+        grupo.MapDelete("/{id:guid}", EliminarLaboratorioAsync);
         grupo.MapPut("/{laboratorioId:guid}/temas/{temaId:guid}", VincularTemaAsync);
         grupo.MapPut("/{laboratorioId:guid}/herramientas/{herramientaId:guid}", VincularHerramientaAsync);
 
@@ -141,6 +146,75 @@ public static class LaboratorioEndpoints
         }
     }
 
+    private static async Task<IResult> ActualizarLaboratorioAsync(
+        Guid id,
+        ActualizarLaboratorioHttpRequest request,
+        ActualizarLaboratorioCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new ActualizarLaboratorioSolicitud(
+                    id,
+                    request.UsuarioId,
+                    request.Nombre,
+                    request.Objetivo,
+                    request.EntornoVms,
+                    request.Hallazgos,
+                    request.TiempoInvertidoMinutos,
+                    request.Fecha,
+                    request.EstadoMadurez),
+                cancellationToken);
+
+            return resultado.Estado switch
+            {
+                ActualizarLaboratorioEstado.Actualizado => Results.NoContent(),
+                ActualizarLaboratorioEstado.UsuarioNoEncontrado => Results.NotFound(),
+                ActualizarLaboratorioEstado.LaboratorioNoEncontrado => Results.NotFound(),
+                ActualizarLaboratorioEstado.UsuarioNoCoincide => Results.Conflict(new
+                {
+                    error = "El Laboratorio no pertenece al usuario indicado."
+                }),
+                _ => Results.Problem("Estado de actualización de Laboratorio no reconocido.")
+            };
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> EliminarLaboratorioAsync(
+        Guid id,
+        Guid usuarioId,
+        EliminarLaboratorioCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new EliminarLaboratorioSolicitud(id, usuarioId),
+                cancellationToken);
+
+            return resultado.Estado switch
+            {
+                EliminarLaboratorioEstado.Eliminado => Results.NoContent(),
+                EliminarLaboratorioEstado.UsuarioNoEncontrado => Results.NotFound(),
+                EliminarLaboratorioEstado.LaboratorioNoEncontrado => Results.NotFound(),
+                EliminarLaboratorioEstado.UsuarioNoCoincide => Results.Conflict(new
+                {
+                    error = "El Laboratorio no pertenece al usuario indicado."
+                }),
+                _ => Results.Problem("Estado de eliminación de Laboratorio no reconocido.")
+            };
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
     private sealed record CrearLaboratorioHttpRequest(
         Guid UsuarioId,
         string Nombre,
@@ -149,4 +223,14 @@ public static class LaboratorioEndpoints
         string? Hallazgos,
         int? TiempoInvertidoMinutos,
         DateOnly? Fecha);
+
+    private sealed record ActualizarLaboratorioHttpRequest(
+        Guid UsuarioId,
+        string Nombre,
+        string? Objetivo,
+        string? EntornoVms,
+        string? Hallazgos,
+        int? TiempoInvertidoMinutos,
+        DateOnly? Fecha,
+        EstadoMadurez EstadoMadurez);
 }

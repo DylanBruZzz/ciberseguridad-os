@@ -1,8 +1,11 @@
+using Aprendizaje.Aplicacion.Evidence.Proyectos.ActualizarProyecto;
 using Aprendizaje.Aplicacion.Evidence.Proyectos.CrearProyecto;
+using Aprendizaje.Aplicacion.Evidence.Proyectos.EliminarProyecto;
 using Aprendizaje.Aplicacion.Evidence.Proyectos.ListarProyectos;
 using Aprendizaje.Aplicacion.Evidence.Proyectos.ObtenerProyectoPorId;
 using Aprendizaje.Aplicacion.Evidence.Proyectos.VincularProyectoAHerramienta;
 using Aprendizaje.Aplicacion.Evidence.Proyectos.VincularProyectoATema;
+using Aprendizaje.Dominio.Evidence;
 
 namespace Aprendizaje.Api.Endpoints.Evidence;
 
@@ -15,6 +18,8 @@ public static class ProyectoEndpoints
         grupo.MapPost("/", CrearProyectoAsync);
         grupo.MapGet("/", ListarProyectosAsync);
         grupo.MapGet("/{id:guid}", ObtenerProyectoPorIdAsync);
+        grupo.MapPut("/{id:guid}", ActualizarProyectoAsync);
+        grupo.MapDelete("/{id:guid}", EliminarProyectoAsync);
         grupo.MapPut("/{proyectoId:guid}/temas/{temaId:guid}", VincularTemaAsync);
         grupo.MapPut("/{proyectoId:guid}/herramientas/{herramientaId:guid}", VincularHerramientaAsync);
 
@@ -134,5 +139,86 @@ public static class ProyectoEndpoints
         }
     }
 
+    private static async Task<IResult> ActualizarProyectoAsync(
+        Guid id,
+        ActualizarProyectoHttpRequest request,
+        ActualizarProyectoCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new ActualizarProyectoSolicitud(
+                    id,
+                    request.UsuarioId,
+                    request.Nombre,
+                    request.Descripcion,
+                    request.Estado,
+                    request.EstadoMadurez,
+                    request.RepositorioUrl,
+                    request.FechaInicio,
+                    request.FechaFin),
+                cancellationToken);
+
+            return resultado.Estado switch
+            {
+                ActualizarProyectoEstado.Actualizado => Results.NoContent(),
+                ActualizarProyectoEstado.UsuarioNoEncontrado => Results.NotFound(),
+                ActualizarProyectoEstado.ProyectoNoEncontrado => Results.NotFound(),
+                ActualizarProyectoEstado.UsuarioNoCoincide => Results.Conflict(new
+                {
+                    error = "El Proyecto no pertenece al usuario indicado."
+                }),
+                _ => Results.Problem("Estado de actualización de Proyecto no reconocido.")
+            };
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> EliminarProyectoAsync(
+        Guid id,
+        Guid usuarioId,
+        EliminarProyectoCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(new EliminarProyectoSolicitud(id, usuarioId), cancellationToken);
+
+            return resultado.Estado switch
+            {
+                EliminarProyectoEstado.Eliminado => Results.NoContent(),
+                EliminarProyectoEstado.UsuarioNoEncontrado => Results.NotFound(),
+                EliminarProyectoEstado.ProyectoNoEncontrado => Results.NotFound(),
+                EliminarProyectoEstado.UsuarioNoCoincide => Results.Conflict(new
+                {
+                    error = "El Proyecto no pertenece al usuario indicado."
+                }),
+                _ => Results.Problem("Estado de eliminación de Proyecto no reconocido.")
+            };
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
     private sealed record CrearProyectoHttpRequest(Guid UsuarioId, string Nombre);
+
+    private sealed record ActualizarProyectoHttpRequest(
+        Guid UsuarioId,
+        string Nombre,
+        string? Descripcion,
+        EstadoProyecto Estado,
+        EstadoMadurez EstadoMadurez,
+        string? RepositorioUrl,
+        DateOnly? FechaInicio,
+        DateOnly? FechaFin);
 }

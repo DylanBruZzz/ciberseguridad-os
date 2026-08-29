@@ -63,6 +63,15 @@ public sealed class Proyecto : AggregateRoot, IEliminableLogicamente
 
     public void AvanzarMadurez(EstadoMadurez estadoMadurez) => EstadoMadurez = estadoMadurez;
 
+    public void ActualizarFechas(DateOnly? fechaInicio, DateOnly? fechaFin)
+    {
+        if (fechaInicio.HasValue && fechaFin.HasValue && fechaInicio.Value > fechaFin.Value)
+            throw new InvalidOperationException("La fecha de inicio no puede ser posterior a la fecha de fin.");
+
+        FechaInicio = fechaInicio;
+        FechaFin = fechaFin;
+    }
+
     public void IniciarDesarrollo(DateOnly fecha)
     {
         if (FechaFin.HasValue && fecha > FechaFin.Value)

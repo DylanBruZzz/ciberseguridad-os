@@ -1,7 +1,10 @@
+using Aprendizaje.Aplicacion.Evidence.CertificacionesObtenidas.ActualizarCertificacionObtenida;
 using Aprendizaje.Aplicacion.Evidence.CertificacionesObtenidas.CrearCertificacionObtenida;
+using Aprendizaje.Aplicacion.Evidence.CertificacionesObtenidas.EliminarCertificacionObtenida;
 using Aprendizaje.Aplicacion.Evidence.CertificacionesObtenidas.ListarCertificacionesObtenidas;
 using Aprendizaje.Aplicacion.Evidence.CertificacionesObtenidas.ObtenerCertificacionObtenidaPorId;
 using Aprendizaje.Dominio.Evidence;
+using Aprendizaje.Dominio.Nucleo;
 using Aprendizaje.Dominio.Roadmap;
 using Aprendizaje.Tests.Soporte;
 using Xunit;
@@ -148,11 +151,180 @@ public sealed class CertificacionesObtenidasApplicationTests
         Assert.Equal(certificacionObtenida.EstadoMadurez, resumen.EstadoMadurez);
     }
 
+    [Fact]
+    public async Task ActualizarCertificacionObtenida_DebeActualizarEvidenciaMadurezYGuardar()
+    {
+        var certificacionesObtenidas = new FakeCertificacionObtenidaRepository();
+        var usuarios = new FakeUsuarioRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuario = Usuario.Registrar("Usuario Certificación", EmailUnico());
+        var certificacionObtenida = CrearCertificacionObtenida(usuario.Id);
+        usuarios.Agregar(usuario);
+        certificacionesObtenidas.Agregar(certificacionObtenida);
+        var casoUso = new ActualizarCertificacionObtenidaCasoUso(
+            certificacionesObtenidas,
+            usuarios,
+            unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(new ActualizarCertificacionObtenidaSolicitud(
+            certificacionObtenida.Id,
+            usuario.Id,
+            "https://example.local/certificado",
+            EstadoMadurez.ListoPortafolio), CancellationToken);
+
+        Assert.Equal(ActualizarCertificacionObtenidaEstado.Actualizada, resultado.Estado);
+        Assert.Equal("https://example.local/certificado", certificacionObtenida.EvidenciaUrl);
+        Assert.Equal(EstadoMadurez.ListoPortafolio, certificacionObtenida.EstadoMadurez);
+        Assert.Equal(1, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task ActualizarCertificacionObtenida_DebeRetornarNoEncontradaSinGuardar()
+    {
+        var usuarios = new FakeUsuarioRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuario = Usuario.Registrar("Usuario Certificación", EmailUnico());
+        usuarios.Agregar(usuario);
+        var casoUso = new ActualizarCertificacionObtenidaCasoUso(
+            new FakeCertificacionObtenidaRepository(),
+            usuarios,
+            unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(new ActualizarCertificacionObtenidaSolicitud(
+            Guid.CreateVersion7(),
+            usuario.Id,
+            "https://example.local/certificado",
+            EstadoMadurez.Documentado), CancellationToken);
+
+        Assert.Equal(ActualizarCertificacionObtenidaEstado.CertificacionObtenidaNoEncontrada, resultado.Estado);
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task ActualizarCertificacionObtenida_DebeRetornarUsuarioNoEncontradoSinGuardar()
+    {
+        var unitOfWork = new FakeUnitOfWork();
+        var casoUso = new ActualizarCertificacionObtenidaCasoUso(
+            new FakeCertificacionObtenidaRepository(),
+            new FakeUsuarioRepository(),
+            unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(new ActualizarCertificacionObtenidaSolicitud(
+            Guid.CreateVersion7(),
+            Guid.CreateVersion7(),
+            "https://example.local/certificado",
+            EstadoMadurez.Documentado), CancellationToken);
+
+        Assert.Equal(ActualizarCertificacionObtenidaEstado.UsuarioNoEncontrado, resultado.Estado);
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task ActualizarCertificacionObtenida_DebeRetornarUsuarioNoCoincideSinGuardar()
+    {
+        var certificacionesObtenidas = new FakeCertificacionObtenidaRepository();
+        var usuarios = new FakeUsuarioRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuarioA = Usuario.Registrar("Usuario A", EmailUnico());
+        var usuarioB = Usuario.Registrar("Usuario B", EmailUnico());
+        var certificacionObtenida = CrearCertificacionObtenida(usuarioA.Id);
+        usuarios.Agregar(usuarioA);
+        usuarios.Agregar(usuarioB);
+        certificacionesObtenidas.Agregar(certificacionObtenida);
+        var casoUso = new ActualizarCertificacionObtenidaCasoUso(
+            certificacionesObtenidas,
+            usuarios,
+            unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(new ActualizarCertificacionObtenidaSolicitud(
+            certificacionObtenida.Id,
+            usuarioB.Id,
+            "https://example.local/no",
+            EstadoMadurez.Publicado), CancellationToken);
+
+        Assert.Equal(ActualizarCertificacionObtenidaEstado.UsuarioNoCoincide, resultado.Estado);
+        Assert.Null(certificacionObtenida.EvidenciaUrl);
+        Assert.Equal(EstadoMadurez.Documentado, certificacionObtenida.EstadoMadurez);
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task EliminarCertificacionObtenida_DebeMarcarComoEliminadaYGuardar()
+    {
+        var certificacionesObtenidas = new FakeCertificacionObtenidaRepository();
+        var usuarios = new FakeUsuarioRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuario = Usuario.Registrar("Usuario Certificación", EmailUnico());
+        var certificacionObtenida = CrearCertificacionObtenida(usuario.Id);
+        usuarios.Agregar(usuario);
+        certificacionesObtenidas.Agregar(certificacionObtenida);
+        var casoUso = new EliminarCertificacionObtenidaCasoUso(
+            certificacionesObtenidas,
+            usuarios,
+            unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(
+            new EliminarCertificacionObtenidaSolicitud(certificacionObtenida.Id, usuario.Id),
+            CancellationToken);
+
+        Assert.Equal(EliminarCertificacionObtenidaEstado.Eliminada, resultado.Estado);
+        Assert.NotNull(certificacionObtenida.FechaEliminacionUtc);
+        Assert.Equal(1, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task EliminarCertificacionObtenida_DebeRetornarNoEncontradaSinGuardar()
+    {
+        var usuarios = new FakeUsuarioRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuario = Usuario.Registrar("Usuario Certificación", EmailUnico());
+        usuarios.Agregar(usuario);
+        var casoUso = new EliminarCertificacionObtenidaCasoUso(
+            new FakeCertificacionObtenidaRepository(),
+            usuarios,
+            unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(
+            new EliminarCertificacionObtenidaSolicitud(Guid.CreateVersion7(), usuario.Id),
+            CancellationToken);
+
+        Assert.Equal(EliminarCertificacionObtenidaEstado.CertificacionObtenidaNoEncontrada, resultado.Estado);
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task EliminarCertificacionObtenida_DebeRetornarUsuarioNoCoincideSinGuardar()
+    {
+        var certificacionesObtenidas = new FakeCertificacionObtenidaRepository();
+        var usuarios = new FakeUsuarioRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuarioA = Usuario.Registrar("Usuario A", EmailUnico());
+        var usuarioB = Usuario.Registrar("Usuario B", EmailUnico());
+        var certificacionObtenida = CrearCertificacionObtenida(usuarioA.Id);
+        usuarios.Agregar(usuarioA);
+        usuarios.Agregar(usuarioB);
+        certificacionesObtenidas.Agregar(certificacionObtenida);
+        var casoUso = new EliminarCertificacionObtenidaCasoUso(
+            certificacionesObtenidas,
+            usuarios,
+            unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(
+            new EliminarCertificacionObtenidaSolicitud(certificacionObtenida.Id, usuarioB.Id),
+            CancellationToken);
+
+        Assert.Equal(EliminarCertificacionObtenidaEstado.UsuarioNoCoincide, resultado.Estado);
+        Assert.Null(certificacionObtenida.FechaEliminacionUtc);
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
     private static CertificacionObtenida CrearCertificacionObtenida(Guid? usuarioId = null) =>
         CertificacionObtenida.Registrar(
             usuarioId ?? Guid.CreateVersion7(),
             Guid.CreateVersion7(),
             new DateOnly(2026, 8, 25));
+
+    private static string EmailUnico() => $"certificacion-obtenida-editable-{Guid.CreateVersion7():N}@local.test";
 
     private static CancellationToken CancellationToken => TestContext.Current.CancellationToken;
 }

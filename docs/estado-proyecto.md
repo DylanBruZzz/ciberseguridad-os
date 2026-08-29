@@ -126,6 +126,10 @@ caf832a feat: establish validated initial persistence
 - STUDY CORRECTIONS V1 VALIDADO END-TO-END
 - SESIONESTUDIO CORREGIBLE CON OWNERSHIP EXPLICITO
 - SOFT DELETE DE SESIONESTUDIO EXPUESTO Y VALIDADO SOBRE SQL SERVER REAL
+- EVIDENCE EDITABLE + MATURITY V1 VALIDADO END-TO-END
+- PROYECTO, LABORATORIO, WRITEUP, ARTEFACTOTECNICO Y CERTIFICACIONOBTENIDA CORREGIBLES CON OWNERSHIP EXPLICITO
+- ESTADOMADUREZ OPERATIVO PARA EVIDENCE Y LISTO PARA PORTAFOLIO READ SIDE
+- SOFT DELETE DE EVIDENCE EXPUESTO Y VALIDADO SOBRE SQL SERVER REAL
 
 ## Migraciones Aplicadas
 
@@ -569,21 +573,21 @@ Nota E2E:
 - Tests de Dominio SesionEstudio: registro, invariantes, correccion de duracion, cambio de Tema/Fecha/Tipo/Notas, soft delete y SesionRegistradaEvento validados.
 - Tests de Dominio EntradaBitacora y Herramienta validados.
 - Tests de Dominio Recurso: edicion, campos opcionales, rating y soft delete validados.
-- Tests de Dominio Laboratorio validados.
-- Tests de Dominio Proyecto validados.
-- Tests de Dominio ArtefactoTecnico validados.
-- Tests de Dominio Writeup validados.
-- Tests de Dominio Certificacion y CertificacionObtenida validados.
+- Tests de Dominio Laboratorio validados, incluyendo editabilidad minima, EstadoMadurez y soft delete.
+- Tests de Dominio Proyecto validados, incluyendo editabilidad minima, EstadoMadurez, fechas opcionales y soft delete.
+- Tests de Dominio ArtefactoTecnico validados, incluyendo editabilidad minima, EstadoMadurez y soft delete.
+- Tests de Dominio Writeup validados, incluyendo editabilidad minima, EstadoMadurez, fecha opcional y soft delete.
+- Tests de Dominio Certificacion y CertificacionObtenida validados, incluyendo evidencia URL, EstadoMadurez y soft delete.
 - Tests de Dominio Nota validados.
 - Tests de Application Roadmap: flujos criticos de Tema, planificacion, percepcion, IntervaloRepaso y Competencia/CompetenciaTema cubiertos con fakes minimos.
 - Tests de Application Resource: crear, obtener, listar, actualizar, eliminar logicamente y vincular cubiertos con fakes minimos.
 - Tests de Application Study: SesionEstudio crear/obtener/listar/corregir duracion/actualizar/eliminar, EntradaBitacora, Herramienta y SesionHerramienta cubiertos con fakes minimos.
-- Tests de Application Evidence: Laboratorio crear, obtener, listar, vincular a Tema y vincular a Herramienta cubiertos con fakes minimos.
-- Tests de Application Evidence: Proyecto crear, obtener, listar, vincular a Tema y vincular a Herramienta cubiertos con fakes minimos.
-- Tests de Application Evidence: ArtefactoTecnico crear, obtener, listar, vincular a Tema y vincular a Herramienta cubiertos con fakes minimos.
-- Tests de Application Evidence: Writeup crear, obtener, listar y vincular a Tema cubiertos con fakes minimos.
+- Tests de Application Evidence: Laboratorio crear, obtener, listar, actualizar, eliminar logicamente, vincular a Tema y vincular a Herramienta cubiertos con fakes minimos.
+- Tests de Application Evidence: Proyecto crear, obtener, listar, actualizar, eliminar logicamente, vincular a Tema y vincular a Herramienta cubiertos con fakes minimos.
+- Tests de Application Evidence: ArtefactoTecnico crear, obtener, listar, actualizar, eliminar logicamente, vincular a Tema y vincular a Herramienta cubiertos con fakes minimos.
+- Tests de Application Evidence: Writeup crear, obtener, listar, actualizar, eliminar logicamente y vincular a Tema cubiertos con fakes minimos.
 - Tests de Application Roadmap: Certificacion crear, obtener, listar y vincular a Tema cubiertos con fake minimo.
-- Tests de Application Evidence: CertificacionObtenida crear, obtener y listar cubiertos con fakes minimos.
+- Tests de Application Evidence: CertificacionObtenida crear, obtener, listar, actualizar evidencia/madurez y eliminar logicamente cubiertos con fakes minimos.
 - Tests de Application Evidence: Nota crear sobre Tema/Proyecto/Laboratorio/Writeup/ArtefactoTecnico, obtener y listar cubiertos con fakes minimos.
 - Tests de Application Analytics: ResumenEstudio valida Guid.Empty y contrato del caso de uso.
 - Tests de Application Analytics: ResumenTema valida ids vacios, no encontrado y contrato del caso de uso.
@@ -601,6 +605,7 @@ Nota E2E:
 - Tests de integracion Importacion Roadmap V1: importan roadmap-v1.json real en AprendizajeTestsDb, validan idempotencia SQL, rollback ante conflicto, reutilizacion de catalogos globales, metadata de Fase, no Evidence creada y ejecucion CLI controlada.
 - Tests de integracion Resource Editable V1: actualizacion persistida, RecursoTema preservado, ownership incorrecto sin mutacion y soft delete oculto por query filter con fila fisica preservada.
 - Tests de integracion Study Corrections V1: actualizacion de SesionEstudio persistida, cambio de Tema con ownership, SesionHerramienta preservada, ownership incorrecto sin mutacion, soft delete oculto por query filter con fila fisica preservada y ResumenEstudio excluyendo sesiones eliminadas.
+- Tests de integracion Evidence Editable + Maturity V1: update, EstadoMadurez, ownership, soft delete, fila fisica preservada y relaciones representativas preservadas para Proyecto, Laboratorio, Writeup, ArtefactoTecnico y CertificacionObtenida.
 
 ## Estado Git Esperado
 
@@ -620,7 +625,7 @@ Importacion Roadmap original: la especificacion normalizada versionada existe en
 
 Importador Roadmap V1: consume data/roadmap/roadmap-v1.json, no parsea HTML, no expone endpoint HTTP, no usa SnapshotProgreso/vw_TemaEstado/eventos y no crea Evidence planificada. SourceKey se usa solo en memoria. La importacion es transaccional e idempotente para el mismo dataset. El dataset contiene 31 entradas documentales de Recurso, que se materializan como 30 recursos fisicos por deduplicacion de clave natural UsuarioId + Titulo + Tipo + Url.
 
-Proxima area sugerida: Evidence editable + maturity V1, para permitir corregir evidencia real y llevar su EstadoMadurez hacia Portafolio V1.
+Proxima area sugerida: Portafolio read side V1, usando Evidence real con EstadoMadurez operativo. No implementar Evidence planificada ni PlanPortafolio.
 
 ## Pendientes Deliberados
 

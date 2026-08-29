@@ -45,4 +45,31 @@ public sealed class WriteupTests
     {
         Assert.Throws<ArgumentException>(() => Writeup.Crear(Guid.CreateVersion7(), titulo));
     }
+
+    [Fact]
+    public void MetodosPublicos_DebenActualizarCamposMadurezYPermitirLimpiarFecha()
+    {
+        var writeup = Writeup.Crear(Guid.CreateVersion7(), "Análisis del modelo OSI con Wireshark");
+
+        writeup.ActualizarPlataformaOrigen("Hack The Box");
+        writeup.ActualizarUrl("https://example.local/writeup");
+        writeup.ActualizarFecha(new DateOnly(2026, 8, 27));
+        writeup.ActualizarFecha(null);
+        writeup.AvanzarMadurez(EstadoMadurez.ListoPortafolio);
+
+        Assert.Equal("Hack The Box", writeup.PlataformaOrigen);
+        Assert.Equal("https://example.local/writeup", writeup.Url);
+        Assert.Null(writeup.Fecha);
+        Assert.Equal(EstadoMadurez.ListoPortafolio, writeup.EstadoMadurez);
+    }
+
+    [Fact]
+    public void MarcarComoEliminado_DebeRegistrarFechaEliminacion()
+    {
+        var writeup = Writeup.Crear(Guid.CreateVersion7(), "Análisis del modelo OSI con Wireshark");
+
+        writeup.MarcarComoEliminado();
+
+        Assert.NotNull(writeup.FechaEliminacionUtc);
+    }
 }

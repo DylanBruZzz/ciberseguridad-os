@@ -1,6 +1,9 @@
+using Aprendizaje.Aplicacion.Evidence.CertificacionesObtenidas.ActualizarCertificacionObtenida;
 using Aprendizaje.Aplicacion.Evidence.CertificacionesObtenidas.CrearCertificacionObtenida;
+using Aprendizaje.Aplicacion.Evidence.CertificacionesObtenidas.EliminarCertificacionObtenida;
 using Aprendizaje.Aplicacion.Evidence.CertificacionesObtenidas.ListarCertificacionesObtenidas;
 using Aprendizaje.Aplicacion.Evidence.CertificacionesObtenidas.ObtenerCertificacionObtenidaPorId;
+using Aprendizaje.Dominio.Evidence;
 
 namespace Aprendizaje.Api.Endpoints.Evidence;
 
@@ -13,6 +16,8 @@ public static class CertificacionObtenidaEndpoints
         grupo.MapPost("/", CrearCertificacionObtenidaAsync);
         grupo.MapGet("/", ListarCertificacionesObtenidasAsync);
         grupo.MapGet("/{id:guid}", ObtenerCertificacionObtenidaPorIdAsync);
+        grupo.MapPut("/{id:guid}", ActualizarCertificacionObtenidaAsync);
+        grupo.MapDelete("/{id:guid}", EliminarCertificacionObtenidaAsync);
 
         return app;
     }
@@ -83,8 +88,77 @@ public static class CertificacionObtenidaEndpoints
         }
     }
 
+    private static async Task<IResult> ActualizarCertificacionObtenidaAsync(
+        Guid id,
+        ActualizarCertificacionObtenidaHttpRequest request,
+        ActualizarCertificacionObtenidaCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new ActualizarCertificacionObtenidaSolicitud(
+                    id,
+                    request.UsuarioId,
+                    request.EvidenciaUrl,
+                    request.EstadoMadurez),
+                cancellationToken);
+
+            return resultado.Estado switch
+            {
+                ActualizarCertificacionObtenidaEstado.Actualizada => Results.NoContent(),
+                ActualizarCertificacionObtenidaEstado.UsuarioNoEncontrado => Results.NotFound(),
+                ActualizarCertificacionObtenidaEstado.CertificacionObtenidaNoEncontrada => Results.NotFound(),
+                ActualizarCertificacionObtenidaEstado.UsuarioNoCoincide => Results.Conflict(new
+                {
+                    error = "La Certificación obtenida no pertenece al usuario indicado."
+                }),
+                _ => Results.Problem("Estado de actualización de Certificación obtenida no reconocido.")
+            };
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> EliminarCertificacionObtenidaAsync(
+        Guid id,
+        Guid usuarioId,
+        EliminarCertificacionObtenidaCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resultado = await casoUso.EjecutarAsync(
+                new EliminarCertificacionObtenidaSolicitud(id, usuarioId),
+                cancellationToken);
+
+            return resultado.Estado switch
+            {
+                EliminarCertificacionObtenidaEstado.Eliminada => Results.NoContent(),
+                EliminarCertificacionObtenidaEstado.UsuarioNoEncontrado => Results.NotFound(),
+                EliminarCertificacionObtenidaEstado.CertificacionObtenidaNoEncontrada => Results.NotFound(),
+                EliminarCertificacionObtenidaEstado.UsuarioNoCoincide => Results.Conflict(new
+                {
+                    error = "La Certificación obtenida no pertenece al usuario indicado."
+                }),
+                _ => Results.Problem("Estado de eliminación de Certificación obtenida no reconocido.")
+            };
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
     private sealed record CrearCertificacionObtenidaHttpRequest(
         Guid UsuarioId,
         Guid CertificacionId,
         DateOnly FechaObtencion);
+
+    private sealed record ActualizarCertificacionObtenidaHttpRequest(
+        Guid UsuarioId,
+        string? EvidenciaUrl,
+        EstadoMadurez EstadoMadurez);
 }

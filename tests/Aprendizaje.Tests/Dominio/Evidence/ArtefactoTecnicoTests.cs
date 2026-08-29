@@ -55,4 +55,25 @@ public sealed class ArtefactoTecnicoTests
             TipoArtefacto.Cheatsheet,
             nombre));
     }
+
+    [Fact]
+    public void MetodosPublicos_DebenActualizarCamposMadurezYSoftDelete()
+    {
+        var artefacto = ArtefactoTecnico.Crear(
+            Guid.CreateVersion7(),
+            TipoArtefacto.Cheatsheet,
+            "Filtros Wireshark para análisis OSI");
+
+        artefacto.CambiarTipoArtefacto(TipoArtefacto.Script);
+        artefacto.ActualizarContenidoOUrl("https://example.local/artefacto");
+        artefacto.ActualizarLenguajeTecnologia("PowerShell");
+        artefacto.AvanzarMadurez(EstadoMadurez.ListoPortafolio);
+        artefacto.MarcarComoEliminado();
+
+        Assert.Equal(TipoArtefacto.Script, artefacto.TipoArtefacto);
+        Assert.Equal("https://example.local/artefacto", artefacto.ContenidoOUrl);
+        Assert.Equal("PowerShell", artefacto.LenguajeTecnologia);
+        Assert.Equal(EstadoMadurez.ListoPortafolio, artefacto.EstadoMadurez);
+        Assert.NotNull(artefacto.FechaEliminacionUtc);
+    }
 }

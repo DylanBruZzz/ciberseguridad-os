@@ -53,4 +53,21 @@ public sealed class CertificacionObtenidaTests
 
         Assert.Equal(fechaObtencion, certificacionObtenida.FechaObtencion);
     }
+
+    [Fact]
+    public void MetodosPublicos_DebenActualizarEvidenciaMadurezYSoftDelete()
+    {
+        var certificacionObtenida = CertificacionObtenida.Registrar(
+            Guid.CreateVersion7(),
+            Guid.CreateVersion7(),
+            new DateOnly(2026, 8, 25));
+
+        certificacionObtenida.ActualizarEvidenciaUrl("https://example.local/certificado");
+        certificacionObtenida.AvanzarMadurez(EstadoMadurez.ListoPortafolio);
+        certificacionObtenida.MarcarComoEliminado();
+
+        Assert.Equal("https://example.local/certificado", certificacionObtenida.EvidenciaUrl);
+        Assert.Equal(EstadoMadurez.ListoPortafolio, certificacionObtenida.EstadoMadurez);
+        Assert.NotNull(certificacionObtenida.FechaEliminacionUtc);
+    }
 }

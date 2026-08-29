@@ -1,9 +1,12 @@
+using Aprendizaje.Aplicacion.Evidence.Laboratorios.ActualizarLaboratorio;
 using Aprendizaje.Aplicacion.Evidence.Laboratorios.CrearLaboratorio;
+using Aprendizaje.Aplicacion.Evidence.Laboratorios.EliminarLaboratorio;
 using Aprendizaje.Aplicacion.Evidence.Laboratorios.ListarLaboratorios;
 using Aprendizaje.Aplicacion.Evidence.Laboratorios.ObtenerLaboratorioPorId;
 using Aprendizaje.Aplicacion.Evidence.Laboratorios.VincularLaboratorioAHerramienta;
 using Aprendizaje.Aplicacion.Evidence.Laboratorios.VincularLaboratorioATema;
 using Aprendizaje.Dominio.Evidence;
+using Aprendizaje.Dominio.Nucleo;
 using Aprendizaje.Dominio.Roadmap;
 using Aprendizaje.Dominio.Study;
 using Aprendizaje.Tests.Soporte;
@@ -286,8 +289,184 @@ public sealed class LaboratoriosApplicationTests
         Assert.Equal(1, unitOfWork.GuardarCambiosLlamadas);
     }
 
+    [Fact]
+    public async Task ActualizarLaboratorio_DebeActualizarCamposMadurezYGuardar()
+    {
+        var laboratorios = new FakeLaboratorioRepository();
+        var usuarios = new FakeUsuarioRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuario = Usuario.Registrar("Usuario Laboratorio", EmailUnico());
+        var laboratorio = CrearLaboratorio(usuario.Id);
+        usuarios.Agregar(usuario);
+        laboratorios.Agregar(laboratorio);
+        var casoUso = new ActualizarLaboratorioCasoUso(laboratorios, usuarios, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(new ActualizarLaboratorioSolicitud(
+            laboratorio.Id,
+            usuario.Id,
+            " Laboratorio corregido ",
+            "Objetivo corregido",
+            "Kali + Windows",
+            "Hallazgos corregidos",
+            120,
+            new DateOnly(2026, 8, 26),
+            EstadoMadurez.ListoPortafolio), CancellationToken);
+
+        Assert.Equal(ActualizarLaboratorioEstado.Actualizado, resultado.Estado);
+        Assert.Equal("Laboratorio corregido", laboratorio.Nombre);
+        Assert.Equal("Objetivo corregido", laboratorio.Objetivo);
+        Assert.Equal("Kali + Windows", laboratorio.EntornoVms);
+        Assert.Equal("Hallazgos corregidos", laboratorio.Hallazgos);
+        Assert.Equal(120, laboratorio.TiempoInvertidoMinutos);
+        Assert.Equal(new DateOnly(2026, 8, 26), laboratorio.Fecha);
+        Assert.Equal(EstadoMadurez.ListoPortafolio, laboratorio.EstadoMadurez);
+        Assert.Equal(1, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task ActualizarLaboratorio_DebeRetornarNoEncontradoSinGuardar()
+    {
+        var usuarios = new FakeUsuarioRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuario = Usuario.Registrar("Usuario Laboratorio", EmailUnico());
+        usuarios.Agregar(usuario);
+        var casoUso = new ActualizarLaboratorioCasoUso(new FakeLaboratorioRepository(), usuarios, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(new ActualizarLaboratorioSolicitud(
+            Guid.CreateVersion7(),
+            usuario.Id,
+            "Laboratorio",
+            null,
+            null,
+            null,
+            null,
+            null,
+            EstadoMadurez.Borrador), CancellationToken);
+
+        Assert.Equal(ActualizarLaboratorioEstado.LaboratorioNoEncontrado, resultado.Estado);
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task ActualizarLaboratorio_DebeRetornarUsuarioNoEncontradoSinGuardar()
+    {
+        var unitOfWork = new FakeUnitOfWork();
+        var casoUso = new ActualizarLaboratorioCasoUso(
+            new FakeLaboratorioRepository(),
+            new FakeUsuarioRepository(),
+            unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(new ActualizarLaboratorioSolicitud(
+            Guid.CreateVersion7(),
+            Guid.CreateVersion7(),
+            "Laboratorio",
+            null,
+            null,
+            null,
+            null,
+            null,
+            EstadoMadurez.Borrador), CancellationToken);
+
+        Assert.Equal(ActualizarLaboratorioEstado.UsuarioNoEncontrado, resultado.Estado);
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task ActualizarLaboratorio_DebeRetornarUsuarioNoCoincideSinGuardar()
+    {
+        var laboratorios = new FakeLaboratorioRepository();
+        var usuarios = new FakeUsuarioRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuarioA = Usuario.Registrar("Usuario A", EmailUnico());
+        var usuarioB = Usuario.Registrar("Usuario B", EmailUnico());
+        var laboratorio = CrearLaboratorio(usuarioA.Id);
+        usuarios.Agregar(usuarioA);
+        usuarios.Agregar(usuarioB);
+        laboratorios.Agregar(laboratorio);
+        var casoUso = new ActualizarLaboratorioCasoUso(laboratorios, usuarios, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(new ActualizarLaboratorioSolicitud(
+            laboratorio.Id,
+            usuarioB.Id,
+            "No persistir",
+            null,
+            null,
+            null,
+            null,
+            null,
+            EstadoMadurez.Publicado), CancellationToken);
+
+        Assert.Equal(ActualizarLaboratorioEstado.UsuarioNoCoincide, resultado.Estado);
+        Assert.Equal("Análisis de tráfico OSI", laboratorio.Nombre);
+        Assert.Equal(EstadoMadurez.Borrador, laboratorio.EstadoMadurez);
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task EliminarLaboratorio_DebeMarcarComoEliminadoYGuardar()
+    {
+        var laboratorios = new FakeLaboratorioRepository();
+        var usuarios = new FakeUsuarioRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuario = Usuario.Registrar("Usuario Laboratorio", EmailUnico());
+        var laboratorio = CrearLaboratorio(usuario.Id);
+        usuarios.Agregar(usuario);
+        laboratorios.Agregar(laboratorio);
+        var casoUso = new EliminarLaboratorioCasoUso(laboratorios, usuarios, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(
+            new EliminarLaboratorioSolicitud(laboratorio.Id, usuario.Id),
+            CancellationToken);
+
+        Assert.Equal(EliminarLaboratorioEstado.Eliminado, resultado.Estado);
+        Assert.NotNull(laboratorio.FechaEliminacionUtc);
+        Assert.Equal(1, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task EliminarLaboratorio_DebeRetornarLaboratorioNoEncontradoSinGuardar()
+    {
+        var usuarios = new FakeUsuarioRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuario = Usuario.Registrar("Usuario Laboratorio", EmailUnico());
+        usuarios.Agregar(usuario);
+        var casoUso = new EliminarLaboratorioCasoUso(new FakeLaboratorioRepository(), usuarios, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(
+            new EliminarLaboratorioSolicitud(Guid.CreateVersion7(), usuario.Id),
+            CancellationToken);
+
+        Assert.Equal(EliminarLaboratorioEstado.LaboratorioNoEncontrado, resultado.Estado);
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
+    [Fact]
+    public async Task EliminarLaboratorio_DebeRetornarUsuarioNoCoincideSinGuardar()
+    {
+        var laboratorios = new FakeLaboratorioRepository();
+        var usuarios = new FakeUsuarioRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var usuarioA = Usuario.Registrar("Usuario A", EmailUnico());
+        var usuarioB = Usuario.Registrar("Usuario B", EmailUnico());
+        var laboratorio = CrearLaboratorio(usuarioA.Id);
+        usuarios.Agregar(usuarioA);
+        usuarios.Agregar(usuarioB);
+        laboratorios.Agregar(laboratorio);
+        var casoUso = new EliminarLaboratorioCasoUso(laboratorios, usuarios, unitOfWork);
+
+        var resultado = await casoUso.EjecutarAsync(
+            new EliminarLaboratorioSolicitud(laboratorio.Id, usuarioB.Id),
+            CancellationToken);
+
+        Assert.Equal(EliminarLaboratorioEstado.UsuarioNoCoincide, resultado.Estado);
+        Assert.Null(laboratorio.FechaEliminacionUtc);
+        Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
+    }
+
     private static Laboratorio CrearLaboratorio(Guid? usuarioId = null) =>
         Laboratorio.Crear(usuarioId ?? Guid.CreateVersion7(), "Análisis de tráfico OSI");
+
+    private static string EmailUnico() => $"laboratorio-editable-{Guid.CreateVersion7():N}@local.test";
 
     private static CancellationToken CancellationToken => TestContext.Current.CancellationToken;
 }

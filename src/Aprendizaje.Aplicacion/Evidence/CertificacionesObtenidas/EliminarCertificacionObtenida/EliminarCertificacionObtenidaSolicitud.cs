@@ -1,0 +1,3 @@
+namespace Aprendizaje.Aplicacion.Evidence.CertificacionesObtenidas.EliminarCertificacionObtenida;
+
+public sealed record EliminarCertificacionObtenidaSolicitud(Guid CertificacionObtenidaId, Guid UsuarioId);

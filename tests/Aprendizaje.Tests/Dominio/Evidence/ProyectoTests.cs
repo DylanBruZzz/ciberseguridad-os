@@ -59,4 +59,35 @@ public sealed class ProyectoTests
 
         Assert.Throws<InvalidOperationException>(() => proyecto.FinalizarDesarrollo(new DateOnly(2026, 8, 23)));
     }
+
+    [Fact]
+    public void ActualizarFechas_DebePermitirLimpiarFechas()
+    {
+        var proyecto = Proyecto.Crear(Guid.CreateVersion7(), "Analizador de tráfico OSI");
+        proyecto.ActualizarFechas(new DateOnly(2026, 8, 1), new DateOnly(2026, 8, 20));
+
+        proyecto.ActualizarFechas(null, null);
+
+        Assert.Null(proyecto.FechaInicio);
+        Assert.Null(proyecto.FechaFin);
+    }
+
+    [Fact]
+    public void ActualizarFechas_DebeRechazarInicioPosteriorAFin()
+    {
+        var proyecto = Proyecto.Crear(Guid.CreateVersion7(), "Analizador de tráfico OSI");
+
+        Assert.Throws<InvalidOperationException>(() =>
+            proyecto.ActualizarFechas(new DateOnly(2026, 8, 21), new DateOnly(2026, 8, 20)));
+    }
+
+    [Fact]
+    public void MarcarComoEliminado_DebeRegistrarFechaEliminacion()
+    {
+        var proyecto = Proyecto.Crear(Guid.CreateVersion7(), "Analizador de tráfico OSI");
+
+        proyecto.MarcarComoEliminado();
+
+        Assert.NotNull(proyecto.FechaEliminacionUtc);
+    }
 }

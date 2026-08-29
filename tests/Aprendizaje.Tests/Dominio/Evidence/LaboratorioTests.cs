@@ -52,13 +52,14 @@ public sealed class LaboratorioTests
         laboratorio.RegistrarHallazgos("Tráfico HTTP observado");
         laboratorio.ActualizarTiempoInvertido(45);
         laboratorio.RegistrarFecha(fecha);
+        laboratorio.ActualizarFecha(null);
         laboratorio.AvanzarMadurez(EstadoMadurez.Documentado);
 
         Assert.Equal("Identificar capas OSI", laboratorio.Objetivo);
         Assert.Equal("Kali + Windows", laboratorio.EntornoVms);
         Assert.Equal("Tráfico HTTP observado", laboratorio.Hallazgos);
         Assert.Equal(45, laboratorio.TiempoInvertidoMinutos);
-        Assert.Equal(fecha, laboratorio.Fecha);
+        Assert.Null(laboratorio.Fecha);
         Assert.Equal(EstadoMadurez.Documentado, laboratorio.EstadoMadurez);
     }
 

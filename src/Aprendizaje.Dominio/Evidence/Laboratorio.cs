@@ -58,6 +58,8 @@ public sealed class Laboratorio : AggregateRoot, IEliminableLogicamente
 
     public void RegistrarFecha(DateOnly fecha) => Fecha = fecha;
 
+    public void ActualizarFecha(DateOnly? fecha) => Fecha = fecha;
+
     public void AvanzarMadurez(EstadoMadurez estadoMadurez) => EstadoMadurez = estadoMadurez;
 
     public void MarcarComoEliminado() => FechaEliminacionUtc = DateTime.UtcNow;

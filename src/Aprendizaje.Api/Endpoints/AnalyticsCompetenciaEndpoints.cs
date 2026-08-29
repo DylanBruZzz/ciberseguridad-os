@@ -1,4 +1,6 @@
 using Aprendizaje.Aplicacion.Analytics.Competencias;
+using Aprendizaje.Api.Endpoints.Nucleo;
+using Aprendizaje.Aplicacion.Nucleo.Usuarios;
 
 namespace Aprendizaje.Api.Endpoints;
 
@@ -14,13 +16,24 @@ public static class AnalyticsCompetenciaEndpoints
     }
 
     private static async Task<IResult> ListarResumenCompetenciasAsync(
-        Guid usuarioId,
+        Guid? usuarioId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ObtenerResumenCompetenciasCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
-            var resumen = await casoUso.EjecutarAsync(usuarioId, cancellationToken);
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                usuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
+            var resumen = await casoUso.EjecutarAsync(usuario.UsuarioId, cancellationToken);
 
             return Results.Ok(resumen);
         }

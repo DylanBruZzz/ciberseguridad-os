@@ -1,6 +1,8 @@
 using Aprendizaje.Aplicacion.Study.EntradasBitacora.CrearEntradaBitacora;
 using Aprendizaje.Aplicacion.Study.EntradasBitacora.ListarEntradasBitacora;
 using Aprendizaje.Aplicacion.Study.EntradasBitacora.ObtenerEntradaBitacoraPorId;
+using Aprendizaje.Api.Endpoints.Nucleo;
+using Aprendizaje.Aplicacion.Nucleo.Usuarios;
 
 namespace Aprendizaje.Api.Endpoints.Study;
 
@@ -19,13 +21,24 @@ public static class EntradaBitacoraEndpoints
 
     private static async Task<IResult> CrearEntradaBitacoraAsync(
         CrearEntradaBitacoraHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         CrearEntradaBitacoraCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                request.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
-                new CrearEntradaBitacoraSolicitud(request.UsuarioId, request.Texto, request.TemaId),
+                new CrearEntradaBitacoraSolicitud(usuario.UsuarioId, request.Texto, request.TemaId),
                 cancellationToken);
 
             return resultado.Estado switch
@@ -49,6 +62,8 @@ public static class EntradaBitacoraEndpoints
 
     private static async Task<IResult> ObtenerEntradaBitacoraPorIdAsync(
         Guid id,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ObtenerEntradaBitacoraPorIdCasoUso casoUso,
         CancellationToken cancellationToken)
     {
@@ -56,9 +71,16 @@ public static class EntradaBitacoraEndpoints
         {
             var resultado = await casoUso.EjecutarAsync(id, cancellationToken);
 
-            return resultado.Encontrada
-                ? Results.Ok(resultado.Entrada)
-                : Results.NotFound();
+            if (!resultado.Encontrada)
+                return Results.NotFound();
+
+            var validacion = await UsuarioHttpContexto.ValidarPertenenciaPersonalAsync(
+                resultado.Entrada!.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            return validacion ?? Results.Ok(resultado.Entrada);
         }
         catch (ArgumentException ex)
         {
@@ -67,14 +89,25 @@ public static class EntradaBitacoraEndpoints
     }
 
     private static async Task<IResult> ListarEntradasBitacoraAsync(
-        Guid usuarioId,
+        Guid? usuarioId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ListarEntradasBitacoraCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                usuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
-                new ListarEntradasBitacoraSolicitud(usuarioId),
+                new ListarEntradasBitacoraSolicitud(usuario.UsuarioId),
                 cancellationToken);
 
             return Results.Ok(resultado.Entradas);
@@ -85,5 +118,5 @@ public static class EntradaBitacoraEndpoints
         }
     }
 
-    private sealed record CrearEntradaBitacoraHttpRequest(Guid UsuarioId, string Texto, Guid? TemaId);
+    private sealed record CrearEntradaBitacoraHttpRequest(Guid? UsuarioId, string Texto, Guid? TemaId);
 }

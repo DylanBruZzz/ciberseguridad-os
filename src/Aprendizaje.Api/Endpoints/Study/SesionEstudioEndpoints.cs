@@ -5,6 +5,8 @@ using Aprendizaje.Aplicacion.Study.SesionesEstudio.RegistrarSesionEstudio;
 using Aprendizaje.Aplicacion.Study.SesionesEstudio.ListarSesionesEstudio;
 using Aprendizaje.Aplicacion.Study.SesionesEstudio.ObtenerSesionEstudioPorId;
 using Aprendizaje.Aplicacion.Study.SesionesEstudio.VincularHerramientaASesionEstudio;
+using Aprendizaje.Api.Endpoints.Nucleo;
+using Aprendizaje.Aplicacion.Nucleo.Usuarios;
 using Aprendizaje.Dominio.Study;
 
 namespace Aprendizaje.Api.Endpoints.Study;
@@ -29,11 +31,24 @@ public static class SesionEstudioEndpoints
     private static async Task<IResult> VincularHerramientaAsync(
         Guid sesionId,
         Guid herramientaId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerSesionEstudioPorIdCasoUso obtenerSesion,
         VincularHerramientaASesionEstudioCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var validacion = await ValidarSesionPersonalAsync(
+                sesionId,
+                environment,
+                usuarioActual,
+                obtenerSesion,
+                cancellationToken);
+
+            if (validacion is not null)
+                return validacion;
+
             var resultado = await casoUso.EjecutarAsync(
                 new VincularHerramientaASesionEstudioSolicitud(sesionId, herramientaId),
                 cancellationToken);
@@ -55,11 +70,24 @@ public static class SesionEstudioEndpoints
     private static async Task<IResult> CorregirDuracionAsync(
         Guid id,
         CorregirDuracionSesionEstudioHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerSesionEstudioPorIdCasoUso obtenerSesion,
         CorregirDuracionSesionEstudioCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var validacion = await ValidarSesionPersonalAsync(
+                id,
+                environment,
+                usuarioActual,
+                obtenerSesion,
+                cancellationToken);
+
+            if (validacion is not null)
+                return validacion;
+
             var resultado = await casoUso.EjecutarAsync(
                 new CorregirDuracionSesionEstudioSolicitud(id, request.DuracionMinutos),
                 cancellationToken);
@@ -80,15 +108,26 @@ public static class SesionEstudioEndpoints
     private static async Task<IResult> ActualizarSesionEstudioAsync(
         Guid id,
         ActualizarSesionEstudioHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ActualizarSesionEstudioCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                request.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
                 new ActualizarSesionEstudioSolicitud(
                     id,
-                    request.UsuarioId,
+                    usuario.UsuarioId,
                     request.TemaId,
                     request.Fecha,
                     request.DuracionMinutos,
@@ -117,14 +156,25 @@ public static class SesionEstudioEndpoints
 
     private static async Task<IResult> EliminarSesionEstudioAsync(
         Guid id,
-        Guid usuarioId,
+        Guid? usuarioId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         EliminarSesionEstudioCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                usuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
-                new EliminarSesionEstudioSolicitud(id, usuarioId),
+                new EliminarSesionEstudioSolicitud(id, usuario.UsuarioId),
                 cancellationToken);
 
             return resultado.Estado switch
@@ -147,25 +197,45 @@ public static class SesionEstudioEndpoints
 
     private static async Task<IResult> ObtenerSesionEstudioPorIdAsync(
         Guid id,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ObtenerSesionEstudioPorIdCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         var resultado = await casoUso.EjecutarAsync(id, cancellationToken);
 
-        return resultado.Encontrado
-            ? Results.Ok(resultado.Sesion)
-            : Results.NotFound();
+        if (!resultado.Encontrado)
+            return Results.NotFound();
+
+        var validacion = await UsuarioHttpContexto.ValidarPertenenciaPersonalAsync(
+            resultado.Sesion!.UsuarioId,
+            environment,
+            usuarioActual,
+            cancellationToken);
+
+        return validacion ?? Results.Ok(resultado.Sesion);
     }
 
     private static async Task<IResult> ListarSesionesEstudioAsync(
-        Guid usuarioId,
+        Guid? usuarioId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ListarSesionesEstudioCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                usuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
-                new ListarSesionesEstudioSolicitud(usuarioId),
+                new ListarSesionesEstudioSolicitud(usuario.UsuarioId),
                 cancellationToken);
 
             return Results.Ok(resultado.Sesiones);
@@ -178,14 +248,25 @@ public static class SesionEstudioEndpoints
 
     private static async Task<IResult> RegistrarSesionEstudioAsync(
         RegistrarSesionEstudioHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         RegistrarSesionEstudioCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                request.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
                 new RegistrarSesionEstudioSolicitud(
-                    request.UsuarioId,
+                    usuario.UsuarioId,
                     request.TemaId,
                     request.Fecha,
                     request.DuracionMinutos,
@@ -212,8 +293,30 @@ public static class SesionEstudioEndpoints
         }
     }
 
+    private static async Task<IResult?> ValidarSesionPersonalAsync(
+        Guid sesionId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerSesionEstudioPorIdCasoUso obtenerSesion,
+        CancellationToken cancellationToken)
+    {
+        if (!environment.IsEnvironment("Personal"))
+            return null;
+
+        var sesion = await obtenerSesion.EjecutarAsync(sesionId, cancellationToken);
+
+        if (!sesion.Encontrado)
+            return Results.NotFound();
+
+        return await UsuarioHttpContexto.ValidarPertenenciaPersonalAsync(
+            sesion.Sesion!.UsuarioId,
+            environment,
+            usuarioActual,
+            cancellationToken);
+    }
+
     private sealed record RegistrarSesionEstudioHttpRequest(
-        Guid UsuarioId,
+        Guid? UsuarioId,
         Guid TemaId,
         DateOnly Fecha,
         int DuracionMinutos,
@@ -221,7 +324,7 @@ public static class SesionEstudioEndpoints
         string? Notas);
 
     private sealed record ActualizarSesionEstudioHttpRequest(
-        Guid UsuarioId,
+        Guid? UsuarioId,
         Guid TemaId,
         DateOnly Fecha,
         int DuracionMinutos,

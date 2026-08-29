@@ -4,6 +4,8 @@ using Aprendizaje.Aplicacion.Resource.Recursos.EliminarRecurso;
 using Aprendizaje.Aplicacion.Resource.Recursos.ListarRecursos;
 using Aprendizaje.Aplicacion.Resource.Recursos.ObtenerRecursoPorId;
 using Aprendizaje.Aplicacion.Resource.Recursos.VincularRecursoATema;
+using Aprendizaje.Api.Endpoints.Nucleo;
+using Aprendizaje.Aplicacion.Nucleo.Usuarios;
 using Aprendizaje.Dominio.Resource;
 
 namespace Aprendizaje.Api.Endpoints.Resource;
@@ -26,13 +28,24 @@ public static class RecursoEndpoints
 
     private static async Task<IResult> CrearRecursoAsync(
         CrearRecursoHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         CrearRecursoCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                request.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
-                new CrearRecursoSolicitud(request.UsuarioId, request.Tipo, request.Titulo, request.Url),
+                new CrearRecursoSolicitud(usuario.UsuarioId, request.Tipo, request.Titulo, request.Url),
                 cancellationToken);
 
             return Results.Created($"/api/recursos/{resultado.Id}", resultado);
@@ -45,25 +58,45 @@ public static class RecursoEndpoints
 
     private static async Task<IResult> ObtenerRecursoPorIdAsync(
         Guid id,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ObtenerRecursoPorIdCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         var resultado = await casoUso.EjecutarAsync(id, cancellationToken);
 
-        return resultado.Encontrado
-            ? Results.Ok(resultado.Recurso)
-            : Results.NotFound();
+        if (!resultado.Encontrado)
+            return Results.NotFound();
+
+        var validacion = await UsuarioHttpContexto.ValidarPertenenciaPersonalAsync(
+            resultado.Recurso!.UsuarioId,
+            environment,
+            usuarioActual,
+            cancellationToken);
+
+        return validacion ?? Results.Ok(resultado.Recurso);
     }
 
     private static async Task<IResult> ListarRecursosAsync(
-        Guid usuarioId,
+        Guid? usuarioId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ListarRecursosCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                usuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
-                new ListarRecursosSolicitud(usuarioId),
+                new ListarRecursosSolicitud(usuario.UsuarioId),
                 cancellationToken);
 
             return Results.Ok(resultado.Recursos);
@@ -77,11 +110,24 @@ public static class RecursoEndpoints
     private static async Task<IResult> VincularTemaAsync(
         Guid recursoId,
         Guid temaId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerRecursoPorIdCasoUso obtenerRecurso,
         VincularRecursoATemaCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var validacion = await ValidarRecursoPersonalAsync(
+                recursoId,
+                environment,
+                usuarioActual,
+                obtenerRecurso,
+                cancellationToken);
+
+            if (validacion is not null)
+                return validacion;
+
             var resultado = await casoUso.EjecutarAsync(
                 new VincularRecursoATemaSolicitud(recursoId, temaId),
                 cancellationToken);
@@ -107,15 +153,26 @@ public static class RecursoEndpoints
     private static async Task<IResult> ActualizarRecursoAsync(
         Guid id,
         ActualizarRecursoHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ActualizarRecursoCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                request.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
                 new ActualizarRecursoSolicitud(
                     id,
-                    request.UsuarioId,
+                    usuario.UsuarioId,
                     request.Titulo,
                     request.Url,
                     request.Estado,
@@ -145,14 +202,25 @@ public static class RecursoEndpoints
 
     private static async Task<IResult> EliminarRecursoAsync(
         Guid id,
-        Guid usuarioId,
+        Guid? usuarioId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         EliminarRecursoCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                usuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
-                new EliminarRecursoSolicitud(id, usuarioId),
+                new EliminarRecursoSolicitud(id, usuario.UsuarioId),
                 cancellationToken);
 
             return resultado.Estado switch
@@ -173,14 +241,36 @@ public static class RecursoEndpoints
         }
     }
 
+    private static async Task<IResult?> ValidarRecursoPersonalAsync(
+        Guid recursoId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerRecursoPorIdCasoUso obtenerRecurso,
+        CancellationToken cancellationToken)
+    {
+        if (!environment.IsEnvironment("Personal"))
+            return null;
+
+        var recurso = await obtenerRecurso.EjecutarAsync(recursoId, cancellationToken);
+
+        if (!recurso.Encontrado)
+            return Results.NotFound();
+
+        return await UsuarioHttpContexto.ValidarPertenenciaPersonalAsync(
+            recurso.Recurso!.UsuarioId,
+            environment,
+            usuarioActual,
+            cancellationToken);
+    }
+
     private sealed record CrearRecursoHttpRequest(
-        Guid UsuarioId,
+        Guid? UsuarioId,
         TipoRecurso Tipo,
         string Titulo,
         string? Url);
 
     private sealed record ActualizarRecursoHttpRequest(
-        Guid UsuarioId,
+        Guid? UsuarioId,
         string Titulo,
         string? Url,
         EstadoRecurso Estado,

@@ -18,6 +18,7 @@
     <ProjectReference Include="..\..\src\Aprendizaje.Dominio\Aprendizaje.Dominio.csproj" />
     <ProjectReference Include="..\..\src\Aprendizaje.Aplicacion\Aprendizaje.Aplicacion.csproj" />
     <ProjectReference Include="..\..\src\Aprendizaje.Infraestructura\Aprendizaje.Infraestructura.csproj" />
+    <ProjectReference Include="..\..\src\Aprendizaje.Api\Aprendizaje.Api.csproj" />
   </ItemGroup>
 
 </Project>

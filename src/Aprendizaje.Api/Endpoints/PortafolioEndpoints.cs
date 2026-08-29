@@ -1,4 +1,6 @@
 using Aprendizaje.Aplicacion.Portafolio;
+using Aprendizaje.Api.Endpoints.Nucleo;
+using Aprendizaje.Aplicacion.Nucleo.Usuarios;
 using Aprendizaje.Dominio.Evidence;
 
 namespace Aprendizaje.Api.Endpoints;
@@ -15,16 +17,27 @@ public static class PortafolioEndpoints
     }
 
     private static async Task<IResult> ObtenerPortafolioAsync(
-        Guid usuarioId,
+        Guid? usuarioId,
         TipoEvidencePortafolio? tipoEvidence,
         EstadoMadurez? estadoMadurez,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ObtenerPortafolioCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                usuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
-                new ObtenerPortafolioSolicitud(usuarioId, tipoEvidence, estadoMadurez),
+                new ObtenerPortafolioSolicitud(usuario.UsuarioId, tipoEvidence, estadoMadurez),
                 cancellationToken);
 
             return resultado.Encontrado

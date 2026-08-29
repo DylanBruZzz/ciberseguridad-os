@@ -58,6 +58,7 @@
 - [x] DbContext design-time validado.
 - [x] Configuracion runtime Personal para operar contra AprendizajePersonalDb.
 - [x] API Personal configurada para escuchar en localhost.
+- [x] API Personal V1 resuelve Usuario actual en el borde HTTP sin exigir usuarioId al Frontend.
 
 ## 6. Git
 
@@ -169,6 +170,8 @@
 
 - [x] ASP.NET Core Minimal APIs.
 - [x] JsonStringEnumConverter configurado para HTTP.
+- [x] Adaptador API Personal V1 para omitir usuarioId en flujos user-owned de Roadmap, Resource, Study, Evidence, Analytics y Portafolio.
+- [x] Endpoints explicit-user legacy conservados temporalmente para Development/tests.
 - [x] POST /api/usuarios.
 - [x] GET /api/usuario-actual.
 - [x] POST /api/recursos.
@@ -442,6 +445,9 @@
 - [x] Usuario actual local con multiples Usuarios visibles -> 409.
 - [x] Usuario actual local excluye Usuarios eliminados logicamente.
 - [x] Usuario actual local fuera de Personal -> 409.
+- [x] API Personal V1 resuelve usuarioId omitido mediante IUsuarioActual.
+- [x] API Personal V1 rechaza usuarioId explicito divergente con el Usuario actual.
+- [x] API Personal V1 protege lecturas user-owned por ownership del Usuario actual.
 - [x] Importador CLI Roadmap V1 validado contra AprendizajeTestsDb.
 - [ ] Nuevos flujos E2E por vertical slice.
 
@@ -513,6 +519,7 @@
 - [x] Tests de integracion para Portafolio V1: elegibilidad, ownership, soft delete, relaciones, filtros, conteos y orden.
 - [x] Tests de Application para UsuarioActualLocal: cardinalidad y soft delete.
 - [x] Tests de integracion para UsuarioActualLocal sobre SQL Server real.
+- [x] Tests de API Personal V1 para resolucion opcional de usuarioId y guardas de ownership en el borde HTTP.
 - [x] Tests de Application para ImportarRoadmapV1: validacion, usuario inexistente, idempotencia y conflictos.
 - [x] Tests de integracion para ImportarRoadmapV1: dataset real, idempotencia SQL, rollback, no Evidence y CLI controlado.
 - [ ] Tests E2E automatizados.
@@ -583,7 +590,7 @@
 - [x] Portafolio read side V1.
 - [x] Contexto single-user local V1.
 - [x] GET /api/usuario-actual.
-- [ ] Migrar API personal para operar sin usuarioId visible en Frontend.
+- [x] API Personal V1 opera sin usuarioId visible para el Frontend en flujos diarios.
 
 ## 16. Pendientes arquitectonicos
 

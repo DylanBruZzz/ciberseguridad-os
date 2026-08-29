@@ -1,6 +1,8 @@
 using Aprendizaje.Aplicacion.Roadmap.Fases.ActualizarMetadataPedagogica;
 using Aprendizaje.Aplicacion.Roadmap.Fases.CrearFase;
 using Aprendizaje.Aplicacion.Roadmap.Fases.ListarFases;
+using Aprendizaje.Api.Endpoints.Nucleo;
+using Aprendizaje.Aplicacion.Nucleo.Usuarios;
 
 namespace Aprendizaje.Api.Endpoints.Roadmap;
 
@@ -19,14 +21,25 @@ public static class FaseEndpoints
 
     private static async Task<IResult> CrearFaseAsync(
         CrearFaseHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         CrearFaseCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                request.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
                 new CrearFaseSolicitud(
-                    request.UsuarioId,
+                    usuario.UsuarioId,
                     request.Nombre,
                     request.Orden,
                     request.Objetivos ?? [],
@@ -45,14 +58,25 @@ public static class FaseEndpoints
     }
 
     private static async Task<IResult> ListarFasesAsync(
-        Guid usuarioId,
+        Guid? usuarioId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ListarFasesCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                usuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
-                new ListarFasesSolicitud(usuarioId),
+                new ListarFasesSolicitud(usuario.UsuarioId),
                 cancellationToken);
 
             return Results.Ok(resultado.Fases);
@@ -66,15 +90,26 @@ public static class FaseEndpoints
     private static async Task<IResult> ActualizarMetadataPedagogicaAsync(
         Guid id,
         ActualizarMetadataPedagogicaFaseHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ActualizarMetadataPedagogicaFaseCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                request.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
                 new ActualizarMetadataPedagogicaFaseSolicitud(
                     id,
-                    request.UsuarioId,
+                    usuario.UsuarioId,
                     request.Objetivos ?? [],
                     request.CriteriosAvance ?? [],
                     request.MesInicioRecomendado,
@@ -100,7 +135,7 @@ public static class FaseEndpoints
     }
 
     private sealed record CrearFaseHttpRequest(
-        Guid UsuarioId,
+        Guid? UsuarioId,
         string Nombre,
         int Orden,
         IReadOnlyCollection<string>? Objetivos,
@@ -110,7 +145,7 @@ public static class FaseEndpoints
         string? CargaSemanalRecomendada);
 
     private sealed record ActualizarMetadataPedagogicaFaseHttpRequest(
-        Guid UsuarioId,
+        Guid? UsuarioId,
         IReadOnlyCollection<string>? Objetivos,
         IReadOnlyCollection<string>? CriteriosAvance,
         int? MesInicioRecomendado,

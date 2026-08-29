@@ -3,6 +3,8 @@ using Aprendizaje.Aplicacion.Evidence.CertificacionesObtenidas.CrearCertificacio
 using Aprendizaje.Aplicacion.Evidence.CertificacionesObtenidas.EliminarCertificacionObtenida;
 using Aprendizaje.Aplicacion.Evidence.CertificacionesObtenidas.ListarCertificacionesObtenidas;
 using Aprendizaje.Aplicacion.Evidence.CertificacionesObtenidas.ObtenerCertificacionObtenidaPorId;
+using Aprendizaje.Api.Endpoints.Nucleo;
+using Aprendizaje.Aplicacion.Nucleo.Usuarios;
 using Aprendizaje.Dominio.Evidence;
 
 namespace Aprendizaje.Api.Endpoints.Evidence;
@@ -24,14 +26,25 @@ public static class CertificacionObtenidaEndpoints
 
     private static async Task<IResult> CrearCertificacionObtenidaAsync(
         CrearCertificacionObtenidaHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         CrearCertificacionObtenidaCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                request.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
                 new CrearCertificacionObtenidaSolicitud(
-                    request.UsuarioId,
+                    usuario.UsuarioId,
                     request.CertificacionId,
                     request.FechaObtencion),
                 cancellationToken);
@@ -52,6 +65,8 @@ public static class CertificacionObtenidaEndpoints
 
     private static async Task<IResult> ObtenerCertificacionObtenidaPorIdAsync(
         Guid id,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ObtenerCertificacionObtenidaPorIdCasoUso casoUso,
         CancellationToken cancellationToken)
     {
@@ -59,9 +74,16 @@ public static class CertificacionObtenidaEndpoints
         {
             var resultado = await casoUso.EjecutarAsync(id, cancellationToken);
 
-            return resultado.Encontrada
-                ? Results.Ok(resultado.CertificacionObtenida)
-                : Results.NotFound();
+            if (!resultado.Encontrada)
+                return Results.NotFound();
+
+            var validacion = await UsuarioHttpContexto.ValidarPertenenciaPersonalAsync(
+                resultado.CertificacionObtenida!.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            return validacion ?? Results.Ok(resultado.CertificacionObtenida);
         }
         catch (ArgumentException ex)
         {
@@ -70,14 +92,25 @@ public static class CertificacionObtenidaEndpoints
     }
 
     private static async Task<IResult> ListarCertificacionesObtenidasAsync(
-        Guid usuarioId,
+        Guid? usuarioId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ListarCertificacionesObtenidasCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                usuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
-                new ListarCertificacionesObtenidasSolicitud(usuarioId),
+                new ListarCertificacionesObtenidasSolicitud(usuario.UsuarioId),
                 cancellationToken);
 
             return Results.Ok(resultado.CertificacionesObtenidas);
@@ -91,15 +124,26 @@ public static class CertificacionObtenidaEndpoints
     private static async Task<IResult> ActualizarCertificacionObtenidaAsync(
         Guid id,
         ActualizarCertificacionObtenidaHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ActualizarCertificacionObtenidaCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                request.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
                 new ActualizarCertificacionObtenidaSolicitud(
                     id,
-                    request.UsuarioId,
+                    usuario.UsuarioId,
                     request.EvidenciaUrl,
                     request.EstadoMadurez),
                 cancellationToken);
@@ -124,14 +168,25 @@ public static class CertificacionObtenidaEndpoints
 
     private static async Task<IResult> EliminarCertificacionObtenidaAsync(
         Guid id,
-        Guid usuarioId,
+        Guid? usuarioId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         EliminarCertificacionObtenidaCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                usuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
-                new EliminarCertificacionObtenidaSolicitud(id, usuarioId),
+                new EliminarCertificacionObtenidaSolicitud(id, usuario.UsuarioId),
                 cancellationToken);
 
             return resultado.Estado switch
@@ -153,12 +208,12 @@ public static class CertificacionObtenidaEndpoints
     }
 
     private sealed record CrearCertificacionObtenidaHttpRequest(
-        Guid UsuarioId,
+        Guid? UsuarioId,
         Guid CertificacionId,
         DateOnly FechaObtencion);
 
     private sealed record ActualizarCertificacionObtenidaHttpRequest(
-        Guid UsuarioId,
+        Guid? UsuarioId,
         string? EvidenciaUrl,
         EstadoMadurez EstadoMadurez);
 }

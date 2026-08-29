@@ -5,6 +5,8 @@ using Aprendizaje.Aplicacion.Evidence.Laboratorios.ListarLaboratorios;
 using Aprendizaje.Aplicacion.Evidence.Laboratorios.ObtenerLaboratorioPorId;
 using Aprendizaje.Aplicacion.Evidence.Laboratorios.VincularLaboratorioAHerramienta;
 using Aprendizaje.Aplicacion.Evidence.Laboratorios.VincularLaboratorioATema;
+using Aprendizaje.Api.Endpoints.Nucleo;
+using Aprendizaje.Aplicacion.Nucleo.Usuarios;
 using Aprendizaje.Dominio.Evidence;
 
 namespace Aprendizaje.Api.Endpoints.Evidence;
@@ -28,14 +30,25 @@ public static class LaboratorioEndpoints
 
     private static async Task<IResult> CrearLaboratorioAsync(
         CrearLaboratorioHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         CrearLaboratorioCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                request.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
                 new CrearLaboratorioSolicitud(
-                    request.UsuarioId,
+                    usuario.UsuarioId,
                     request.Nombre,
                     request.Objetivo,
                     request.EntornoVms,
@@ -54,6 +67,8 @@ public static class LaboratorioEndpoints
 
     private static async Task<IResult> ObtenerLaboratorioPorIdAsync(
         Guid id,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ObtenerLaboratorioPorIdCasoUso casoUso,
         CancellationToken cancellationToken)
     {
@@ -61,9 +76,16 @@ public static class LaboratorioEndpoints
         {
             var resultado = await casoUso.EjecutarAsync(id, cancellationToken);
 
-            return resultado.Encontrado
-                ? Results.Ok(resultado.Laboratorio)
-                : Results.NotFound();
+            if (!resultado.Encontrado)
+                return Results.NotFound();
+
+            var validacion = await UsuarioHttpContexto.ValidarPertenenciaPersonalAsync(
+                resultado.Laboratorio!.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            return validacion ?? Results.Ok(resultado.Laboratorio);
         }
         catch (ArgumentException ex)
         {
@@ -72,14 +94,25 @@ public static class LaboratorioEndpoints
     }
 
     private static async Task<IResult> ListarLaboratoriosAsync(
-        Guid usuarioId,
+        Guid? usuarioId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ListarLaboratoriosCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                usuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
-                new ListarLaboratoriosSolicitud(usuarioId),
+                new ListarLaboratoriosSolicitud(usuario.UsuarioId),
                 cancellationToken);
 
             return Results.Ok(resultado.Laboratorios);
@@ -93,11 +126,24 @@ public static class LaboratorioEndpoints
     private static async Task<IResult> VincularTemaAsync(
         Guid laboratorioId,
         Guid temaId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerLaboratorioPorIdCasoUso obtenerLaboratorio,
         VincularLaboratorioATemaCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var validacion = await ValidarLaboratorioPersonalAsync(
+                laboratorioId,
+                environment,
+                usuarioActual,
+                obtenerLaboratorio,
+                cancellationToken);
+
+            if (validacion is not null)
+                return validacion;
+
             var resultado = await casoUso.EjecutarAsync(
                 new VincularLaboratorioATemaSolicitud(laboratorioId, temaId),
                 cancellationToken);
@@ -123,11 +169,24 @@ public static class LaboratorioEndpoints
     private static async Task<IResult> VincularHerramientaAsync(
         Guid laboratorioId,
         Guid herramientaId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerLaboratorioPorIdCasoUso obtenerLaboratorio,
         VincularLaboratorioAHerramientaCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var validacion = await ValidarLaboratorioPersonalAsync(
+                laboratorioId,
+                environment,
+                usuarioActual,
+                obtenerLaboratorio,
+                cancellationToken);
+
+            if (validacion is not null)
+                return validacion;
+
             var resultado = await casoUso.EjecutarAsync(
                 new VincularLaboratorioAHerramientaSolicitud(laboratorioId, herramientaId),
                 cancellationToken);
@@ -149,15 +208,26 @@ public static class LaboratorioEndpoints
     private static async Task<IResult> ActualizarLaboratorioAsync(
         Guid id,
         ActualizarLaboratorioHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ActualizarLaboratorioCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                request.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
                 new ActualizarLaboratorioSolicitud(
                     id,
-                    request.UsuarioId,
+                    usuario.UsuarioId,
                     request.Nombre,
                     request.Objetivo,
                     request.EntornoVms,
@@ -187,14 +257,25 @@ public static class LaboratorioEndpoints
 
     private static async Task<IResult> EliminarLaboratorioAsync(
         Guid id,
-        Guid usuarioId,
+        Guid? usuarioId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         EliminarLaboratorioCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                usuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
-                new EliminarLaboratorioSolicitud(id, usuarioId),
+                new EliminarLaboratorioSolicitud(id, usuario.UsuarioId),
                 cancellationToken);
 
             return resultado.Estado switch
@@ -215,8 +296,30 @@ public static class LaboratorioEndpoints
         }
     }
 
+    private static async Task<IResult?> ValidarLaboratorioPersonalAsync(
+        Guid laboratorioId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerLaboratorioPorIdCasoUso obtenerLaboratorio,
+        CancellationToken cancellationToken)
+    {
+        if (!environment.IsEnvironment("Personal"))
+            return null;
+
+        var laboratorio = await obtenerLaboratorio.EjecutarAsync(laboratorioId, cancellationToken);
+
+        if (!laboratorio.Encontrado)
+            return Results.NotFound();
+
+        return await UsuarioHttpContexto.ValidarPertenenciaPersonalAsync(
+            laboratorio.Laboratorio!.UsuarioId,
+            environment,
+            usuarioActual,
+            cancellationToken);
+    }
+
     private sealed record CrearLaboratorioHttpRequest(
-        Guid UsuarioId,
+        Guid? UsuarioId,
         string Nombre,
         string? Objetivo,
         string? EntornoVms,
@@ -225,7 +328,7 @@ public static class LaboratorioEndpoints
         DateOnly? Fecha);
 
     private sealed record ActualizarLaboratorioHttpRequest(
-        Guid UsuarioId,
+        Guid? UsuarioId,
         string Nombre,
         string? Objetivo,
         string? EntornoVms,

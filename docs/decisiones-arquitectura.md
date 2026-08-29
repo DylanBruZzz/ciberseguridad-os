@@ -73,7 +73,7 @@ Este documento registra decisiones congeladas. No es historial de conversacion.
   - AprendizajeDb = desarrollo/E2E.
   - AprendizajeTestsDb = pruebas automatizadas.
   - AprendizajePersonalDb = uso personal real V1.
-- La configuracion runtime permanente hacia AprendizajePersonalDb se hara en un bloque operativo posterior; appsettings.Development.json sigue apuntando a AprendizajeDb.
+- appsettings.Personal.json configura el runtime Personal contra AprendizajePersonalDb; appsettings.Development.json sigue apuntando a AprendizajeDb.
 
 ## RowVersion
 
@@ -129,6 +129,10 @@ Soft delete es selectivo y solo aplica a Aggregate Roots que implementan IElimin
 - No se guarda UsuarioId en appsettings.Personal.json y no se resuelve por Email. El Email permanece como atributo interno del dominio, no como login.
 - Application conserva UsuarioId explicito en sus casos de uso para mantener ownership y facilitar una evolucion futura a Auth real sin reescribir dominio.
 - API/runtime es responsable de resolver el Usuario actual para endpoints personales futuros. GET /api/usuario-actual expone solo Id y Nombre.
+- API Personal V1 resuelve usuarioId en el borde HTTP mediante IUsuarioActual para flujos user-owned de Roadmap, Resource, Study, Evidence, Analytics y Portafolio. Application sigue recibiendo UsuarioId explicito.
+- La estrategia de compatibilidad es gradual: los contratos explicit-user legacy se conservan temporalmente para Development/tests. En modo Personal, si se envia un usuarioId explicito que no coincide con el Usuario actual, la API responde conflicto.
+- GET por Id de entidades user-owned debe validar ownership contra el Usuario actual en modo Personal; conocer un Guid no debe permitir saltar aislamiento.
+- Los catalogos globales Herramienta y Certificacion no reciben ownership artificial por la adaptacion Personal.
 - La operacion Personal debe escuchar por loopback/local. CORS se definira junto con Frontend Foundation; no usar AllowAnyOrigin permanente.
 
 ## Portafolio V1 Read Side
@@ -139,7 +143,7 @@ Soft delete es selectivo y solo aplica a Aggregate Roots que implementan IElimin
 - ListoPortafolio se incluye para previsualizacion personal; Publicado no implica exposicion publica ni web publicada.
 - CertificacionObtenida se enriquece desde Certificacion global relacionada, sin modificar ni duplicar el catalogo.
 - Temas y Herramientas se muestran solo mediante relaciones persistidas existentes; no hay inferencia por texto, tagging automatico ni AI summaries.
-- El endpoint de lectura mantiene usuarioId explicito hasta Auth. Ownership se garantiza filtrando Evidence por UsuarioId y validando Usuario visible.
+- El endpoint de lectura participa de API Personal V1: en modo Personal puede omitir usuarioId y resolverlo en la capa HTTP; los contratos explicit-user legacy permanecen temporalmente para Development/tests.
 - No se crea Snapshot, vista materializada, cache ni motor de scoring para Portafolio V1.
 
 ## Tema.Objetivos

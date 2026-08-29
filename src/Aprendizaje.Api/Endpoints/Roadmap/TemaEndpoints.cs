@@ -10,6 +10,8 @@ using Aprendizaje.Aplicacion.Roadmap.Temas.EstablecerObjetivos;
 using Aprendizaje.Aplicacion.Roadmap.Temas.ListarTemas;
 using Aprendizaje.Aplicacion.Roadmap.Temas.MarcarCriterio;
 using Aprendizaje.Aplicacion.Roadmap.Temas.ObtenerTemaPorId;
+using Aprendizaje.Api.Endpoints.Nucleo;
+using Aprendizaje.Aplicacion.Nucleo.Usuarios;
 using Aprendizaje.Dominio.Roadmap;
 
 namespace Aprendizaje.Api.Endpoints.Roadmap;
@@ -38,13 +40,24 @@ public static class TemaEndpoints
 
     private static async Task<IResult> CrearTemaAsync(
         CrearTemaHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         CrearTemaCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                request.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
-                new CrearTemaSolicitud(request.UsuarioId, request.Nombre, request.TipoConocimiento),
+                new CrearTemaSolicitud(usuario.UsuarioId, request.Nombre, request.TipoConocimiento),
                 cancellationToken);
 
             return Results.Created($"/api/temas/{resultado.Id}", resultado);
@@ -56,14 +69,25 @@ public static class TemaEndpoints
     }
 
     private static async Task<IResult> ListarTemasAsync(
-        Guid usuarioId,
+        Guid? usuarioId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ListarTemasCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                usuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
-                new ListarTemasSolicitud(usuarioId),
+                new ListarTemasSolicitud(usuario.UsuarioId),
                 cancellationToken);
 
             return Results.Ok(resultado.Temas);
@@ -76,19 +100,31 @@ public static class TemaEndpoints
 
     private static async Task<IResult> ObtenerTemaPorIdAsync(
         Guid id,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ObtenerTemaPorIdCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         var resultado = await casoUso.EjecutarAsync(id, cancellationToken);
 
-        return resultado.Encontrado
-            ? Results.Ok(resultado.Tema)
-            : Results.NotFound();
+        if (!resultado.Encontrado)
+            return Results.NotFound();
+
+        var validacion = await UsuarioHttpContexto.ValidarPertenenciaPersonalAsync(
+            resultado.Tema!.UsuarioId,
+            environment,
+            usuarioActual,
+            cancellationToken);
+
+        return validacion ?? Results.Ok(resultado.Tema);
     }
 
     private static async Task<IResult> EstablecerObjetivosAsync(
         Guid id,
         EstablecerObjetivosTemaHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerTemaPorIdCasoUso obtenerTema,
         EstablecerObjetivosTemaCasoUso casoUso,
         CancellationToken cancellationToken)
     {
@@ -97,6 +133,10 @@ public static class TemaEndpoints
 
         try
         {
+            var validacion = await ValidarTemaPersonalAsync(id, environment, usuarioActual, obtenerTema, cancellationToken);
+            if (validacion is not null)
+                return validacion;
+
             var resultado = await casoUso.EjecutarAsync(
                 new EstablecerObjetivosTemaSolicitud(id, request.Objetivos),
                 cancellationToken);
@@ -114,11 +154,18 @@ public static class TemaEndpoints
     private static async Task<IResult> ActualizarPercepcionAsync(
         Guid temaId,
         ActualizarPercepcionTemaHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerTemaPorIdCasoUso obtenerTema,
         ActualizarPercepcionTemaCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var validacion = await ValidarTemaPersonalAsync(temaId, environment, usuarioActual, obtenerTema, cancellationToken);
+            if (validacion is not null)
+                return validacion;
+
             var resultado = await casoUso.EjecutarAsync(
                 new ActualizarPercepcionTemaSolicitud(temaId, request.DificultadPercibida, request.Confianza),
                 cancellationToken);
@@ -140,11 +187,18 @@ public static class TemaEndpoints
     private static async Task<IResult> ActualizarPlanificacionAsync(
         Guid temaId,
         ActualizarPlanificacionTemaHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerTemaPorIdCasoUso obtenerTema,
         ActualizarPlanificacionTemaCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var validacion = await ValidarTemaPersonalAsync(temaId, environment, usuarioActual, obtenerTema, cancellationToken);
+            if (validacion is not null)
+                return validacion;
+
             var resultado = await casoUso.EjecutarAsync(
                 new ActualizarPlanificacionTemaSolicitud(temaId, request.FechaInicio, request.FechaFin),
                 cancellationToken);
@@ -166,11 +220,18 @@ public static class TemaEndpoints
     private static async Task<IResult> ConfigurarIntervaloRepasoAsync(
         Guid temaId,
         ConfigurarIntervaloRepasoTemaHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerTemaPorIdCasoUso obtenerTema,
         ConfigurarIntervaloRepasoTemaCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var validacion = await ValidarTemaPersonalAsync(temaId, environment, usuarioActual, obtenerTema, cancellationToken);
+            if (validacion is not null)
+                return validacion;
+
             var resultado = await casoUso.EjecutarAsync(
                 new ConfigurarIntervaloRepasoTemaSolicitud(temaId, request.Dias),
                 cancellationToken);
@@ -192,11 +253,18 @@ public static class TemaEndpoints
     private static async Task<IResult> AsignarFaseAsync(
         Guid temaId,
         AsignarTemaAFaseHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerTemaPorIdCasoUso obtenerTema,
         AsignarTemaAFaseCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var validacion = await ValidarTemaPersonalAsync(temaId, environment, usuarioActual, obtenerTema, cancellationToken);
+            if (validacion is not null)
+                return validacion;
+
             var resultado = await casoUso.EjecutarAsync(
                 new AsignarTemaAFaseSolicitud(temaId, request.FaseId),
                 cancellationToken);
@@ -222,6 +290,9 @@ public static class TemaEndpoints
     private static async Task<IResult> DefinirCriteriosAsync(
         Guid temaId,
         DefinirCriteriosRelevantesTemaHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerTemaPorIdCasoUso obtenerTema,
         DefinirCriteriosRelevantesTemaCasoUso casoUso,
         CancellationToken cancellationToken)
     {
@@ -230,6 +301,10 @@ public static class TemaEndpoints
 
         try
         {
+            var validacion = await ValidarTemaPersonalAsync(temaId, environment, usuarioActual, obtenerTema, cancellationToken);
+            if (validacion is not null)
+                return validacion;
+
             var resultado = await casoUso.EjecutarAsync(
                 new DefinirCriteriosRelevantesTemaSolicitud(temaId, request.Criterios),
                 cancellationToken);
@@ -254,11 +329,18 @@ public static class TemaEndpoints
     private static async Task<IResult> MarcarCriterioAsync(
         Guid temaId,
         TipoCriterio tipo,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerTemaPorIdCasoUso obtenerTema,
         MarcarCriterioTemaCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var validacion = await ValidarTemaPersonalAsync(temaId, environment, usuarioActual, obtenerTema, cancellationToken);
+            if (validacion is not null)
+                return validacion;
+
             var resultado = await casoUso.EjecutarAsync(
                 new MarcarCriterioTemaSolicitud(temaId, tipo),
                 cancellationToken);
@@ -283,11 +365,18 @@ public static class TemaEndpoints
     private static async Task<IResult> DesmarcarCriterioAsync(
         Guid temaId,
         TipoCriterio tipo,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerTemaPorIdCasoUso obtenerTema,
         DesmarcarCriterioTemaCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var validacion = await ValidarTemaPersonalAsync(temaId, environment, usuarioActual, obtenerTema, cancellationToken);
+            if (validacion is not null)
+                return validacion;
+
             var resultado = await casoUso.EjecutarAsync(
                 new DesmarcarCriterioTemaSolicitud(temaId, tipo),
                 cancellationToken);
@@ -312,11 +401,18 @@ public static class TemaEndpoints
     private static async Task<IResult> AsignarPadreAsync(
         Guid temaId,
         AsignarTemaPadreHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerTemaPorIdCasoUso obtenerTema,
         AsignarTemaPadreCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var validacion = await ValidarTemaPersonalAsync(temaId, environment, usuarioActual, obtenerTema, cancellationToken);
+            if (validacion is not null)
+                return validacion;
+
             var resultado = await casoUso.EjecutarAsync(
                 new AsignarTemaPadreSolicitud(temaId, request.TemaPadreId),
                 cancellationToken);
@@ -343,8 +439,30 @@ public static class TemaEndpoints
         }
     }
 
+    private static async Task<IResult?> ValidarTemaPersonalAsync(
+        Guid temaId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerTemaPorIdCasoUso obtenerTema,
+        CancellationToken cancellationToken)
+    {
+        if (!environment.IsEnvironment("Personal"))
+            return null;
+
+        var tema = await obtenerTema.EjecutarAsync(temaId, cancellationToken);
+
+        if (!tema.Encontrado)
+            return Results.NotFound();
+
+        return await UsuarioHttpContexto.ValidarPertenenciaPersonalAsync(
+            tema.Tema!.UsuarioId,
+            environment,
+            usuarioActual,
+            cancellationToken);
+    }
+
     private sealed record CrearTemaHttpRequest(
-        Guid UsuarioId,
+        Guid? UsuarioId,
         string Nombre,
         TipoConocimiento TipoConocimiento);
 

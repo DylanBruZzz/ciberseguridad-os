@@ -2,6 +2,9 @@ using Aprendizaje.Aplicacion.Roadmap.Certificaciones.CrearCertificacion;
 using Aprendizaje.Aplicacion.Roadmap.Certificaciones.ListarCertificaciones;
 using Aprendizaje.Aplicacion.Roadmap.Certificaciones.ObtenerCertificacionPorId;
 using Aprendizaje.Aplicacion.Roadmap.Certificaciones.VincularCertificacionATema;
+using Aprendizaje.Aplicacion.Roadmap.Temas.ObtenerTemaPorId;
+using Aprendizaje.Api.Endpoints.Nucleo;
+using Aprendizaje.Aplicacion.Nucleo.Usuarios;
 using Aprendizaje.Dominio.Roadmap;
 
 namespace Aprendizaje.Api.Endpoints.Roadmap;
@@ -70,11 +73,31 @@ public static class CertificacionEndpoints
     private static async Task<IResult> VincularTemaAsync(
         Guid certificacionId,
         Guid temaId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerTemaPorIdCasoUso obtenerTema,
         VincularCertificacionATemaCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            if (environment.IsEnvironment("Personal"))
+            {
+                var tema = await obtenerTema.EjecutarAsync(temaId, cancellationToken);
+
+                if (!tema.Encontrado)
+                    return Results.NotFound();
+
+                var validacion = await UsuarioHttpContexto.ValidarPertenenciaPersonalAsync(
+                    tema.Tema!.UsuarioId,
+                    environment,
+                    usuarioActual,
+                    cancellationToken);
+
+                if (validacion is not null)
+                    return validacion;
+            }
+
             var resultado = await casoUso.EjecutarAsync(
                 new VincularCertificacionATemaSolicitud(certificacionId, temaId),
                 cancellationToken);

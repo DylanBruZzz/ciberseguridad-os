@@ -6,6 +6,8 @@ using Aprendizaje.Aplicacion.Evidence.Notas.CrearNotaParaTema;
 using Aprendizaje.Aplicacion.Evidence.Notas.CrearNotaParaWriteup;
 using Aprendizaje.Aplicacion.Evidence.Notas.ListarNotas;
 using Aprendizaje.Aplicacion.Evidence.Notas.ObtenerNotaPorId;
+using Aprendizaje.Api.Endpoints.Nucleo;
+using Aprendizaje.Aplicacion.Nucleo.Usuarios;
 using Aprendizaje.Dominio.Evidence;
 
 namespace Aprendizaje.Api.Endpoints.Evidence;
@@ -31,13 +33,24 @@ public static class NotaEndpoints
     private static async Task<IResult> CrearNotaParaTemaAsync(
         Guid temaId,
         CrearNotaHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         CrearNotaParaTemaCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                request.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
-                new CrearNotaParaTemaSolicitud(request.UsuarioId, temaId, request.Texto, request.Tipo),
+                new CrearNotaParaTemaSolicitud(usuario.UsuarioId, temaId, request.Texto, request.Tipo),
                 cancellationToken);
 
             return MapearCreacion(resultado);
@@ -51,13 +64,24 @@ public static class NotaEndpoints
     private static async Task<IResult> CrearNotaParaProyectoAsync(
         Guid proyectoId,
         CrearNotaHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         CrearNotaParaProyectoCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                request.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
-                new CrearNotaParaProyectoSolicitud(request.UsuarioId, proyectoId, request.Texto, request.Tipo),
+                new CrearNotaParaProyectoSolicitud(usuario.UsuarioId, proyectoId, request.Texto, request.Tipo),
                 cancellationToken);
 
             return MapearCreacion(resultado);
@@ -71,13 +95,24 @@ public static class NotaEndpoints
     private static async Task<IResult> CrearNotaParaLaboratorioAsync(
         Guid laboratorioId,
         CrearNotaHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         CrearNotaParaLaboratorioCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                request.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
-                new CrearNotaParaLaboratorioSolicitud(request.UsuarioId, laboratorioId, request.Texto, request.Tipo),
+                new CrearNotaParaLaboratorioSolicitud(usuario.UsuarioId, laboratorioId, request.Texto, request.Tipo),
                 cancellationToken);
 
             return MapearCreacion(resultado);
@@ -91,13 +126,24 @@ public static class NotaEndpoints
     private static async Task<IResult> CrearNotaParaWriteupAsync(
         Guid writeupId,
         CrearNotaHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         CrearNotaParaWriteupCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                request.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
-                new CrearNotaParaWriteupSolicitud(request.UsuarioId, writeupId, request.Texto, request.Tipo),
+                new CrearNotaParaWriteupSolicitud(usuario.UsuarioId, writeupId, request.Texto, request.Tipo),
                 cancellationToken);
 
             return MapearCreacion(resultado);
@@ -111,14 +157,25 @@ public static class NotaEndpoints
     private static async Task<IResult> CrearNotaParaArtefactoTecnicoAsync(
         Guid artefactoTecnicoId,
         CrearNotaHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         CrearNotaParaArtefactoTecnicoCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                request.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
                 new CrearNotaParaArtefactoTecnicoSolicitud(
-                    request.UsuarioId,
+                    usuario.UsuarioId,
                     artefactoTecnicoId,
                     request.Texto,
                     request.Tipo),
@@ -134,6 +191,8 @@ public static class NotaEndpoints
 
     private static async Task<IResult> ObtenerNotaPorIdAsync(
         Guid id,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ObtenerNotaPorIdCasoUso casoUso,
         CancellationToken cancellationToken)
     {
@@ -141,9 +200,16 @@ public static class NotaEndpoints
         {
             var resultado = await casoUso.EjecutarAsync(id, cancellationToken);
 
-            return resultado.Encontrada
-                ? Results.Ok(resultado.Nota)
-                : Results.NotFound();
+            if (!resultado.Encontrada)
+                return Results.NotFound();
+
+            var validacion = await UsuarioHttpContexto.ValidarPertenenciaPersonalAsync(
+                resultado.Nota!.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            return validacion ?? Results.Ok(resultado.Nota);
         }
         catch (ArgumentException ex)
         {
@@ -152,13 +218,24 @@ public static class NotaEndpoints
     }
 
     private static async Task<IResult> ListarNotasAsync(
-        Guid usuarioId,
+        Guid? usuarioId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ListarNotasCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
-            var resultado = await casoUso.EjecutarAsync(new ListarNotasSolicitud(usuarioId), cancellationToken);
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                usuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
+            var resultado = await casoUso.EjecutarAsync(new ListarNotasSolicitud(usuario.UsuarioId), cancellationToken);
 
             return Results.Ok(resultado.Notas);
         }
@@ -180,5 +257,5 @@ public static class NotaEndpoints
             _ => Results.Problem("Estado de creación de Nota no reconocido.")
         };
 
-    private sealed record CrearNotaHttpRequest(Guid UsuarioId, string Texto, TipoNota Tipo = TipoNota.Nota);
+    private sealed record CrearNotaHttpRequest(Guid? UsuarioId, string Texto, TipoNota Tipo = TipoNota.Nota);
 }

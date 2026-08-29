@@ -5,6 +5,8 @@ using Aprendizaje.Aplicacion.Evidence.Proyectos.ListarProyectos;
 using Aprendizaje.Aplicacion.Evidence.Proyectos.ObtenerProyectoPorId;
 using Aprendizaje.Aplicacion.Evidence.Proyectos.VincularProyectoAHerramienta;
 using Aprendizaje.Aplicacion.Evidence.Proyectos.VincularProyectoATema;
+using Aprendizaje.Api.Endpoints.Nucleo;
+using Aprendizaje.Aplicacion.Nucleo.Usuarios;
 using Aprendizaje.Dominio.Evidence;
 
 namespace Aprendizaje.Api.Endpoints.Evidence;
@@ -28,13 +30,24 @@ public static class ProyectoEndpoints
 
     private static async Task<IResult> CrearProyectoAsync(
         CrearProyectoHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         CrearProyectoCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                request.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
-                new CrearProyectoSolicitud(request.UsuarioId, request.Nombre),
+                new CrearProyectoSolicitud(usuario.UsuarioId, request.Nombre),
                 cancellationToken);
 
             return Results.Created($"/api/proyectos/{resultado.Id}", resultado);
@@ -47,6 +60,8 @@ public static class ProyectoEndpoints
 
     private static async Task<IResult> ObtenerProyectoPorIdAsync(
         Guid id,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ObtenerProyectoPorIdCasoUso casoUso,
         CancellationToken cancellationToken)
     {
@@ -54,9 +69,16 @@ public static class ProyectoEndpoints
         {
             var resultado = await casoUso.EjecutarAsync(id, cancellationToken);
 
-            return resultado.Encontrado
-                ? Results.Ok(resultado.Proyecto)
-                : Results.NotFound();
+            if (!resultado.Encontrado)
+                return Results.NotFound();
+
+            var validacion = await UsuarioHttpContexto.ValidarPertenenciaPersonalAsync(
+                resultado.Proyecto!.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            return validacion ?? Results.Ok(resultado.Proyecto);
         }
         catch (ArgumentException ex)
         {
@@ -65,14 +87,25 @@ public static class ProyectoEndpoints
     }
 
     private static async Task<IResult> ListarProyectosAsync(
-        Guid usuarioId,
+        Guid? usuarioId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ListarProyectosCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                usuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
-                new ListarProyectosSolicitud(usuarioId),
+                new ListarProyectosSolicitud(usuario.UsuarioId),
                 cancellationToken);
 
             return Results.Ok(resultado.Proyectos);
@@ -86,11 +119,24 @@ public static class ProyectoEndpoints
     private static async Task<IResult> VincularTemaAsync(
         Guid proyectoId,
         Guid temaId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerProyectoPorIdCasoUso obtenerProyecto,
         VincularProyectoATemaCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var validacion = await ValidarProyectoPersonalAsync(
+                proyectoId,
+                environment,
+                usuarioActual,
+                obtenerProyecto,
+                cancellationToken);
+
+            if (validacion is not null)
+                return validacion;
+
             var resultado = await casoUso.EjecutarAsync(
                 new VincularProyectoATemaSolicitud(proyectoId, temaId),
                 cancellationToken);
@@ -116,11 +162,24 @@ public static class ProyectoEndpoints
     private static async Task<IResult> VincularHerramientaAsync(
         Guid proyectoId,
         Guid herramientaId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerProyectoPorIdCasoUso obtenerProyecto,
         VincularProyectoAHerramientaCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var validacion = await ValidarProyectoPersonalAsync(
+                proyectoId,
+                environment,
+                usuarioActual,
+                obtenerProyecto,
+                cancellationToken);
+
+            if (validacion is not null)
+                return validacion;
+
             var resultado = await casoUso.EjecutarAsync(
                 new VincularProyectoAHerramientaSolicitud(proyectoId, herramientaId),
                 cancellationToken);
@@ -142,15 +201,26 @@ public static class ProyectoEndpoints
     private static async Task<IResult> ActualizarProyectoAsync(
         Guid id,
         ActualizarProyectoHttpRequest request,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         ActualizarProyectoCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                request.UsuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
             var resultado = await casoUso.EjecutarAsync(
                 new ActualizarProyectoSolicitud(
                     id,
-                    request.UsuarioId,
+                    usuario.UsuarioId,
                     request.Nombre,
                     request.Descripcion,
                     request.Estado,
@@ -184,13 +254,26 @@ public static class ProyectoEndpoints
 
     private static async Task<IResult> EliminarProyectoAsync(
         Guid id,
-        Guid usuarioId,
+        Guid? usuarioId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
         EliminarProyectoCasoUso casoUso,
         CancellationToken cancellationToken)
     {
         try
         {
-            var resultado = await casoUso.EjecutarAsync(new EliminarProyectoSolicitud(id, usuarioId), cancellationToken);
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                usuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
+            var resultado = await casoUso.EjecutarAsync(
+                new EliminarProyectoSolicitud(id, usuario.UsuarioId),
+                cancellationToken);
 
             return resultado.Estado switch
             {
@@ -210,10 +293,32 @@ public static class ProyectoEndpoints
         }
     }
 
-    private sealed record CrearProyectoHttpRequest(Guid UsuarioId, string Nombre);
+    private static async Task<IResult?> ValidarProyectoPersonalAsync(
+        Guid proyectoId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerProyectoPorIdCasoUso obtenerProyecto,
+        CancellationToken cancellationToken)
+    {
+        if (!environment.IsEnvironment("Personal"))
+            return null;
+
+        var proyecto = await obtenerProyecto.EjecutarAsync(proyectoId, cancellationToken);
+
+        if (!proyecto.Encontrado)
+            return Results.NotFound();
+
+        return await UsuarioHttpContexto.ValidarPertenenciaPersonalAsync(
+            proyecto.Proyecto!.UsuarioId,
+            environment,
+            usuarioActual,
+            cancellationToken);
+    }
+
+    private sealed record CrearProyectoHttpRequest(Guid? UsuarioId, string Nombre);
 
     private sealed record ActualizarProyectoHttpRequest(
-        Guid UsuarioId,
+        Guid? UsuarioId,
         string Nombre,
         string? Descripcion,
         EstadoProyecto Estado,

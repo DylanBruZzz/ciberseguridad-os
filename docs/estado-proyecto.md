@@ -137,6 +137,8 @@ caf832a feat: establish validated initial persistence
 - RUNTIME PERSONAL CONFIGURADO PARA APRENDIZAJEPERSONALDB
 - USUARIO ACTUAL LOCAL RESUELTO POR CARDINALIDAD VISIBLE
 - GET /api/usuario-actual VALIDADO EN RUNTIME PERSONAL
+- API PERSONAL V1 VALIDADA END-TO-END
+- FRONTEND V1 YA NO REQUIERE ENVIAR USUARIOID PARA FLUJOS DIARIOS
 
 ## Migraciones Aplicadas
 
@@ -158,7 +160,8 @@ caf832a feat: establish validated initial persistence
 - AprendizajePersonalDb: base personal real V1.
 - Environment Personal: configurado para usar AprendizajePersonalDb mediante appsettings.Personal.json.
 - El contexto single-user local resuelve el unico Usuario visible en modo Personal. Cero o multiples usuarios visibles son error operativo.
-- Los endpoints V1 existentes aun conservan usuarioId explicito salvo GET /api/usuario-actual; la migracion de API personal queda como siguiente bloque.
+- API Personal resuelve usuarioId en el borde HTTP mediante IUsuarioActual. El frontend V1 puede omitir usuarioId en flujos diarios de Roadmap, Resource, Study, Evidence, Analytics y Portafolio.
+- Los contratos explicit-user legacy siguen disponibles temporalmente para Development/tests; en modo Personal un usuarioId explicito que no coincide con el Usuario actual se rechaza como conflicto.
 
 ## Datos Roadmap V1 Personal
 
@@ -393,6 +396,8 @@ Nota E2E:
 
 ## Flujos Funcionales Actuales
 
+- En environment Personal, los endpoints user-owned V1 aceptan omitir usuarioId en query/body y resuelven el Usuario actual por IUsuarioActual en la capa API. Application conserva UsuarioId explicito internamente.
+- Los endpoints legacy con usuarioId explicito permanecen para compatibilidad de Development/tests durante la transicion.
 - POST /api/usuarios -> 201
 - POST /api/temas -> 201
 - GET /api/temas/{id} -> 200
@@ -586,7 +591,7 @@ Nota E2E:
 - Microsoft.NET.Test.Sdk: no requerido con la estrategia MTP actual
 - dotnet run del proyecto de tests: validado
 - dotnet test por proyecto: validado
-- dotnet test por solucion: validado con 458 tests correctos
+- dotnet test por solucion: validado con 465 tests correctos
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
 - Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, planificacion, percepcion, IntervaloRepaso, dominio y TemaDominadoEvento validados.
 - Tests de Dominio Competencia validados.
@@ -614,6 +619,7 @@ Nota E2E:
 - Tests de Application Analytics: ResumenCompetencia y ResumenCertificacion validan Guid.Empty, lista vacia y contrato de respuesta.
 - Tests de Application Portafolio: validan usuarioId vacio, Usuario inexistente, filtros de madurez, filtros de tipo y contrato de portafolio vacio.
 - Tests de Application UsuarioActualLocal: validan cero, uno y multiples Usuarios visibles, ademas de Usuario eliminado logicamente.
+- Tests de API Personal V1: validan resolucion HTTP de usuarioId opcional en Personal, rechazo de usuarioId divergente, 400 fuera de Personal sin usuarioId y proteccion de lecturas por ownership.
 - Tests de integracion/persistencia: SQL Server real .\MSSQLSERVER01 con base exclusiva AprendizajeTestsDb.
 - Guard rail de integracion: rechaza AprendizajeDb, database vacio y cualquier base distinta a AprendizajeTestsDb antes de recrear.
 - Tests de persistencia cubren: metadata pedagogica de Fase, listas vacias de Fase materializadas no-null, checks SQL de meses recomendados de Fase, Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, planificacion/percepcion/IntervaloRepaso de Tema, RowVersion de Tema tras update, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica CompetenciaTema, idempotencia fisica CertificacionTema con Peso NULL, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, idempotencia fisica ProyectoTema, idempotencia fisica ProyectoHerramienta, idempotencia fisica ArtefactoTema, idempotencia fisica ArtefactoHerramienta, idempotencia fisica WriteupTema, RowVersion de Proyecto poblada al insertar y estable al vincular joins, FK real CertificacionObtenida -> Certificacion, valores iniciales de CertificacionObtenida, query filter de CertificacionObtenida, Nota con un padre valido, CHECK CK_Nota_UnSoloPadre para cero y dos padres, query filter de Nota, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
@@ -653,7 +659,9 @@ Portafolio read side V1 validado: GET /api/portafolio devuelve una proyeccion fa
 
 Contexto single-user local V1 validado: Environment Personal usa AprendizajePersonalDb, no introduce Auth visible y resuelve el Usuario actual por cardinalidad de Usuarios visibles. GET /api/usuario-actual devuelve Id y Nombre, no expone Email ni datos de configuracion. Application conserva UsuarioId explicito internamente.
 
-Proxima area sugerida: migrar gradualmente la API V1 personal para que el futuro Frontend no tenga que enviar usuarioId en los flujos diarios. No implementar Evidence planificada ni PlanPortafolio.
+API Personal V1 validada: en modo Personal, la capa HTTP resuelve usuarioId mediante IUsuarioActual para flujos diarios de Roadmap, Resource, Study, Evidence, Analytics y Portafolio. No introduce Auth, JWT, Identity, migraciones ni paquetes. Los endpoints explicit-user legacy se conservan temporalmente para Development/tests y compatibilidad; si en Personal se envia un usuarioId explicito divergente, la API responde conflicto. GET /api/fases y GET /api/portafolio fueron validados en runtime Personal contra AprendizajePersonalDb en modo read-only.
+
+Proxima area sugerida: Frontend Foundation V1 sobre API Personal sin usuarioId visible. No implementar Evidence planificada ni PlanPortafolio.
 
 ## Pendientes Deliberados
 
@@ -674,7 +682,6 @@ Proxima area sugerida: migrar gradualmente la API V1 personal para que el futuro
 - prueba automatizada directa de TemaDominadoEvento;
 - concurrencia HTTP/ETag/If-Match para Tema y Proyecto;
 - auth;
-- migracion API personal sin usuarioId visible;
 - SnapshotProgreso operativo;
 - integrations;
 - frontend;

@@ -138,6 +138,7 @@
 - [x] ObtenerResumenTema implementado.
 - [x] ObtenerResumenCompetencias implementado.
 - [x] ObtenerResumenCertificaciones implementado.
+- [x] ObtenerPortafolio implementado como read side factual sobre Evidence existente.
 - [x] ImportarRoadmapV1 implementado como bootstrap CLI idempotente.
 - [x] CrearTema implementado.
 - [x] ObtenerTemaPorId implementado.
@@ -232,6 +233,7 @@
 - [x] GET /api/analytics/temas/{temaId}?usuarioId={id}.
 - [x] GET /api/analytics/competencias?usuarioId={id}.
 - [x] GET /api/analytics/certificaciones?usuarioId={id}.
+- [x] GET /api/portafolio?usuarioId={id}.
 - [x] POST /api/temas.
 - [x] GET /api/temas/{id}.
 - [x] PUT /api/temas/{id}/objetivos.
@@ -425,6 +427,12 @@
 - [x] Resumen estructural de Certificaciones -> 200.
 - [x] Resumen estructural de Certificaciones con Guid.Empty -> 400.
 - [x] Analytics directo minimo funcional cerrado.
+- [x] Portafolio V1 read side -> 200.
+- [x] Portafolio V1 read side con Guid.Empty -> 400.
+- [x] Portafolio V1 read side con Usuario inexistente -> 404.
+- [x] Portafolio V1 filtra por TipoEvidence.
+- [x] Portafolio V1 filtra por EstadoMadurez elegible.
+- [x] Portafolio V1 rechaza EstadoMadurez no elegible.
 - [x] Importador CLI Roadmap V1 validado contra AprendizajeTestsDb.
 - [ ] Nuevos flujos E2E por vertical slice.
 
@@ -492,6 +500,8 @@
 - [x] Tests de integracion para ResumenTema sobre SQL Server real.
 - [x] Tests de Application para ResumenCompetencia y ResumenCertificacion.
 - [x] Tests de integracion para ResumenCompetencia y ResumenCertificacion sobre SQL Server real.
+- [x] Tests de Application para Portafolio V1: usuario, filtros y contrato de consulta.
+- [x] Tests de integracion para Portafolio V1: elegibilidad, ownership, soft delete, relaciones, filtros, conteos y orden.
 - [x] Tests de Application para ImportarRoadmapV1: validacion, usuario inexistente, idempotencia y conflictos.
 - [x] Tests de integracion para ImportarRoadmapV1: dataset real, idempotencia SQL, rollback, no Evidence y CLI controlado.
 - [ ] Tests E2E automatizados.
@@ -508,6 +518,7 @@
 - [x] Consulta on-demand ResumenCompetencia con metricas factuales.
 - [x] Consulta on-demand ResumenCertificacion con metricas factuales.
 - [x] Analytics directo minimo funcional cerrado.
+- [x] Portafolio V1 read side como proyeccion sobre Evidence con EstadoMadurez ListoPortafolio/Publicado.
 - [ ] Analytics semantico avanzado.
 - [ ] SnapshotProgreso operativo.
 
@@ -558,7 +569,7 @@
 - [x] CertificacionObtenida editable V1: EvidenciaUrl y EstadoMadurez; Certificacion global y FechaObtencion no se modifican en este bloque.
 - [x] Soft delete Evidence V1 expuesto para Proyecto, Laboratorio, Writeup, ArtefactoTecnico y CertificacionObtenida.
 - [x] Nota permanece append-only.
-- [ ] Portafolio read side V1.
+- [x] Portafolio read side V1.
 
 ## 16. Pendientes arquitectonicos
 

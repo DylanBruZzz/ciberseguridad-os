@@ -120,6 +120,17 @@ Soft delete es selectivo y solo aplica a Aggregate Roots que implementan IElimin
 - Estrategia actual: vertical slices minimos.
 - No introducir MediatR, AutoMapper, FluentValidation ni frameworks preventivos.
 
+## Portafolio V1 Read Side
+
+- Portafolio V1 es una proyeccion de lectura sobre Evidence existente; no es Aggregate Root, no tiene tabla propia y no duplica datos.
+- La elegibilidad V1 se define por Evidence visible del Usuario con EstadoMadurez ListoPortafolio o Publicado.
+- Borrador, Documentado y Evidence eliminada logicamente quedan fuera del Portafolio V1.
+- ListoPortafolio se incluye para previsualizacion personal; Publicado no implica exposicion publica ni web publicada.
+- CertificacionObtenida se enriquece desde Certificacion global relacionada, sin modificar ni duplicar el catalogo.
+- Temas y Herramientas se muestran solo mediante relaciones persistidas existentes; no hay inferencia por texto, tagging automatico ni AI summaries.
+- El endpoint de lectura mantiene usuarioId explicito hasta Auth. Ownership se garantiza filtrando Evidence por UsuarioId y validando Usuario visible.
+- No se crea Snapshot, vista materializada, cache ni motor de scoring para Portafolio V1.
+
 ## Tema.Objetivos
 
 - Dominio: Objetivos se expone como coleccion no-null desde la API publica.

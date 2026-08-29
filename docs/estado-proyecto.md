@@ -130,6 +130,9 @@ caf832a feat: establish validated initial persistence
 - PROYECTO, LABORATORIO, WRITEUP, ARTEFACTOTECNICO Y CERTIFICACIONOBTENIDA CORREGIBLES CON OWNERSHIP EXPLICITO
 - ESTADOMADUREZ OPERATIVO PARA EVIDENCE Y LISTO PARA PORTAFOLIO READ SIDE
 - SOFT DELETE DE EVIDENCE EXPUESTO Y VALIDADO SOBRE SQL SERVER REAL
+- PORTAFOLIO V1 READ SIDE VALIDADO END-TO-END
+- PORTAFOLIO ES PROYECCION SOBRE EVIDENCE EXISTENTE, SIN AGGREGATE ROOT NI TABLA PROPIA
+- ELEGIBILIDAD PORTAFOLIO DEFINIDA POR ESTADOMADUREZ LISTOPORTAFOLIO/PUBLICADO
 
 ## Migraciones Aplicadas
 
@@ -551,6 +554,12 @@ Nota E2E:
 - GET /api/analytics/competencias?usuarioId={Guid.Empty} -> 400
 - GET /api/analytics/certificaciones?usuarioId={id} -> 200
 - GET /api/analytics/certificaciones?usuarioId={Guid.Empty} -> 400
+- GET /api/portafolio?usuarioId={id} -> 200
+- GET /api/portafolio?usuarioId={id}&tipoEvidence={tipo} -> 200
+- GET /api/portafolio?usuarioId={id}&estadoMadurez={ListoPortafolio|Publicado} -> 200
+- GET /api/portafolio?usuarioId={Guid.Empty} -> 400
+- GET /api/portafolio con EstadoMadurez no elegible -> 400
+- GET /api/portafolio con Usuario inexistente -> 404
 
 ## Build
 
@@ -566,7 +575,7 @@ Nota E2E:
 - Microsoft.NET.Test.Sdk: no requerido con la estrategia MTP actual
 - dotnet run del proyecto de tests: validado
 - dotnet test por proyecto: validado
-- dotnet test por solucion: validado con 392 tests correctos
+- dotnet test por solucion: validado con 448 tests correctos
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
 - Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, planificacion, percepcion, IntervaloRepaso, dominio y TemaDominadoEvento validados.
 - Tests de Dominio Competencia validados.
@@ -592,6 +601,7 @@ Nota E2E:
 - Tests de Application Analytics: ResumenEstudio valida Guid.Empty y contrato del caso de uso.
 - Tests de Application Analytics: ResumenTema valida ids vacios, no encontrado y contrato del caso de uso.
 - Tests de Application Analytics: ResumenCompetencia y ResumenCertificacion validan Guid.Empty, lista vacia y contrato de respuesta.
+- Tests de Application Portafolio: validan usuarioId vacio, Usuario inexistente, filtros de madurez, filtros de tipo y contrato de portafolio vacio.
 - Tests de integracion/persistencia: SQL Server real .\MSSQLSERVER01 con base exclusiva AprendizajeTestsDb.
 - Guard rail de integracion: rechaza AprendizajeDb, database vacio y cualquier base distinta a AprendizajeTestsDb antes de recrear.
 - Tests de persistencia cubren: metadata pedagogica de Fase, listas vacias de Fase materializadas no-null, checks SQL de meses recomendados de Fase, Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, planificacion/percepcion/IntervaloRepaso de Tema, RowVersion de Tema tras update, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica CompetenciaTema, idempotencia fisica CertificacionTema con Peso NULL, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, idempotencia fisica ProyectoTema, idempotencia fisica ProyectoHerramienta, idempotencia fisica ArtefactoTema, idempotencia fisica ArtefactoHerramienta, idempotencia fisica WriteupTema, RowVersion de Proyecto poblada al insertar y estable al vincular joins, FK real CertificacionObtenida -> Certificacion, valores iniciales de CertificacionObtenida, query filter de CertificacionObtenida, Nota con un padre valido, CHECK CK_Nota_UnSoloPadre para cero y dos padres, query filter de Nota, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
@@ -606,6 +616,7 @@ Nota E2E:
 - Tests de integracion Resource Editable V1: actualizacion persistida, RecursoTema preservado, ownership incorrecto sin mutacion y soft delete oculto por query filter con fila fisica preservada.
 - Tests de integracion Study Corrections V1: actualizacion de SesionEstudio persistida, cambio de Tema con ownership, SesionHerramienta preservada, ownership incorrecto sin mutacion, soft delete oculto por query filter con fila fisica preservada y ResumenEstudio excluyendo sesiones eliminadas.
 - Tests de integracion Evidence Editable + Maturity V1: update, EstadoMadurez, ownership, soft delete, fila fisica preservada y relaciones representativas preservadas para Proyecto, Laboratorio, Writeup, ArtefactoTecnico y CertificacionObtenida.
+- Tests de integracion Portafolio V1: validan inclusion de Evidence elegible, exclusion de Borrador/Documentado/soft-delete, aislamiento por Usuario, enriquecimiento con Tema/Herramienta/Certificacion, filtros y orden estable.
 
 ## Estado Git Esperado
 
@@ -625,7 +636,9 @@ Importacion Roadmap original: la especificacion normalizada versionada existe en
 
 Importador Roadmap V1: consume data/roadmap/roadmap-v1.json, no parsea HTML, no expone endpoint HTTP, no usa SnapshotProgreso/vw_TemaEstado/eventos y no crea Evidence planificada. SourceKey se usa solo en memoria. La importacion es transaccional e idempotente para el mismo dataset. El dataset contiene 31 entradas documentales de Recurso, que se materializan como 30 recursos fisicos por deduplicacion de clave natural UsuarioId + Titulo + Tipo + Url.
 
-Proxima area sugerida: Portafolio read side V1, usando Evidence real con EstadoMadurez operativo. No implementar Evidence planificada ni PlanPortafolio.
+Portafolio read side V1 validado: GET /api/portafolio devuelve una proyeccion factual sobre Evidence visible del Usuario con EstadoMadurez ListoPortafolio o Publicado. No crea tabla, no duplica Evidence, no implementa Portafolio como Aggregate Root, no publica web y no modifica Evidence write-side.
+
+Proxima area sugerida: preparar operacion/frontend V1 sobre Roadmap, Resource, Study, Evidence y Portafolio ya disponibles. No implementar Evidence planificada ni PlanPortafolio.
 
 ## Pendientes Deliberados
 
@@ -634,7 +647,6 @@ Proxima area sugerida: Portafolio read side V1, usando Evidence real con EstadoM
 - IDespachadorEventos concreto;
 - registro DespachoEventosInterceptor;
 - vw_TemaEstado;
-- read side;
 - Application dependency policy tests;
 - TemaDependencia race;
 - deteccion completa de ciclos profundos en jerarquia de Temas;
@@ -646,7 +658,6 @@ Proxima area sugerida: Portafolio read side V1, usando Evidence real con EstadoM
 - Evidence planificada excluida de la importacion;
 - prueba automatizada directa de TemaDominadoEvento;
 - concurrencia HTTP/ETag/If-Match para Tema y Proyecto;
-- updates de Proyecto;
 - auth;
 - SnapshotProgreso operativo;
 - integrations;

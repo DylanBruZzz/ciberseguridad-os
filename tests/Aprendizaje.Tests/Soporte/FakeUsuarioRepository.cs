@@ -10,5 +10,13 @@ internal sealed class FakeUsuarioRepository : IUsuarioRepository
     public Task<Usuario?> ObtenerPorIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         Task.FromResult(_usuarios.GetValueOrDefault(id));
 
+    public Task<IReadOnlyCollection<Usuario>> ListarVisiblesAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyCollection<Usuario>>(
+            _usuarios.Values
+                .Where(u => u.FechaEliminacionUtc is null)
+                .OrderBy(u => u.FechaRegistro)
+                .ThenBy(u => u.Id)
+                .ToList());
+
     public void Agregar(Usuario usuario) => _usuarios[usuario.Id] = usuario;
 }

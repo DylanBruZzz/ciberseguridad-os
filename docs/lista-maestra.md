@@ -54,8 +54,10 @@
 - [x] dotnet-ef local 10.0.9 configurado.
 - [x] Microsoft.EntityFrameworkCore.Design 10.0.9 disponible.
 - [x] appsettings.Development.json configurado para SQL Server local.
+- [x] appsettings.Personal.json configurado para SQL Server local y AprendizajePersonalDb.
 - [x] DbContext design-time validado.
-- [ ] Configuracion runtime permanente para operar contra AprendizajePersonalDb.
+- [x] Configuracion runtime Personal para operar contra AprendizajePersonalDb.
+- [x] API Personal configurada para escuchar en localhost.
 
 ## 6. Git
 
@@ -72,6 +74,7 @@
 - [x] IUnitOfWork definido.
 - [x] ITransaccionAplicacion definido para importaciones atomicas controladas.
 - [x] CrearUsuario implementado.
+- [x] UsuarioActualLocal implementado para contexto single-user V1.
 - [x] CrearRecurso implementado.
 - [x] ActualizarRecurso implementado.
 - [x] EliminarRecurso implementado como soft delete.
@@ -167,6 +170,7 @@
 - [x] ASP.NET Core Minimal APIs.
 - [x] JsonStringEnumConverter configurado para HTTP.
 - [x] POST /api/usuarios.
+- [x] GET /api/usuario-actual.
 - [x] POST /api/recursos.
 - [x] GET /api/recursos/{id}.
 - [x] GET /api/recursos?usuarioId={id}.
@@ -433,6 +437,11 @@
 - [x] Portafolio V1 filtra por TipoEvidence.
 - [x] Portafolio V1 filtra por EstadoMadurez elegible.
 - [x] Portafolio V1 rechaza EstadoMadurez no elegible.
+- [x] Usuario actual local en Personal -> 200.
+- [x] Usuario actual local con cero Usuarios visibles -> 409.
+- [x] Usuario actual local con multiples Usuarios visibles -> 409.
+- [x] Usuario actual local excluye Usuarios eliminados logicamente.
+- [x] Usuario actual local fuera de Personal -> 409.
 - [x] Importador CLI Roadmap V1 validado contra AprendizajeTestsDb.
 - [ ] Nuevos flujos E2E por vertical slice.
 
@@ -502,6 +511,8 @@
 - [x] Tests de integracion para ResumenCompetencia y ResumenCertificacion sobre SQL Server real.
 - [x] Tests de Application para Portafolio V1: usuario, filtros y contrato de consulta.
 - [x] Tests de integracion para Portafolio V1: elegibilidad, ownership, soft delete, relaciones, filtros, conteos y orden.
+- [x] Tests de Application para UsuarioActualLocal: cardinalidad y soft delete.
+- [x] Tests de integracion para UsuarioActualLocal sobre SQL Server real.
 - [x] Tests de Application para ImportarRoadmapV1: validacion, usuario inexistente, idempotencia y conflictos.
 - [x] Tests de integracion para ImportarRoadmapV1: dataset real, idempotencia SQL, rollback, no Evidence y CLI controlado.
 - [ ] Tests E2E automatizados.
@@ -570,6 +581,9 @@
 - [x] Soft delete Evidence V1 expuesto para Proyecto, Laboratorio, Writeup, ArtefactoTecnico y CertificacionObtenida.
 - [x] Nota permanece append-only.
 - [x] Portafolio read side V1.
+- [x] Contexto single-user local V1.
+- [x] GET /api/usuario-actual.
+- [ ] Migrar API personal para operar sin usuarioId visible en Frontend.
 
 ## 16. Pendientes arquitectonicos
 
@@ -583,4 +597,5 @@
 - [ ] PlanPortafolio / EntregablePlanificado.
 - [ ] Read side de vw_TemaEstado.
 - [ ] Politica de autenticacion/autorizacion.
+- [ ] Auth visible/multiusuario diferida hasta exposicion remota o necesidad real.
 - [ ] Estrategia de observabilidad.

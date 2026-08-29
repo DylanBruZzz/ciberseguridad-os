@@ -120,6 +120,17 @@ Soft delete es selectivo y solo aplica a Aggregate Roots que implementan IElimin
 - Estrategia actual: vertical slices minimos.
 - No introducir MediatR, AutoMapper, FluentValidation ni frameworks preventivos.
 
+## Identidad y Operacion Local V1
+
+- V1 adopta single-user local context para la experiencia personal: abrir la aplicacion y usarla sin pantalla de registro, login ni seleccion manual de Usuario.
+- Auth visible, passwords, JWT, cookies, Identity, roles y sesiones quedan diferidos hasta exposicion remota, multiusuario o necesidad real.
+- Environment Personal usa AprendizajePersonalDb. Development conserva AprendizajeDb y Testing conserva AprendizajeTestsDb.
+- El Usuario actual local se resuelve por cardinalidad de Usuarios visibles en la base Personal: cero Usuarios visibles es error operativo, un Usuario visible es el Usuario actual y multiples Usuarios visibles es error de configuracion.
+- No se guarda UsuarioId en appsettings.Personal.json y no se resuelve por Email. El Email permanece como atributo interno del dominio, no como login.
+- Application conserva UsuarioId explicito en sus casos de uso para mantener ownership y facilitar una evolucion futura a Auth real sin reescribir dominio.
+- API/runtime es responsable de resolver el Usuario actual para endpoints personales futuros. GET /api/usuario-actual expone solo Id y Nombre.
+- La operacion Personal debe escuchar por loopback/local. CORS se definira junto con Frontend Foundation; no usar AllowAnyOrigin permanente.
+
 ## Portafolio V1 Read Side
 
 - Portafolio V1 es una proyeccion de lectura sobre Evidence existente; no es Aggregate Root, no tiene tabla propia y no duplica datos.

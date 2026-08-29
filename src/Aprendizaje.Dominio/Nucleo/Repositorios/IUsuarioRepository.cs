@@ -4,5 +4,7 @@ public interface IUsuarioRepository
 {
     Task<Usuario?> ObtenerPorIdAsync(Guid id, CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyCollection<Usuario>> ListarVisiblesAsync(CancellationToken cancellationToken = default);
+
     void Agregar(Usuario usuario);
 }

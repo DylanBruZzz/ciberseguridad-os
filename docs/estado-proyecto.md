@@ -133,6 +133,10 @@ caf832a feat: establish validated initial persistence
 - PORTAFOLIO V1 READ SIDE VALIDADO END-TO-END
 - PORTAFOLIO ES PROYECCION SOBRE EVIDENCE EXISTENTE, SIN AGGREGATE ROOT NI TABLA PROPIA
 - ELEGIBILIDAD PORTAFOLIO DEFINIDA POR ESTADOMADUREZ LISTOPORTAFOLIO/PUBLICADO
+- CONTEXTO SINGLE-USER LOCAL V1 VALIDADO END-TO-END
+- RUNTIME PERSONAL CONFIGURADO PARA APRENDIZAJEPERSONALDB
+- USUARIO ACTUAL LOCAL RESUELTO POR CARDINALIDAD VISIBLE
+- GET /api/usuario-actual VALIDADO EN RUNTIME PERSONAL
 
 ## Migraciones Aplicadas
 
@@ -152,7 +156,9 @@ caf832a feat: establish validated initial persistence
 - AprendizajeDb: base de desarrollo/E2E.
 - AprendizajeTestsDb: base exclusiva de pruebas automatizadas.
 - AprendizajePersonalDb: base personal real V1.
-- La configuracion runtime permanente de la aplicacion personal todavia no fue cambiada.
+- Environment Personal: configurado para usar AprendizajePersonalDb mediante appsettings.Personal.json.
+- El contexto single-user local resuelve el unico Usuario visible en modo Personal. Cero o multiples usuarios visibles son error operativo.
+- Los endpoints V1 existentes aun conservan usuarioId explicito salvo GET /api/usuario-actual; la migracion de API personal queda como siguiente bloque.
 
 ## Datos Roadmap V1 Personal
 
@@ -560,6 +566,11 @@ Nota E2E:
 - GET /api/portafolio?usuarioId={Guid.Empty} -> 400
 - GET /api/portafolio con EstadoMadurez no elegible -> 400
 - GET /api/portafolio con Usuario inexistente -> 404
+- GET /api/usuario-actual en environment Personal -> 200 con Id y Nombre.
+- GET /api/usuario-actual no expone Email ni datos de configuracion.
+- GET /api/usuario-actual con cero Usuarios visibles -> 409.
+- GET /api/usuario-actual con multiples Usuarios visibles -> 409.
+- GET /api/usuario-actual fuera de environment Personal -> 409.
 
 ## Build
 
@@ -575,7 +586,7 @@ Nota E2E:
 - Microsoft.NET.Test.Sdk: no requerido con la estrategia MTP actual
 - dotnet run del proyecto de tests: validado
 - dotnet test por proyecto: validado
-- dotnet test por solucion: validado con 448 tests correctos
+- dotnet test por solucion: validado con 458 tests correctos
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
 - Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, planificacion, percepcion, IntervaloRepaso, dominio y TemaDominadoEvento validados.
 - Tests de Dominio Competencia validados.
@@ -602,6 +613,7 @@ Nota E2E:
 - Tests de Application Analytics: ResumenTema valida ids vacios, no encontrado y contrato del caso de uso.
 - Tests de Application Analytics: ResumenCompetencia y ResumenCertificacion validan Guid.Empty, lista vacia y contrato de respuesta.
 - Tests de Application Portafolio: validan usuarioId vacio, Usuario inexistente, filtros de madurez, filtros de tipo y contrato de portafolio vacio.
+- Tests de Application UsuarioActualLocal: validan cero, uno y multiples Usuarios visibles, ademas de Usuario eliminado logicamente.
 - Tests de integracion/persistencia: SQL Server real .\MSSQLSERVER01 con base exclusiva AprendizajeTestsDb.
 - Guard rail de integracion: rechaza AprendizajeDb, database vacio y cualquier base distinta a AprendizajeTestsDb antes de recrear.
 - Tests de persistencia cubren: metadata pedagogica de Fase, listas vacias de Fase materializadas no-null, checks SQL de meses recomendados de Fase, Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, planificacion/percepcion/IntervaloRepaso de Tema, RowVersion de Tema tras update, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica CompetenciaTema, idempotencia fisica CertificacionTema con Peso NULL, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, idempotencia fisica ProyectoTema, idempotencia fisica ProyectoHerramienta, idempotencia fisica ArtefactoTema, idempotencia fisica ArtefactoHerramienta, idempotencia fisica WriteupTema, RowVersion de Proyecto poblada al insertar y estable al vincular joins, FK real CertificacionObtenida -> Certificacion, valores iniciales de CertificacionObtenida, query filter de CertificacionObtenida, Nota con un padre valido, CHECK CK_Nota_UnSoloPadre para cero y dos padres, query filter de Nota, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
@@ -617,6 +629,7 @@ Nota E2E:
 - Tests de integracion Study Corrections V1: actualizacion de SesionEstudio persistida, cambio de Tema con ownership, SesionHerramienta preservada, ownership incorrecto sin mutacion, soft delete oculto por query filter con fila fisica preservada y ResumenEstudio excluyendo sesiones eliminadas.
 - Tests de integracion Evidence Editable + Maturity V1: update, EstadoMadurez, ownership, soft delete, fila fisica preservada y relaciones representativas preservadas para Proyecto, Laboratorio, Writeup, ArtefactoTecnico y CertificacionObtenida.
 - Tests de integracion Portafolio V1: validan inclusion de Evidence elegible, exclusion de Borrador/Documentado/soft-delete, aislamiento por Usuario, enriquecimiento con Tema/Herramienta/Certificacion, filtros y orden estable.
+- Tests de integracion UsuarioActualLocal: validan cardinalidad sobre SQL Server real, query filter de Usuario eliminado y resolucion de 1 visible + 1 eliminado.
 
 ## Estado Git Esperado
 
@@ -638,7 +651,9 @@ Importador Roadmap V1: consume data/roadmap/roadmap-v1.json, no parsea HTML, no 
 
 Portafolio read side V1 validado: GET /api/portafolio devuelve una proyeccion factual sobre Evidence visible del Usuario con EstadoMadurez ListoPortafolio o Publicado. No crea tabla, no duplica Evidence, no implementa Portafolio como Aggregate Root, no publica web y no modifica Evidence write-side.
 
-Proxima area sugerida: preparar operacion/frontend V1 sobre Roadmap, Resource, Study, Evidence y Portafolio ya disponibles. No implementar Evidence planificada ni PlanPortafolio.
+Contexto single-user local V1 validado: Environment Personal usa AprendizajePersonalDb, no introduce Auth visible y resuelve el Usuario actual por cardinalidad de Usuarios visibles. GET /api/usuario-actual devuelve Id y Nombre, no expone Email ni datos de configuracion. Application conserva UsuarioId explicito internamente.
+
+Proxima area sugerida: migrar gradualmente la API V1 personal para que el futuro Frontend no tenga que enviar usuarioId en los flujos diarios. No implementar Evidence planificada ni PlanPortafolio.
 
 ## Pendientes Deliberados
 
@@ -659,6 +674,7 @@ Proxima area sugerida: preparar operacion/frontend V1 sobre Roadmap, Resource, S
 - prueba automatizada directa de TemaDominadoEvento;
 - concurrencia HTTP/ETag/If-Match para Tema y Proyecto;
 - auth;
+- migracion API personal sin usuarioId visible;
 - SnapshotProgreso operativo;
 - integrations;
 - frontend;

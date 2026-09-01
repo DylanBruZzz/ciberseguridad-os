@@ -49,6 +49,7 @@ Este documento registra decisiones congeladas. No es historial de conversacion.
   - SnapshotProgreso
   - Conector
 - CriterioTema y LogSincronizacion son entidades internas.
+- ApunteTema es entidad de dominio dependiente para el texto personal editable 0..1 de un Tema; no es Aggregate Root nuevo y no reutiliza Nota.
 - Las 12 tablas de union puras se representan con modelos tecnicos de Infraestructura, sin entidades de dominio.
 - No crear Aggregate Roots, DbSet ni repositorios para tablas de union puras.
 - No crear repositorio generico.
@@ -135,6 +136,17 @@ Soft delete es selectivo y solo aplica a Aggregate Roots que implementan IElimin
 - Los catalogos globales Herramienta y Certificacion no reciben ownership artificial por la adaptacion Personal.
 - La operacion Personal debe escuchar por loopback/local. CORS se definira junto con Frontend Foundation; no usar AllowAnyOrigin permanente.
 
+## Frontend V1
+
+- Frontend V1 se implementa con Angular 21 standalone en frontend/.
+- El cliente frontend no almacena ni envia UsuarioId para ownership en modo Personal; la API resuelve el Usuario actual en el borde HTTP.
+- La base de API del frontend es /api. En desarrollo se usa proxy Angular local hacia http://localhost:64021 para evitar CORS y mantener la API limitada a loopback.
+- No se configura AllowAnyOrigin. Cualquier CORS futuro debe limitarse al origen local real o eliminarse mediante despliegue same-origin.
+- El frontend no contiene connection strings, Email de usuario, secretos ni configuracion SQL.
+- La primera pantalla funcional es Roadmap: consume Fases y Temas reales desde AprendizajePersonalDb en modo read-only, sin hardcodear datos del roadmap.
+- Study, Resources, Evidence y Portfolio quedan como rutas preparadas; su funcionalidad se implementara por bloques V1 posteriores.
+- El diseno visual definitivo no queda congelado por la foundation.
+
 ## Portafolio V1 Read Side
 
 - Portafolio V1 es una proyeccion de lectura sobre Evidence existente; no es Aggregate Root, no tiene tabla propia y no duplica datos.
@@ -152,6 +164,15 @@ Soft delete es selectivo y solo aplica a Aggregate Roots que implementan IElimin
 - Persistencia: la coleccion vacia se representa actualmente como SQL NULL.
 - TemaConfiguration: Objetivos es nullable.
 - Tema normaliza el backing field cuando EF materializa NULL.
+
+## ApunteTema V1
+
+- ApunteTema representa apuntes personales permanentes y editables del Tema: conocimiento que el usuario conserva y reemplaza a lo largo del tiempo.
+- La cardinalidad es 0..1 por Tema mediante indice unico en roadmap.ApunteTema.TemaId.
+- Contenido usa nvarchar(max) para no limitar artificialmente texto potencialmente amplio.
+- Se mantiene separado de Tema.Objetivos, Nota append-only, SesionEstudio.Notas y Recurso.Notas.
+- No usa RowVersion ni soft delete en V1; RowVersion sigue restringido a Usuario, Tema, SesionEstudio y Proyecto.
+- API Personal expone GET/PUT /api/temas/{temaId}/apuntes resolviendo Usuario actual en el borde HTTP; Application conserva UsuarioId explicito.
 
 ## Fase.MetadataPedagogica
 

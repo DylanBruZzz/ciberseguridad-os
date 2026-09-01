@@ -1,0 +1,112 @@
+<section class="roadmap-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Roadmap personal</p>
+      <h1>Ciberseguridad V1</h1>
+    </div>
+
+    <div class="summary" aria-label="Resumen del roadmap">
+      <span><strong>{{ fases().length }}</strong> fases</span>
+      <span><strong>{{ totalTemas() }}</strong> temas</span>
+    </div>
+  </header>
+
+  @if (cargando()) {
+    <section class="state-panel" aria-live="polite">
+      <h2>Cargando roadmap</h2>
+      <p>Conectando con la API Personal local.</p>
+    </section>
+  } @else if (error()) {
+    <section class="state-panel error" role="alert">
+      <h2>No se pudo cargar el roadmap</h2>
+      <p>{{ error() }}</p>
+    </section>
+  } @else if (fases().length === 0) {
+    <section class="state-panel">
+      <h2>Roadmap vacio</h2>
+      <p>No hay fases disponibles para el usuario local.</p>
+    </section>
+  } @else {
+    <div class="roadmap-grid">
+      <aside class="phase-list" aria-label="Fases">
+        @for (fase of fases(); track fase.id) {
+          <button
+            type="button"
+            [class.active]="fase.id === faseSeleccionada().id"
+            (click)="seleccionarFase(fase.id)"
+          >
+            <span class="phase-order">{{ fase.orden }}</span>
+            <span>{{ fase.nombre }}</span>
+          </button>
+        }
+      </aside>
+
+      @if (faseSeleccionada(); as fase) {
+        <section class="phase-detail">
+          <div class="phase-heading">
+            <div>
+              <p class="eyebrow">Fase {{ fase.orden }}</p>
+              <h2>{{ fase.nombre }}</h2>
+            </div>
+
+            <dl>
+              <div>
+                <dt>Meses</dt>
+                <dd>{{ fase.mesInicioRecomendado ?? '-' }} - {{ fase.mesFinRecomendado ?? '-' }}</dd>
+              </div>
+              <div>
+                <dt>Carga</dt>
+                <dd>{{ fase.cargaSemanalRecomendada ?? 'No definida' }}</dd>
+              </div>
+            </dl>
+          </div>
+
+          @if (fase.descripcion) {
+            <p class="phase-description">{{ fase.descripcion }}</p>
+          }
+
+          @if (fase.objetivos.length > 0) {
+            <section class="detail-block">
+              <h3>Objetivos</h3>
+              <ul>
+                @for (objetivo of fase.objetivos; track objetivo) {
+                  <li>{{ objetivo }}</li>
+                }
+              </ul>
+            </section>
+          }
+
+          @if (fase.criteriosAvance.length > 0) {
+            <section class="detail-block">
+              <h3>Criterios de avance</h3>
+              <ul>
+                @for (criterio of fase.criteriosAvance; track criterio) {
+                  <li>{{ criterio }}</li>
+                }
+              </ul>
+            </section>
+          }
+
+          <section class="detail-block">
+            <h3>Temas</h3>
+            @if (temasDeFase().length > 0) {
+              <div class="topic-list">
+                @for (tema of temasDeFase(); track tema.id) {
+                  <article class="topic-item">
+                    <span>{{ tema.tipoConocimiento }}</span>
+                    <strong>{{ tema.nombre }}</strong>
+                    @if (tema.descripcion) {
+                      <p>{{ tema.descripcion }}</p>
+                    }
+                  </article>
+                }
+              </div>
+            } @else {
+              <p class="muted">Esta fase aun no tiene temas visibles.</p>
+            }
+          </section>
+        </section>
+      }
+    </div>
+  }
+</section>

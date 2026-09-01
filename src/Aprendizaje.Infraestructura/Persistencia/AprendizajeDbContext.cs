@@ -23,6 +23,7 @@ public sealed class AprendizajeDbContext : DbContext, IUnitOfWork
     public DbSet<Fase> Fases => Set<Fase>();
     public DbSet<Certificacion> Certificaciones => Set<Certificacion>();
     public DbSet<Tema> Temas => Set<Tema>();
+    public DbSet<ApunteTema> ApuntesTema => Set<ApunteTema>();
     public DbSet<Competencia> Competencias => Set<Competencia>();
 
     // Study

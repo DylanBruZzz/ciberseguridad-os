@@ -1,6 +1,9 @@
 # Build results
 **/bin/
 **/obj/
+**/dist/
+**/.angular/
+**/node_modules/
 
 # Visual Studio
 .vs/
@@ -23,6 +26,9 @@
 # Logs
 *.log
 logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Temporary files
 *.tmp

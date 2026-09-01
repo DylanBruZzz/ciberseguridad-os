@@ -139,12 +139,21 @@ caf832a feat: establish validated initial persistence
 - GET /api/usuario-actual VALIDADO EN RUNTIME PERSONAL
 - API PERSONAL V1 VALIDADA END-TO-END
 - FRONTEND V1 YA NO REQUIERE ENVIAR USUARIOID PARA FLUJOS DIARIOS
+- FRONTEND FOUNDATION V1 VALIDADO END-TO-END
+- ROADMAP REAL VISIBLE DESDE FRONTEND SIN USUARIOID
+- APUNTES PERMANENTES DE TEMA V1 BACKEND VALIDADO END-TO-END
+- APUNTETEMA SOPORTA CONTENIDO PERSONAL EDITABLE SIN REUTILIZAR NOTA APPEND-ONLY
+- API PERSONAL GET/PUT /api/temas/{temaId}/apuntes SIN USUARIOID VALIDADA
 
 ## Migraciones Aplicadas
 
 - 20260818153945_Inicial
 - 20260818174900_HacerObjetivosTemaNullable
 - 20260827073704_AgregarMetadataPedagogicaFase
+
+## Migraciones Disponibles Pendientes De Aplicacion Operativa
+
+- 20260901003645_AgregarApuntesPermanentesTema: crea roadmap.ApunteTema y fue validada por tests contra AprendizajeTestsDb. No fue aplicada a AprendizajePersonalDb.
 
 ## Base de Desarrollo
 
@@ -162,6 +171,27 @@ caf832a feat: establish validated initial persistence
 - El contexto single-user local resuelve el unico Usuario visible en modo Personal. Cero o multiples usuarios visibles son error operativo.
 - API Personal resuelve usuarioId en el borde HTTP mediante IUsuarioActual. El frontend V1 puede omitir usuarioId en flujos diarios de Roadmap, Resource, Study, Evidence, Analytics y Portafolio.
 - Los contratos explicit-user legacy siguen disponibles temporalmente para Development/tests; en modo Personal un usuarioId explicito que no coincide con el Usuario actual se rechaza como conflicto.
+
+## Frontend V1
+
+- Stack: Angular 21 standalone.
+- Ubicacion: frontend/
+- Routing: habilitado.
+- Estilos: CSS nativo.
+- Base API frontend: /api.
+- Desarrollo frontend: Angular dev server con proxy local hacia http://localhost:64021.
+- No se almacena UsuarioId, Email, connection string ni secretos en el frontend.
+- Usuario actual: GET /api/usuario-actual devuelve Id y Nombre; el Id es informativo y no se usa para construir requests de ownership.
+- Roadmap inicial: GET /api/fases y GET /api/temas se consumen sin usuarioId desde frontend.
+- Runtime Personal validado en modo read-only:
+  - UsuarioActual: Dylan
+  - Fases: 7
+  - Temas: 63
+- Navegacion base preparada: Roadmap, Study, Resources, Evidence y Portfolio.
+- Implementacion funcional profunda actual: Roadmap.
+- Study, Resources, Evidence y Portfolio quedan como rutas placeholder limpias hasta sus bloques V1.
+- CORS no se agrego en este bloque; el desarrollo usa proxy Angular especifico. No existe AllowAnyOrigin.
+- Diseno visual definitivo: pendiente.
 
 ## Datos Roadmap V1 Personal
 
@@ -416,6 +446,10 @@ Nota E2E:
 - PUT intervalo-repaso Tema inexistente -> 404
 - PUT intervalo-repaso con Guid.Empty -> 400
 - PUT intervalo-repaso con dias invalidos -> 400
+- GET /api/temas/{temaId}/apuntes -> 200 con contenido vacio si aun no existen apuntes.
+- PUT /api/temas/{temaId}/apuntes -> 204 como upsert logico de apuntes permanentes.
+- GET/PUT apuntes de Tema en Personal resuelven Usuario actual sin usuarioId explicito.
+- GET/PUT apuntes de Tema ajeno en Personal -> 404.
 - GET /api/temas/{id} devuelve dificultad, confianza, fechas e IntervaloRepasoDias configurados.
 - GET /api/temas?usuarioId={id} -> 200
 - GET /api/temas?usuarioId={id-sin-temas} -> 200 con []
@@ -591,7 +625,9 @@ Nota E2E:
 - Microsoft.NET.Test.Sdk: no requerido con la estrategia MTP actual
 - dotnet run del proyecto de tests: validado
 - dotnet test por proyecto: validado
-- dotnet test por solucion: validado con 465 tests correctos
+- dotnet test por solucion: validado con 486 tests correctos
+- Frontend: Angular build validado.
+- Frontend: 10 tests unitarios correctos.
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
 - Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, planificacion, percepcion, IntervaloRepaso, dominio y TemaDominadoEvento validados.
 - Tests de Dominio Competencia validados.
@@ -620,6 +656,10 @@ Nota E2E:
 - Tests de Application Portafolio: validan usuarioId vacio, Usuario inexistente, filtros de madurez, filtros de tipo y contrato de portafolio vacio.
 - Tests de Application UsuarioActualLocal: validan cero, uno y multiples Usuarios visibles, ademas de Usuario eliminado logicamente.
 - Tests de API Personal V1: validan resolucion HTTP de usuarioId opcional en Personal, rechazo de usuarioId divergente, 400 fuera de Personal sin usuarioId y proteccion de lecturas por ownership.
+- Tests de Apuntes Permanentes de Tema V1: dominio, aplicacion, API Personal y persistencia SQL validados.
+- Tests de Application Roadmap: ObtenerApuntesTema y GuardarApuntesTema cubren Tema inexistente, ownership incorrecto, contenido vacio y upsert sin duplicados.
+- Tests de API Personal ApuntesTema: GET/PUT sin usuarioId explicito, Tema ajeno no visible y actualizacion posterior visible.
+- Tests de integracion ApuntesTema: persistencia real, update sin duplicar, unique TemaId y Tema soft-deleted oculto por query filter del Tema.
 - Tests de integracion/persistencia: SQL Server real .\MSSQLSERVER01 con base exclusiva AprendizajeTestsDb.
 - Guard rail de integracion: rechaza AprendizajeDb, database vacio y cualquier base distinta a AprendizajeTestsDb antes de recrear.
 - Tests de persistencia cubren: metadata pedagogica de Fase, listas vacias de Fase materializadas no-null, checks SQL de meses recomendados de Fase, Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, planificacion/percepcion/IntervaloRepaso de Tema, RowVersion de Tema tras update, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica CompetenciaTema, idempotencia fisica CertificacionTema con Peso NULL, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, idempotencia fisica ProyectoTema, idempotencia fisica ProyectoHerramienta, idempotencia fisica ArtefactoTema, idempotencia fisica ArtefactoHerramienta, idempotencia fisica WriteupTema, RowVersion de Proyecto poblada al insertar y estable al vincular joins, FK real CertificacionObtenida -> Certificacion, valores iniciales de CertificacionObtenida, query filter de CertificacionObtenida, Nota con un padre valido, CHECK CK_Nota_UnSoloPadre para cero y dos padres, query filter de Nota, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
@@ -661,7 +701,11 @@ Contexto single-user local V1 validado: Environment Personal usa AprendizajePers
 
 API Personal V1 validada: en modo Personal, la capa HTTP resuelve usuarioId mediante IUsuarioActual para flujos diarios de Roadmap, Resource, Study, Evidence, Analytics y Portafolio. No introduce Auth, JWT, Identity, migraciones ni paquetes. Los endpoints explicit-user legacy se conservan temporalmente para Development/tests y compatibilidad; si en Personal se envia un usuarioId explicito divergente, la API responde conflicto. GET /api/fases y GET /api/portafolio fueron validados en runtime Personal contra AprendizajePersonalDb en modo read-only.
 
-Proxima area sugerida: Frontend Foundation V1 sobre API Personal sin usuarioId visible. No implementar Evidence planificada ni PlanPortafolio.
+Frontend Foundation V1 validado: Angular standalone vive en frontend/, consume la API Personal via /api y proxy local, obtiene UsuarioActual y muestra las 7 Fases reales y 63 Temas sin que el cliente envie usuarioId. No hay Auth, CORS global, dashboard avanzado ni escritura sobre AprendizajePersonalDb.
+
+Apuntes permanentes de Tema V1 backend validado: `roadmap.ApunteTema` modela el contenido personal editable 0..1 asociado a un Tema. No reemplaza Tema.Objetivos, Nota append-only, SesionEstudio.Notas ni Recurso.Notas. GET/PUT `/api/temas/{temaId}/apuntes` participan de API Personal y resuelven Usuario actual en el borde HTTP. La migracion `20260901003645_AgregarApuntesPermanentesTema` fue creada y validada sobre AprendizajeTestsDb; AprendizajePersonalDb no fue modificada en este bloque.
+
+Proxima area sugerida: Gate de diseno visual V1 y luego pantallas frontend incrementales de Roadmap/Study/Resource sobre API Personal. No implementar Evidence planificada ni PlanPortafolio.
 
 ## Pendientes Deliberados
 
@@ -684,7 +728,9 @@ Proxima area sugerida: Frontend Foundation V1 sobre API Personal sin usuarioId v
 - auth;
 - SnapshotProgreso operativo;
 - integrations;
-- frontend;
+- pantallas frontend V1 completas;
+- formularios frontend Resource/Study/Evidence;
+- Portafolio frontend completo;
 - filtros Resource;
 - filtros Study;
 - edicion EntradaBitacora;

@@ -18,6 +18,7 @@
 - [x] RowVersion selectivo definido.
 - [x] Soft delete selectivo definido.
 - [x] Tema.Objetivos robustecido ante NULL materializado por EF.
+- [x] ApunteTema incorporado como entidad dependiente para apuntes personales permanentes editables, sin crear Aggregate Root nuevo.
 - [x] Roadmap avanzado minimo funcional cerrado sin TemaDependencia.
 - [x] Fase.MetadataPedagogica incorporada como metadata descriptiva del roadmap recomendado.
 - [ ] Nuevos comportamientos de dominio por caso de uso real.
@@ -33,6 +34,7 @@
 - [x] Tema.Objetivos nullable en EF.
 - [x] Fase.Objetivos y Fase.CriteriosAvance nullable en EF con colecciones no-null en dominio/API.
 - [x] Fase.MesInicioRecomendado, Fase.MesFinRecomendado y CargaSemanalRecomendada configurados.
+- [x] roadmap.ApunteTema configurado con contenido amplio, FK a Tema/Usuario e indice unico por TemaId.
 - [ ] IDespachadorEventos concreto.
 - [ ] Registro de DespachoEventosInterceptor.
 
@@ -47,6 +49,7 @@
 - [x] Migracion AgregarMetadataPedagogicaFase aplicada a AprendizajeDb.
 - [x] AprendizajePersonalDb creada mediante migrations existentes para uso personal V1.
 - [x] AprendizajePersonalDb validada con migrations Inicial, HacerObjetivosTemaNullable y AgregarMetadataPedagogicaFase.
+- [x] Migracion AgregarApuntesPermanentesTema creada y validada por tests contra AprendizajeTestsDb.
 - [ ] Crear migraciones futuras solo con auditoria previa.
 
 ## 5. Tooling / entorno
@@ -150,6 +153,8 @@
 - [x] ActualizarPercepcionTema implementado.
 - [x] ActualizarPlanificacionTema implementado.
 - [x] ConfigurarIntervaloRepasoTema implementado.
+- [x] ObtenerApuntesTema implementado.
+- [x] GuardarApuntesTema implementado como upsert logico.
 - [x] CrearCompetencia implementado.
 - [x] ObtenerCompetenciaPorId implementado.
 - [x] ListarCompetencias implementado.
@@ -247,6 +252,8 @@
 - [x] PUT /api/temas/{id}/percepcion.
 - [x] PUT /api/temas/{id}/planificacion.
 - [x] PUT /api/temas/{id}/intervalo-repaso.
+- [x] GET /api/temas/{temaId}/apuntes.
+- [x] PUT /api/temas/{temaId}/apuntes.
 - [x] POST /api/competencias.
 - [x] GET /api/competencias/{id}.
 - [x] GET /api/competencias?usuarioId={id}.
@@ -448,6 +455,7 @@
 - [x] API Personal V1 resuelve usuarioId omitido mediante IUsuarioActual.
 - [x] API Personal V1 rechaza usuarioId explicito divergente con el Usuario actual.
 - [x] API Personal V1 protege lecturas user-owned por ownership del Usuario actual.
+- [x] Apuntes permanentes de Tema V1: GET/PUT Personal sin usuarioId explicito y ownership protegido.
 - [x] Importador CLI Roadmap V1 validado contra AprendizajeTestsDb.
 - [ ] Nuevos flujos E2E por vertical slice.
 
@@ -520,6 +528,7 @@
 - [x] Tests de Application para UsuarioActualLocal: cardinalidad y soft delete.
 - [x] Tests de integracion para UsuarioActualLocal sobre SQL Server real.
 - [x] Tests de API Personal V1 para resolucion opcional de usuarioId y guardas de ownership en el borde HTTP.
+- [x] Tests de ApuntesTema V1 en dominio, aplicacion, API Personal y persistencia SQL.
 - [x] Tests de Application para ImportarRoadmapV1: validacion, usuario inexistente, idempotencia y conflictos.
 - [x] Tests de integracion para ImportarRoadmapV1: dataset real, idempotencia SQL, rollback, no Evidence y CLI controlado.
 - [ ] Tests E2E automatizados.
@@ -549,9 +558,18 @@
 
 ## 13. Frontend
 
-- [ ] Frontend definido.
-- [ ] Experiencia de usuario inicial.
-- [ ] Integracion con API.
+- [x] Frontend definido con Angular 21 standalone en frontend/.
+- [x] Experiencia de usuario inicial con shell, navegacion base y estados loading/success/empty/error.
+- [x] Integracion con API Personal mediante /api y proxy Angular local.
+- [x] Frontend obtiene UsuarioActual sin login y sin seleccionar UsuarioId.
+- [x] Roadmap real visible desde frontend: 7 Fases y 63 Temas sin usuarioId en requests.
+- [x] Rutas base preparadas: Roadmap, Study, Resources, Evidence y Portfolio.
+- [ ] Pantalla Roadmap completa con navegacion Tema detallada.
+- [ ] Pantalla Study V1.
+- [ ] Pantalla Resources V1.
+- [ ] Pantalla Evidence V1.
+- [ ] Pantalla Portfolio V1.
+- [ ] CORS/runtime publish definido para Frontend Foundation fuera de dev proxy.
 
 ## 14. Importacion Roadmap original
 
@@ -591,6 +609,9 @@
 - [x] Contexto single-user local V1.
 - [x] GET /api/usuario-actual.
 - [x] API Personal V1 opera sin usuarioId visible para el Frontend en flujos diarios.
+- [x] Frontend Foundation V1.
+- [x] Roadmap real visible desde Frontend sin usuarioId.
+- [x] Apuntes permanentes editables de Tema V1 backend.
 
 ## 16. Pendientes arquitectonicos
 
@@ -606,3 +627,4 @@
 - [ ] Politica de autenticacion/autorizacion.
 - [ ] Auth visible/multiusuario diferida hasta exposicion remota o necesidad real.
 - [ ] Estrategia de observabilidad.
+- [ ] Operacion local/publish de frontend y backend.

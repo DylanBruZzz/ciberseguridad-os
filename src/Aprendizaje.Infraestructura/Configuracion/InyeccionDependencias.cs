@@ -28,6 +28,7 @@ public static class InyeccionDependencias
         services.AddSingleton<AuditoriaInterceptor>();
 
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+        services.AddScoped<IApunteTemaRepository, ApunteTemaRepository>();
         services.AddScoped<ITemaRepository, TemaRepository>();
         services.AddScoped<IFaseRepository, FaseRepository>();
         services.AddScoped<ICompetenciaRepository, CompetenciaRepository>();

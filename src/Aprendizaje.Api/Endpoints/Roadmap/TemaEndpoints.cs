@@ -10,6 +10,8 @@ using Aprendizaje.Aplicacion.Roadmap.Temas.EstablecerObjetivos;
 using Aprendizaje.Aplicacion.Roadmap.Temas.ListarTemas;
 using Aprendizaje.Aplicacion.Roadmap.Temas.MarcarCriterio;
 using Aprendizaje.Aplicacion.Roadmap.Temas.ObtenerTemaPorId;
+using Aprendizaje.Aplicacion.Roadmap.Temas.ObtenerApuntesTema;
+using Aprendizaje.Aplicacion.Roadmap.Temas.GuardarApuntesTema;
 using Aprendizaje.Api.Endpoints.Nucleo;
 using Aprendizaje.Aplicacion.Nucleo.Usuarios;
 using Aprendizaje.Dominio.Roadmap;
@@ -25,6 +27,8 @@ public static class TemaEndpoints
         grupo.MapPost("/", CrearTemaAsync);
         grupo.MapGet("/", ListarTemasAsync);
         grupo.MapGet("/{id:guid}", ObtenerTemaPorIdAsync);
+        grupo.MapGet("/{temaId:guid}/apuntes", ObtenerApuntesAsync);
+        grupo.MapPut("/{temaId:guid}/apuntes", GuardarApuntesAsync);
         grupo.MapPut("/{id:guid}/objetivos", EstablecerObjetivosAsync);
         grupo.MapPut("/{temaId:guid}/percepcion", ActualizarPercepcionAsync);
         grupo.MapPut("/{temaId:guid}/planificacion", ActualizarPlanificacionAsync);
@@ -117,6 +121,84 @@ public static class TemaEndpoints
             cancellationToken);
 
         return validacion ?? Results.Ok(resultado.Tema);
+    }
+
+    private static async Task<IResult> ObtenerApuntesAsync(
+        Guid temaId,
+        Guid? usuarioId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        ObtenerApuntesTemaCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                usuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
+            var resultado = await casoUso.EjecutarAsync(
+                new ObtenerApuntesTemaSolicitud(usuario.UsuarioId, temaId),
+                cancellationToken);
+
+            return resultado.Estado switch
+            {
+                ObtenerApuntesTemaEstado.Encontrado => Results.Ok(resultado.Apuntes),
+                ObtenerApuntesTemaEstado.TemaNoEncontrado => Results.NotFound(),
+                ObtenerApuntesTemaEstado.UsuarioNoCoincide => ResultadoOwnershipNoCoincide(environment),
+                _ => Results.Problem("Estado de obtención de apuntes de Tema no reconocido.")
+            };
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> GuardarApuntesAsync(
+        Guid temaId,
+        GuardarApuntesTemaHttpRequest request,
+        Guid? usuarioId,
+        IHostEnvironment environment,
+        IUsuarioActual usuarioActual,
+        GuardarApuntesTemaCasoUso casoUso,
+        CancellationToken cancellationToken)
+    {
+        if (request.Contenido is null)
+            return Results.BadRequest(new { error = "El contenido de los apuntes no puede ser null." });
+
+        try
+        {
+            var usuario = await UsuarioHttpContexto.ResolverAsync(
+                usuarioId,
+                environment,
+                usuarioActual,
+                cancellationToken);
+
+            if (!usuario.Exitosa)
+                return usuario.Error!;
+
+            var resultado = await casoUso.EjecutarAsync(
+                new GuardarApuntesTemaSolicitud(usuario.UsuarioId, temaId, request.Contenido),
+                cancellationToken);
+
+            return resultado.Estado switch
+            {
+                GuardarApuntesTemaEstado.Guardado => Results.NoContent(),
+                GuardarApuntesTemaEstado.TemaNoEncontrado => Results.NotFound(),
+                GuardarApuntesTemaEstado.UsuarioNoCoincide => ResultadoOwnershipNoCoincide(environment),
+                _ => Results.Problem("Estado de guardado de apuntes de Tema no reconocido.")
+            };
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
     }
 
     private static async Task<IResult> EstablecerObjetivosAsync(
@@ -461,6 +543,11 @@ public static class TemaEndpoints
             cancellationToken);
     }
 
+    private static IResult ResultadoOwnershipNoCoincide(IHostEnvironment environment) =>
+        environment.IsEnvironment("Personal")
+            ? Results.NotFound()
+            : Results.Conflict(new { error = "El Tema debe pertenecer al Usuario indicado." });
+
     private sealed record CrearTemaHttpRequest(
         Guid? UsuarioId,
         string Nombre,
@@ -478,6 +565,8 @@ public static class TemaEndpoints
         DateOnly? FechaFin);
 
     private sealed record ConfigurarIntervaloRepasoTemaHttpRequest(int? Dias);
+
+    private sealed record GuardarApuntesTemaHttpRequest(string? Contenido);
 
     private sealed record DefinirCriteriosRelevantesTemaHttpRequest(
         IReadOnlyCollection<TipoCriterio>? Criterios);

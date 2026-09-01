@@ -147,6 +147,7 @@
 - [x] ObtenerResumenCertificaciones implementado.
 - [x] ObtenerPortafolio implementado como read side factual sobre Evidence existente.
 - [x] ImportarRoadmapV1 implementado como bootstrap CLI idempotente.
+- [x] ObtenerRoadmapVistaV1 implementado como read side factual on-demand para Roadmap V1.
 - [x] CrearTema implementado.
 - [x] ObtenerTemaPorId implementado.
 - [x] EstablecerObjetivosTema implementado.
@@ -456,6 +457,7 @@
 - [x] API Personal V1 rechaza usuarioId explicito divergente con el Usuario actual.
 - [x] API Personal V1 protege lecturas user-owned por ownership del Usuario actual.
 - [x] Apuntes permanentes de Tema V1: GET/PUT Personal sin usuarioId explicito y ownership protegido.
+- [x] RoadmapVistaV1: GET /api/roadmap/vista Personal sin usuarioId explicito.
 - [x] Importador CLI Roadmap V1 validado contra AprendizajeTestsDb.
 - [ ] Nuevos flujos E2E por vertical slice.
 
@@ -529,6 +531,7 @@
 - [x] Tests de integracion para UsuarioActualLocal sobre SQL Server real.
 - [x] Tests de API Personal V1 para resolucion opcional de usuarioId y guardas de ownership en el borde HTTP.
 - [x] Tests de ApuntesTema V1 en dominio, aplicacion, API Personal y persistencia SQL.
+- [x] Tests de RoadmapVistaV1 en Application, API Personal e integracion SQL.
 - [x] Tests de Application para ImportarRoadmapV1: validacion, usuario inexistente, idempotencia y conflictos.
 - [x] Tests de integracion para ImportarRoadmapV1: dataset real, idempotencia SQL, rollback, no Evidence y CLI controlado.
 - [ ] Tests E2E automatizados.
@@ -546,6 +549,7 @@
 - [x] Consulta on-demand ResumenCertificacion con metricas factuales.
 - [x] Analytics directo minimo funcional cerrado.
 - [x] Portafolio V1 read side como proyeccion sobre Evidence con EstadoMadurez ListoPortafolio/Publicado.
+- [x] RoadmapVistaV1 read side como proyeccion on-demand sin SnapshotProgreso ni vw_TemaEstado.
 - [ ] Analytics semantico avanzado.
 - [ ] SnapshotProgreso operativo.
 
@@ -612,6 +616,7 @@
 - [x] Frontend Foundation V1.
 - [x] Roadmap real visible desde Frontend sin usuarioId.
 - [x] Apuntes permanentes editables de Tema V1 backend.
+- [x] RoadmapVistaV1 backend/read-side.
 
 ## 16. Pendientes arquitectonicos
 

@@ -32,6 +32,7 @@ using Xunit;
 
 namespace Aprendizaje.Tests.Api;
 
+[Collection("ApiEndpoints")]
 public sealed class ApuntesTemaEndpointsTests
 {
     [Fact]

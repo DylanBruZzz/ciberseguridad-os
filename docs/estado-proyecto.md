@@ -144,6 +144,9 @@ caf832a feat: establish validated initial persistence
 - APUNTES PERMANENTES DE TEMA V1 BACKEND VALIDADO END-TO-END
 - APUNTETEMA SOPORTA CONTENIDO PERSONAL EDITABLE SIN REUTILIZAR NOTA APPEND-ONLY
 - API PERSONAL GET/PUT /api/temas/{temaId}/apuntes SIN USUARIOID VALIDADA
+- ROADMAPVISTAV1 READ-SIDE BACKEND VALIDADO END-TO-END
+- API PERSONAL GET /api/roadmap/vista SIN USUARIOID VALIDADA
+- PROGRESO DE ROADMAP, FASE ACTUAL Y REPASO DERIVADOS SIN PERSISTENCIA NUEVA
 
 ## Migraciones Aplicadas
 
@@ -625,7 +628,7 @@ Nota E2E:
 - Microsoft.NET.Test.Sdk: no requerido con la estrategia MTP actual
 - dotnet run del proyecto de tests: validado
 - dotnet test por proyecto: validado
-- dotnet test por solucion: validado con 486 tests correctos
+- dotnet test por solucion: validado con 498 tests correctos
 - Frontend: Angular build validado.
 - Frontend: 10 tests unitarios correctos.
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
@@ -660,6 +663,7 @@ Nota E2E:
 - Tests de Application Roadmap: ObtenerApuntesTema y GuardarApuntesTema cubren Tema inexistente, ownership incorrecto, contenido vacio y upsert sin duplicados.
 - Tests de API Personal ApuntesTema: GET/PUT sin usuarioId explicito, Tema ajeno no visible y actualizacion posterior visible.
 - Tests de integracion ApuntesTema: persistencia real, update sin duplicar, unique TemaId y Tema soft-deleted oculto por query filter del Tema.
+- Tests de RoadmapVistaV1: Application valida contrato de consulta, API Personal valida GET /api/roadmap/vista sin usuarioId y contexto invalido, e integracion SQL valida roadmap vacio, orden de Fases, metadata pedagogica, TemaPadreId, criterios total/cumplidos, progreso, EstadoTema, repaso, fase actual, ownership, soft delete y ausencia de N+1 obvio con maximo 4 comandos de lectura.
 - Tests de integracion/persistencia: SQL Server real .\MSSQLSERVER01 con base exclusiva AprendizajeTestsDb.
 - Guard rail de integracion: rechaza AprendizajeDb, database vacio y cualquier base distinta a AprendizajeTestsDb antes de recrear.
 - Tests de persistencia cubren: metadata pedagogica de Fase, listas vacias de Fase materializadas no-null, checks SQL de meses recomendados de Fase, Tema.Objetivos vacios como SQL NULL y rematerializacion no-null, planificacion/percepcion/IntervaloRepaso de Tema, RowVersion de Tema tras update, RowVersion de SesionEstudio tras update, idempotencia fisica RecursoTema, idempotencia fisica CompetenciaTema, idempotencia fisica CertificacionTema con Peso NULL, idempotencia fisica SesionHerramienta, idempotencia fisica LaboratorioTema, idempotencia fisica LaboratorioHerramienta, idempotencia fisica ProyectoTema, idempotencia fisica ProyectoHerramienta, idempotencia fisica ArtefactoTema, idempotencia fisica ArtefactoHerramienta, idempotencia fisica WriteupTema, RowVersion de Proyecto poblada al insertar y estable al vincular joins, FK real CertificacionObtenida -> Certificacion, valores iniciales de CertificacionObtenida, query filter de CertificacionObtenida, Nota con un padre valido, CHECK CK_Nota_UnSoloPadre para cero y dos padres, query filter de Nota, query filter de soft delete en Tema y FK real SesionEstudio -> Tema.
@@ -687,7 +691,7 @@ Roadmap avanzado minimo funcional cerrado: Fase, jerarquia Tema padre/hijo, obje
 
 TemaDependencia queda diferida conscientemente: aporta prerequisitos transversales utiles, pero no es necesaria para importacion inicial ni para Analytics minimo. Exponerla ahora dejaria incompleta la garantia de ausencia de ciclos profundos y no resolveria la carrera read -> validate -> insert bajo concurrencia.
 
-Analytics directo minimo funcional cerrado: ResumenEstudio, ResumenTema, ResumenCompetencia y ResumenCertificacion estan disponibles como consultas on-demand factuales. Esto no equivale a Analytics completo: progreso global, readiness, estado/repaso, SnapshotProgreso y vw_TemaEstado siguen diferidos.
+Analytics directo minimo funcional cerrado: ResumenEstudio, ResumenTema, ResumenCompetencia y ResumenCertificacion estan disponibles como consultas on-demand factuales. RoadmapVistaV1 agrega una proyeccion de lectura especifica para Roadmap con progreso de Tema/Fase/Global, fase actual derivada y repaso recomendado calculados on-demand. Esto no equivale a Dashboard completo: readiness, SnapshotProgreso operativo y vw_TemaEstado siguen diferidos.
 
 Metadata pedagogica de Fase validada: Fase ahora puede describir objetivos, criterios descriptivos de avance, meses relativos recomendados y carga semanal recomendada como texto. Esta metadata pertenece al roadmap recomendado; no representa progreso real del usuario, no reemplaza Tema.FechaInicio/FechaFin y no crea evidencia.
 
@@ -705,7 +709,9 @@ Frontend Foundation V1 validado: Angular standalone vive en frontend/, consume l
 
 Apuntes permanentes de Tema V1 backend validado: `roadmap.ApunteTema` modela el contenido personal editable 0..1 asociado a un Tema. No reemplaza Tema.Objetivos, Nota append-only, SesionEstudio.Notas ni Recurso.Notas. GET/PUT `/api/temas/{temaId}/apuntes` participan de API Personal y resuelven Usuario actual en el borde HTTP. La migracion `20260901003645_AgregarApuntesPermanentesTema` fue creada y validada sobre AprendizajeTestsDb; AprendizajePersonalDb no fue modificada en este bloque.
 
-Proxima area sugerida: Gate de diseno visual V1 y luego pantallas frontend incrementales de Roadmap/Study/Resource sobre API Personal. No implementar Evidence planificada ni PlanPortafolio.
+RoadmapVistaV1 backend validado: GET `/api/roadmap/vista` participa de API Personal y resuelve Usuario actual en el borde HTTP. La respuesta entrega Fases ordenadas con metadata pedagogica, Temas planos por Fase con TemaPadreId, criterios total/cumplidos, progreso de Tema, EstadoTema, proxima fecha de repaso si existe ultima sesion, repaso recomendado, progreso de Fase y progreso global. Progreso de Tema = criterios cumplidos / criterios totales, 0% si no hay criterios; no hay pesos. Progreso de Fase y Global = promedio de progreso de Temas evaluables asociados a Fases; un Tema padre con hijos y 0 criterios se trata como nodo organizativo para no degradar el avance de sus hijos. Fase actual = primera Fase por Orden no completada; una Fase se completa solo si tiene Temas evaluables y todos estan estructuralmente completos por criterios, aunque alguno este en EstadoTema.EnRepaso; si todas estan completas se devuelve la ultima. CriteriosAvance de Fase permanecen como metadata descriptiva, no progreso. No crea migraciones, SnapshotProgreso, vw_TemaEstado, Dashboard ni TemaWorkspaceV1.
+
+Proxima area sugerida: checkpoint RoadmapVistaV1 y luego pantalla frontend Roadmap V1 consumiendo `/api/roadmap/vista`. No implementar Dashboard completo, Evidence planificada ni PlanPortafolio.
 
 ## Pendientes Deliberados
 

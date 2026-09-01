@@ -104,8 +104,8 @@ Soft delete es selectivo y solo aplica a Aggregate Roots que implementan IElimin
 
 ## Decisiones Diferidas
 
-- vw_TemaEstado esta deliberadamente diferida al read side.
-- No crear entidad keyless para vw_TemaEstado hasta fase de lectura.
+- vw_TemaEstado esta deliberadamente diferida. RoadmapVistaV1 reutiliza Tema.CalcularEstado() desde una consulta on-demand y no crea vista SQL, entidad keyless ni snapshot persistido.
+- No crear entidad keyless para vw_TemaEstado hasta una fase explicita de paridad SQL.
 - TemaDependencia tiene condicion de carrera read -> validate -> insert diferida.
 - TemaDependencia queda diferida hasta disenar una garantia completa de aciclicidad y concurrencia.
 - Gobernanza de catalogos globales Herramienta/Certificacion diferida.
@@ -157,6 +157,19 @@ Soft delete es selectivo y solo aplica a Aggregate Roots que implementan IElimin
 - Temas y Herramientas se muestran solo mediante relaciones persistidas existentes; no hay inferencia por texto, tagging automatico ni AI summaries.
 - El endpoint de lectura participa de API Personal V1: en modo Personal puede omitir usuarioId y resolverlo en la capa HTTP; los contratos explicit-user legacy permanecen temporalmente para Development/tests.
 - No se crea Snapshot, vista materializada, cache ni motor de scoring para Portafolio V1.
+
+## RoadmapVistaV1
+
+- RoadmapVistaV1 es una proyeccion de lectura on-demand para la pantalla Roadmap V1. No es entidad, Aggregate Root, snapshot persistido, vista SQL ni motor paralelo de dominio.
+- API Personal expone GET /api/roadmap/vista resolviendo Usuario actual en el borde HTTP; Application conserva UsuarioId explicito.
+- Progreso de Tema = criterios cumplidos / criterios totales, redondeado a porcentaje entero; si un Tema no tiene criterios definidos, su progreso es 0%. CriterioTema no tiene pesos en V1, por lo que no hay ponderacion.
+- EstadoTema se calcula con Tema.CalcularEstado(), usando la ultima SesionEstudio visible del Tema y el intervalo efectivo de repaso: Tema.IntervaloRepaso si existe, o Usuario.IntervaloRepasoDefectoDias.
+- Repaso recomendado solo es true cuando EstadoTema resulta EnRepaso. ProximaFechaRepaso se expone si existe ultima sesion; sin ultima sesion no se inventa fecha.
+- Progreso de Fase = promedio simple del progreso de sus Temas evaluables asociados. Un Tema padre con hijos y 0 criterios se trata como nodo organizativo y no participa en el denominador de progreso; un Tema sin hijos y 0 criterios sigue siendo un Tema no iniciado. CriteriosAvance de Fase permanecen como metadata pedagogica descriptiva y no alteran el calculo.
+- TemasDominados cuenta Temas estructuralmente completos por criterios: CriteriosTotal mayor a 0 y CriteriosCumplidos igual a CriteriosTotal. EnRepaso conserva progreso 100% y cuenta como avance estructural ya recorrido, aunque se expone separadamente como repaso recomendado.
+- Fase actual derivada = primera Fase por Orden que no esta completada. Una Fase esta completada solo si tiene al menos un Tema evaluable y todos sus Temas evaluables estan estructuralmente completos por criterios. Si todas las Fases estan completadas, la Fase actual derivada es la ultima. Una Fase sin Temas evaluables no se considera completada.
+- ProgresoGlobalPorcentaje se incluye porque deriva del mismo conjunto de datos del Roadmap: promedio simple del progreso de los Temas evaluables asociados a Fases. No implica Dashboard completo ni SnapshotProgreso operativo.
+- Los Temas se entregan planos por Fase con TemaPadreId; no se construye arbol recursivo en backend para evitar DTOs recursivos innecesarios.
 
 ## Tema.Objetivos
 

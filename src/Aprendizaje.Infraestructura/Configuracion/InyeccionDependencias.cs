@@ -4,6 +4,7 @@ using Aprendizaje.Aplicacion.Analytics.Competencias;
 using Aprendizaje.Aplicacion.Analytics.Estudio;
 using Aprendizaje.Aplicacion.Analytics.Temas;
 using Aprendizaje.Aplicacion.Portafolio;
+using Aprendizaje.Aplicacion.Roadmap.Vistas.RoadmapVistaV1;
 using Aprendizaje.Dominio.Evidence.Repositorios;
 using Aprendizaje.Dominio.Nucleo.Repositorios;
 using Aprendizaje.Dominio.Resource.Repositorios;
@@ -11,6 +12,7 @@ using Aprendizaje.Dominio.Roadmap.Repositorios;
 using Aprendizaje.Dominio.Study.Repositorios;
 using Aprendizaje.Infraestructura.Persistencia;
 using Aprendizaje.Infraestructura.Persistencia.Consultas;
+using Aprendizaje.Infraestructura.Persistencia.Consultas.Roadmap;
 using Aprendizaje.Infraestructura.Persistencia.Interceptores;
 using Aprendizaje.Infraestructura.Persistencia.Repositorios;
 using Microsoft.EntityFrameworkCore;
@@ -48,6 +50,7 @@ public static class InyeccionDependencias
         services.AddScoped<IConsultaResumenCompetencias, ConsultaResumenCompetencias>();
         services.AddScoped<IConsultaResumenCertificaciones, ConsultaResumenCertificaciones>();
         services.AddScoped<IConsultaPortafolio, ConsultaPortafolio>();
+        services.AddScoped<IConsultaRoadmapVistaV1, ConsultaRoadmapVistaV1>();
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<AprendizajeDbContext>());
         services.AddScoped<ITransaccionAplicacion, TransaccionAplicacion>();
 

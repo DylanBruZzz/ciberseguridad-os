@@ -171,6 +171,15 @@ Soft delete es selectivo y solo aplica a Aggregate Roots que implementan IElimin
 - ProgresoGlobalPorcentaje se incluye porque deriva del mismo conjunto de datos del Roadmap: promedio simple del progreso de los Temas evaluables asociados a Fases. No implica Dashboard completo ni SnapshotProgreso operativo.
 - Los Temas se entregan planos por Fase con TemaPadreId; no se construye arbol recursivo en backend para evitar DTOs recursivos innecesarios.
 
+## TemaWorkspaceV1
+
+- TemaWorkspaceV1 es una proyeccion de lectura on-demand para abrir el Workspace de un Tema. No es entidad, Aggregate Root, snapshot persistido, vista SQL, cache ni God Dashboard.
+- API Personal expone GET /api/temas/{temaId}/workspace resolviendo Usuario actual en el borde HTTP; Application conserva UsuarioId explicito.
+- Reutiliza la misma semantica de RoadmapVistaV1 mediante una utilidad de read-side compartida: progreso de Tema = criterios cumplidos / criterios totales, 0% si no hay criterios; EstadoTema = Tema.CalcularEstado(); repasoRecomendado = EstadoTema.EnRepaso; proximaFechaRepaso solo existe si hay ultima sesion.
+- El endpoint devuelve contexto inicial del Tema: Tema, Fase, objetivos reales del Tema, criterios de dominio, ApunteTema actual, ultima SesionEstudio y resumenes de Resources, Sesiones y Evidence.
+- Resources, Sesiones y Evidence se exponen como resumenes contextuales para evitar cargar listas profundas. Evidence se cuenta por los ARs existentes: Proyecto, Laboratorio, Writeup, ArtefactoTecnico y CertificacionObtenida; CertificacionObtenida se relaciona con Tema a traves de CertificacionTema.
+- Leer Workspace no crea ApunteTema, no escribe estado de repaso, no persiste progreso y no implementa EvidenceListaV1 ni frontend.
+
 ## Tema.Objetivos
 
 - Dominio: Objetivos se expone como coleccion no-null desde la API publica.

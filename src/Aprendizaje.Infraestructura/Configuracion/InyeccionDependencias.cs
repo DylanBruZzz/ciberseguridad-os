@@ -5,6 +5,7 @@ using Aprendizaje.Aplicacion.Analytics.Estudio;
 using Aprendizaje.Aplicacion.Analytics.Temas;
 using Aprendizaje.Aplicacion.Portafolio;
 using Aprendizaje.Aplicacion.Roadmap.Vistas.RoadmapVistaV1;
+using Aprendizaje.Aplicacion.Roadmap.Vistas.TemaWorkspaceV1;
 using Aprendizaje.Dominio.Evidence.Repositorios;
 using Aprendizaje.Dominio.Nucleo.Repositorios;
 using Aprendizaje.Dominio.Resource.Repositorios;
@@ -51,6 +52,7 @@ public static class InyeccionDependencias
         services.AddScoped<IConsultaResumenCertificaciones, ConsultaResumenCertificaciones>();
         services.AddScoped<IConsultaPortafolio, ConsultaPortafolio>();
         services.AddScoped<IConsultaRoadmapVistaV1, ConsultaRoadmapVistaV1>();
+        services.AddScoped<IConsultaTemaWorkspaceV1, ConsultaTemaWorkspaceV1>();
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<AprendizajeDbContext>());
         services.AddScoped<ITransaccionAplicacion, TransaccionAplicacion>();
 

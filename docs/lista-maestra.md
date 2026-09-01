@@ -148,6 +148,7 @@
 - [x] ObtenerPortafolio implementado como read side factual sobre Evidence existente.
 - [x] ImportarRoadmapV1 implementado como bootstrap CLI idempotente.
 - [x] ObtenerRoadmapVistaV1 implementado como read side factual on-demand para Roadmap V1.
+- [x] ObtenerTemaWorkspaceV1 implementado como read side factual on-demand para Workspace de Tema V1.
 - [x] CrearTema implementado.
 - [x] ObtenerTemaPorId implementado.
 - [x] EstablecerObjetivosTema implementado.
@@ -255,6 +256,7 @@
 - [x] PUT /api/temas/{id}/intervalo-repaso.
 - [x] GET /api/temas/{temaId}/apuntes.
 - [x] PUT /api/temas/{temaId}/apuntes.
+- [x] GET /api/temas/{temaId}/workspace.
 - [x] POST /api/competencias.
 - [x] GET /api/competencias/{id}.
 - [x] GET /api/competencias?usuarioId={id}.
@@ -532,6 +534,7 @@
 - [x] Tests de API Personal V1 para resolucion opcional de usuarioId y guardas de ownership en el borde HTTP.
 - [x] Tests de ApuntesTema V1 en dominio, aplicacion, API Personal y persistencia SQL.
 - [x] Tests de RoadmapVistaV1 en Application, API Personal e integracion SQL.
+- [x] Tests de TemaWorkspaceV1 en Application, API Personal e integracion SQL.
 - [x] Tests de Application para ImportarRoadmapV1: validacion, usuario inexistente, idempotencia y conflictos.
 - [x] Tests de integracion para ImportarRoadmapV1: dataset real, idempotencia SQL, rollback, no Evidence y CLI controlado.
 - [ ] Tests E2E automatizados.
@@ -550,6 +553,7 @@
 - [x] Analytics directo minimo funcional cerrado.
 - [x] Portafolio V1 read side como proyeccion sobre Evidence con EstadoMadurez ListoPortafolio/Publicado.
 - [x] RoadmapVistaV1 read side como proyeccion on-demand sin SnapshotProgreso ni vw_TemaEstado.
+- [x] TemaWorkspaceV1 read side como proyeccion contextual on-demand sin SnapshotProgreso, vw_TemaEstado ni God Dashboard.
 - [ ] Analytics semantico avanzado.
 - [ ] SnapshotProgreso operativo.
 
@@ -617,6 +621,7 @@
 - [x] Roadmap real visible desde Frontend sin usuarioId.
 - [x] Apuntes permanentes editables de Tema V1 backend.
 - [x] RoadmapVistaV1 backend/read-side.
+- [x] TemaWorkspaceV1 backend/read-side.
 
 ## 16. Pendientes arquitectonicos
 

@@ -1,3 +1,4 @@
+using Aprendizaje.Aplicacion.Roadmap.Vistas;
 using Aprendizaje.Aplicacion.Roadmap.Vistas.RoadmapVistaV1;
 using Aprendizaje.Dominio.Roadmap;
 using Aprendizaje.Dominio.Roadmap.ValueObjects;
@@ -83,7 +84,8 @@ public sealed class ConsultaRoadmapVistaV1 : IConsultaRoadmapVistaV1
 
         return new RoadmapVistaV1Dto(
             faseActualId,
-            CalcularPromedioPorcentaje(temasEvaluablesGlobales.Select(t => t.ProgresoPorcentaje)),
+            SemanticaTemaReadSide.CalcularPromedioPorcentaje(
+                temasEvaluablesGlobales.Select(t => t.ProgresoPorcentaje)),
             todosLosTemas.Length,
             temasEvaluablesGlobales.Count(EsTemaCompletadoEstructuralmente),
             fasesVista);
@@ -95,12 +97,12 @@ public sealed class ConsultaRoadmapVistaV1 : IConsultaRoadmapVistaV1
         IntervaloRepaso intervaloDefecto,
         DateTime ahoraUtc)
     {
-        var intervaloEfectivo = tema.IntervaloRepaso ?? intervaloDefecto;
         var ultimaSesion = ultimasSesiones.GetValueOrDefault(tema.Id);
-        DateTime? ultimaPracticaUtc = ultimaSesion == default ? null : ConvertirAUtc(ultimaSesion);
-        var estado = tema.CalcularEstado(ultimaPracticaUtc, ahoraUtc, intervaloEfectivo);
-        var criteriosTotal = tema.Criterios.Count;
-        var criteriosCumplidos = tema.Criterios.Count(c => c.Cumplido);
+        var semantica = SemanticaTemaReadSide.Calcular(
+            tema,
+            ultimaSesion == default ? null : ultimaSesion,
+            intervaloDefecto,
+            ahoraUtc);
 
         return new TemaRoadmapVistaV1Dto(
             tema.Id,
@@ -111,16 +113,14 @@ public sealed class ConsultaRoadmapVistaV1 : IConsultaRoadmapVistaV1
             tema.TipoConocimiento,
             tema.DificultadPercibida?.Valor,
             tema.Confianza?.Valor,
-            intervaloEfectivo.Dias,
-            estado,
-            criteriosTotal,
-            criteriosCumplidos,
-            CalcularPorcentaje(criteriosCumplidos, criteriosTotal),
+            semantica.IntervaloRepasoDias,
+            semantica.Estado,
+            semantica.CriteriosTotal,
+            semantica.CriteriosCumplidos,
+            semantica.ProgresoPorcentaje,
             ultimaSesion == default ? null : ultimaSesion,
-            ultimaPracticaUtc is null
-                ? null
-                : DateOnly.FromDateTime(intervaloEfectivo.ProximaFecha(ultimaPracticaUtc.Value)),
-            estado == EstadoTema.EnRepaso);
+            semantica.ProximaFechaRepaso,
+            semantica.RepasoRecomendado);
     }
 
     private static FaseIntermedia CrearFaseIntermedia(
@@ -132,7 +132,8 @@ public sealed class ConsultaRoadmapVistaV1 : IConsultaRoadmapVistaV1
             .Where(t => !EsNodoOrganizativoSinCriterios(t, temas))
             .ToArray();
         var temasDominados = temasEvaluables.Count(EsTemaCompletadoEstructuralmente);
-        var progresoPorcentaje = CalcularPromedioPorcentaje(temasEvaluables.Select(t => t.ProgresoPorcentaje));
+        var progresoPorcentaje = SemanticaTemaReadSide.CalcularPromedioPorcentaje(
+            temasEvaluables.Select(t => t.ProgresoPorcentaje));
         var estaCompletada = temasEvaluables.Length > 0
             && temasEvaluables.All(EsTemaCompletadoEstructuralmente);
 
@@ -165,32 +166,17 @@ public sealed class ConsultaRoadmapVistaV1 : IConsultaRoadmapVistaV1
     }
 
     private static bool EsTemaCompletadoEstructuralmente(TemaRoadmapVistaV1Dto tema) =>
-        tema.CriteriosTotal > 0 && tema.CriteriosCumplidos == tema.CriteriosTotal;
+        SemanticaTemaReadSide.EsTemaCompletadoEstructuralmente(
+            tema.CriteriosTotal,
+            tema.CriteriosCumplidos);
 
     private static bool EsNodoOrganizativoSinCriterios(
         TemaRoadmapVistaV1Dto tema,
         IReadOnlyCollection<TemaRoadmapVistaV1Dto> temasDeLaFase) =>
-        tema.CriteriosTotal == 0 && temasDeLaFase.Any(t => t.TemaPadreId == tema.Id);
-
-    private static int CalcularPorcentaje(int cumplidos, int total)
-    {
-        if (total <= 0)
-            return 0;
-
-        return (int)Math.Round(cumplidos * 100m / total, MidpointRounding.AwayFromZero);
-    }
-
-    private static int CalcularPromedioPorcentaje(IEnumerable<int> porcentajes)
-    {
-        var valores = porcentajes.ToArray();
-
-        return valores.Length == 0
-            ? 0
-            : (int)Math.Round(valores.Average(), MidpointRounding.AwayFromZero);
-    }
-
-    private static DateTime ConvertirAUtc(DateOnly fecha) =>
-        DateTime.SpecifyKind(fecha.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
+        SemanticaTemaReadSide.EsNodoOrganizativoSinCriterios(
+            tema.Id,
+            tema.CriteriosTotal,
+            temasDeLaFase.Select(t => t.TemaPadreId));
 
     private sealed record FaseIntermedia(
         Guid Id,

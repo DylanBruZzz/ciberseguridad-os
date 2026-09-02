@@ -146,6 +146,7 @@
 - [x] ObtenerResumenCompetencias implementado.
 - [x] ObtenerResumenCertificaciones implementado.
 - [x] ObtenerPortafolio implementado como read side factual sobre Evidence existente.
+- [x] ObtenerEvidenceListaV1 implementado como read side factual unificado sobre los cinco AR de Evidence.
 - [x] ImportarRoadmapV1 implementado como bootstrap CLI idempotente.
 - [x] ObtenerRoadmapVistaV1 implementado como read side factual on-demand para Roadmap V1.
 - [x] ObtenerTemaWorkspaceV1 implementado como read side factual on-demand para Workspace de Tema V1.
@@ -535,6 +536,7 @@
 - [x] Tests de ApuntesTema V1 en dominio, aplicacion, API Personal y persistencia SQL.
 - [x] Tests de RoadmapVistaV1 en Application, API Personal e integracion SQL.
 - [x] Tests de TemaWorkspaceV1 en Application, API Personal e integracion SQL.
+- [x] Tests de EvidenceListaV1 en Application, API Personal e integracion SQL.
 - [x] Tests de Application para ImportarRoadmapV1: validacion, usuario inexistente, idempotencia y conflictos.
 - [x] Tests de integracion para ImportarRoadmapV1: dataset real, idempotencia SQL, rollback, no Evidence y CLI controlado.
 - [ ] Tests E2E automatizados.
@@ -552,6 +554,7 @@
 - [x] Consulta on-demand ResumenCertificacion con metricas factuales.
 - [x] Analytics directo minimo funcional cerrado.
 - [x] Portafolio V1 read side como proyeccion sobre Evidence con EstadoMadurez ListoPortafolio/Publicado.
+- [x] EvidenceListaV1 read side como indice unificado de Evidence con filtros por tipo, EstadoMadurez y Tema.
 - [x] RoadmapVistaV1 read side como proyeccion on-demand sin SnapshotProgreso ni vw_TemaEstado.
 - [x] TemaWorkspaceV1 read side como proyeccion contextual on-demand sin SnapshotProgreso, vw_TemaEstado ni God Dashboard.
 - [ ] Analytics semantico avanzado.
@@ -622,6 +625,7 @@
 - [x] Apuntes permanentes editables de Tema V1 backend.
 - [x] RoadmapVistaV1 backend/read-side.
 - [x] TemaWorkspaceV1 backend/read-side.
+- [x] EvidenceListaV1 backend/read-side.
 
 ## 16. Pendientes arquitectonicos
 

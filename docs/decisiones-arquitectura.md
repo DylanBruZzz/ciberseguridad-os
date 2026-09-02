@@ -178,7 +178,19 @@ Soft delete es selectivo y solo aplica a Aggregate Roots que implementan IElimin
 - Reutiliza la misma semantica de RoadmapVistaV1 mediante una utilidad de read-side compartida: progreso de Tema = criterios cumplidos / criterios totales, 0% si no hay criterios; EstadoTema = Tema.CalcularEstado(); repasoRecomendado = EstadoTema.EnRepaso; proximaFechaRepaso solo existe si hay ultima sesion.
 - El endpoint devuelve contexto inicial del Tema: Tema, Fase, objetivos reales del Tema, criterios de dominio, ApunteTema actual, ultima SesionEstudio y resumenes de Resources, Sesiones y Evidence.
 - Resources, Sesiones y Evidence se exponen como resumenes contextuales para evitar cargar listas profundas. Evidence se cuenta por los ARs existentes: Proyecto, Laboratorio, Writeup, ArtefactoTecnico y CertificacionObtenida; CertificacionObtenida se relaciona con Tema a traves de CertificacionTema.
-- Leer Workspace no crea ApunteTema, no escribe estado de repaso, no persiste progreso y no implementa EvidenceListaV1 ni frontend.
+- Leer Workspace no crea ApunteTema, no escribe estado de repaso, no persiste progreso y no implementa frontend.
+
+## EvidenceListaV1
+
+- EvidenceListaV1 es una proyeccion de lectura on-demand para la pantalla Evidence V1. No es entidad, Aggregate Root, superclase de dominio, tabla, vista SQL ni repositorio generico.
+- API Personal expone GET /api/evidence resolviendo Usuario actual en el borde HTTP; Application conserva UsuarioId explicito. Filtros V1: tipoEvidence, estadoMadurez y temaId.
+- Los cinco ARs permanecen como fuentes de verdad: Proyecto, Laboratorio, Writeup, ArtefactoTecnico y CertificacionObtenida. El discriminador `TipoEvidenceV1` vive en Application/read-side y no se persiste.
+- EstadoMadurez se devuelve factual con los valores de dominio Borrador, Documentado, ListoPortafolio y Publicado; no se transforma en porcentaje ni estado visual.
+- El titulo se normaliza por proyeccion: Proyecto.Nombre, Laboratorio.Nombre, Writeup.Titulo, ArtefactoTecnico.Nombre y Certificacion.Nombre para CertificacionObtenida.
+- Fechas factuales: fechaCreacionUtc, fechaModificacionUtc y fechaActividadUtc como FechaModificacionUtc o FechaCreacionUtc; el texto relativo queda para frontend. FechaReferencia usa la fecha propia del AR cuando existe.
+- Temas se exponen por relaciones reales: ProyectoTema, LaboratorioTema, WriteupTema, ArtefactoTema y CertificacionTema para CertificacionObtenida via Certificacion. Herramientas se exponen solo para Proyecto, Laboratorio y ArtefactoTecnico.
+- Portafolio permanece separado: EvidenceListaV1 incluye todos los EstadosMadurez visibles; Portafolio sigue filtrando ListoPortafolio/Publicado.
+- No crea detail unificado ni writes genericos `/api/evidence`; el frontend puede usar tipoEvidence + id para ir al endpoint especifico del AR.
 
 ## Tema.Objetivos
 

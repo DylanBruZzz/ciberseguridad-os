@@ -150,6 +150,8 @@ caf832a feat: establish validated initial persistence
 - TEMAWORKSPACEV1 READ-SIDE BACKEND VALIDADO END-TO-END
 - API PERSONAL GET /api/temas/{temaId}/workspace SIN USUARIOID VALIDADA
 - TEMAWORKSPACEV1 REUTILIZA SEMANTICA ROADMAPVISTAV1 PARA PROGRESO, ESTADO Y REPASO
+- VISUAL SHELL V1 FRONTEND VALIDADO
+- IDENTIDAD CIBERSEGURIDAD OS ESTABLECIDA EN DARK MODE
 
 ## Migraciones Aplicadas
 
@@ -193,11 +195,11 @@ caf832a feat: establish validated initial persistence
   - UsuarioActual: Dylan
   - Fases: 7
   - Temas: 63
-- Navegacion base preparada: Roadmap, Study, Resources, Evidence y Portfolio.
+- Navegacion base preparada: Dashboard, Roadmap, Study, Resources, Evidence y Portfolio.
 - Implementacion funcional profunda actual: Roadmap.
-- Study, Resources, Evidence y Portfolio quedan como rutas placeholder limpias hasta sus bloques V1.
+- Dashboard, Study, Resources, Evidence y Portfolio quedan como rutas placeholder limpias hasta sus bloques V1.
 - CORS no se agrego en este bloque; el desarrollo usa proxy Angular especifico. No existe AllowAnyOrigin.
-- Diseno visual definitivo: pendiente.
+- Visual Shell V1 validado: dark mode, identidad Ciberseguridad OS, sidebar vertical compacta, topbar por modulo, Search/Ctrl+K preparado, responsive base y estados globales discretos. Light mode, dock inferior y pantallas profundas siguen diferidos.
 
 ## Datos Roadmap V1 Personal
 
@@ -636,7 +638,7 @@ Nota E2E:
 - dotnet test por proyecto: validado
 - dotnet test por solucion: validado con 525 tests correctos
 - Frontend: Angular build validado.
-- Frontend: 10 tests unitarios correctos.
+- Frontend: 14 tests unitarios correctos.
 - Smoke test actual: Tema.Crear expone Objetivos como coleccion no-null y vacia.
 - Tests de Dominio Tema: objetivos, fase, jerarquia directa, criterios, planificacion, percepcion, IntervaloRepaso, dominio y TemaDominadoEvento validados.
 - Tests de Dominio Competencia validados.
@@ -716,6 +718,8 @@ API Personal V1 validada: en modo Personal, la capa HTTP resuelve usuarioId medi
 
 Frontend Foundation V1 validado: Angular standalone vive en frontend/, consume la API Personal via /api y proxy local, obtiene UsuarioActual y muestra las 7 Fases reales y 63 Temas sin que el cliente envie usuarioId. No hay Auth, CORS global, dashboard avanzado ni escritura sobre AprendizajePersonalDb.
 
+Visual Shell V1 frontend validado: la ruta inicial es `/dashboard`; la shell usa identidad `Ciberseguridad OS`, dark mode, sidebar izquierda compacta con Dashboard, Roadmap, Study, Resources, Evidence, Portfolio y Search, topbar con titulo derivado de route data y UsuarioActual cuando esta disponible. Search abre una command palette basica por boton o Ctrl+K sin motor global. Dashboard, Study, Resources, Evidence y Portfolio son placeholders visuales intencionales; Roadmap conserva la integracion existente sin ampliarla a RoadmapVistaV1 profundo. No se agregaron UI frameworks, paquetes, Auth, light mode, dock inferior, analytics screen ni frontend profundo de Workspace/Evidence/Portfolio.
+
 Apuntes permanentes de Tema V1 backend validado: `roadmap.ApunteTema` modela el contenido personal editable 0..1 asociado a un Tema. No reemplaza Tema.Objetivos, Nota append-only, SesionEstudio.Notas ni Recurso.Notas. GET/PUT `/api/temas/{temaId}/apuntes` participan de API Personal y resuelven Usuario actual en el borde HTTP. La migracion `20260901003645_AgregarApuntesPermanentesTema` fue creada y validada sobre AprendizajeTestsDb; AprendizajePersonalDb no fue modificada en este bloque.
 
 RoadmapVistaV1 backend validado: GET `/api/roadmap/vista` participa de API Personal y resuelve Usuario actual en el borde HTTP. La respuesta entrega Fases ordenadas con metadata pedagogica, Temas planos por Fase con TemaPadreId, criterios total/cumplidos, progreso de Tema, EstadoTema, proxima fecha de repaso si existe ultima sesion, repaso recomendado, progreso de Fase y progreso global. Progreso de Tema = criterios cumplidos / criterios totales, 0% si no hay criterios; no hay pesos. Progreso de Fase y Global = promedio de progreso de Temas evaluables asociados a Fases; un Tema padre con hijos y 0 criterios se trata como nodo organizativo para no degradar el avance de sus hijos. Fase actual = primera Fase por Orden no completada; una Fase se completa solo si tiene Temas evaluables y todos estan estructuralmente completos por criterios, aunque alguno este en EstadoTema.EnRepaso; si todas estan completas se devuelve la ultima. CriteriosAvance de Fase permanecen como metadata descriptiva, no progreso. No crea migraciones, SnapshotProgreso, vw_TemaEstado ni Dashboard.
@@ -724,7 +728,7 @@ TemaWorkspaceV1 backend validado: GET `/api/temas/{temaId}/workspace` participa 
 
 EvidenceListaV1 backend validado: GET `/api/evidence` participa de API Personal y resuelve Usuario actual en el borde HTTP. La respuesta unifica solo en read-side Proyecto, Laboratorio, Writeup, ArtefactoTecnico y CertificacionObtenida con discriminador `TipoEvidenceV1`, titulo normalizado, EstadoMadurez factual, fechas factuales, Temas relacionados y Herramientas solo donde existen relaciones reales. Filtros V1 disponibles: `tipoEvidence`, `estadoMadurez` y `temaId`; CertificacionObtenida se relaciona con Tema a traves de CertificacionTema. Portafolio permanece separado y sigue incluyendo solo ListoPortafolio/Publicado. No crea entidad Evidence generica, no crea writes genericos, no crea migraciones, no implementa UI Evidence y no modifica AprendizajePersonalDb.
 
-Proxima area sugerida: checkpoint EvidenceListaV1 y luego pantalla frontend Evidence V1 consumiendo `/api/evidence`. No implementar Dashboard completo, Evidence planificada, Portfolio nuevo ni writes genericos Evidence.
+Proxima area sugerida: auditoria visual de Visual Shell V1 y luego checkpoint frontend. No implementar Dashboard completo, Roadmap profundo, Workspace frontend, Evidence frontend, Portfolio frontend, light mode ni dock inferior.
 
 ## Pendientes Deliberados
 

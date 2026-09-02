@@ -1,47 +1,95 @@
-<div class="app-shell">
-  <header class="topbar">
-    <a class="brand" routerLink="/roadmap" aria-label="Aprendizaje Roadmap">
-      <span class="brand-mark" aria-hidden="true">A</span>
-      <span>
-        <strong>Aprendizaje</strong>
-        <small>Personal V1</small>
+<div class="app-shell" [class.search-open]="paletteAbierta()">
+  <aside class="sidebar" aria-label="Navegacion principal">
+    <a class="brand" routerLink="/dashboard" aria-label="Ciberseguridad OS">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="M12 3 20 7.5v9L12 21l-8-4.5v-9L12 3Z" />
+          <path d="M12 7v10M8.5 9.5 12 7l3.5 2.5M8.5 14.5 12 17l3.5-2.5" />
+        </svg>
       </span>
+      <span class="sr-only">Ciberseguridad OS</span>
     </a>
 
-    <nav class="main-nav" aria-label="Navegacion principal">
+    <nav class="main-nav">
       @for (item of navegacion; track item.route) {
         <a
           [routerLink]="item.route"
           routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: item.route === '/roadmap' }"
+          [routerLinkActiveOptions]="{ exact: true }"
+          [attr.aria-label]="item.ariaLabel"
+          [attr.title]="item.label"
         >
-          {{ item.label }}
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path [attr.d]="item.icon" />
+          </svg>
+          <span>{{ item.label }}</span>
         </a>
       }
     </nav>
 
-    <div class="user-chip" aria-live="polite">
-      @if (cargandoUsuario()) {
-        <span class="status-dot pending" aria-hidden="true"></span>
-        <span>Conectando</span>
-      } @else if (usuario(); as actual) {
-        <span class="avatar" aria-hidden="true">{{ iniciales() }}</span>
-        <span>{{ actual.nombre }}</span>
-      } @else {
-        <span class="status-dot error" aria-hidden="true"></span>
-        <span>Configuracion requerida</span>
-      }
-    </div>
-  </header>
+    <div class="sidebar-separator" aria-hidden="true"></div>
 
-  @if (errorUsuario()) {
-    <section class="system-alert" role="alert">
-      <strong>No se pudo resolver el usuario local.</strong>
-      <span>{{ errorUsuario() }}</span>
+    <button
+      type="button"
+      class="search-trigger"
+      aria-label="Abrir busqueda global"
+      title="Search"
+      (click)="abrirBusqueda()"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" />
+      </svg>
+      <span>Search</span>
+    </button>
+  </aside>
+
+  <div class="workspace">
+    <header class="topbar">
+      <div class="module-title">
+        <span class="topbar-mark" aria-hidden="true">⬡</span>
+        <span>Ciberseguridad OS · {{ moduloActual() }}</span>
+      </div>
+
+      <div class="user-chip" aria-live="polite">
+        @if (cargandoUsuario()) {
+          <span class="status-dot pending" aria-hidden="true"></span>
+          <span>Conectando</span>
+        } @else if (usuario(); as actual) {
+          <span class="avatar" aria-hidden="true">{{ iniciales() }}</span>
+          <span>{{ actual.nombre }}</span>
+        } @else {
+          <span class="status-dot error" aria-hidden="true"></span>
+          <span>Configuracion requerida</span>
+        }
+      </div>
+    </header>
+
+    @if (errorUsuario()) {
+      <section class="system-alert" role="alert">
+        <strong>No se pudo resolver el usuario local.</strong>
+        <span>{{ errorUsuario() }}</span>
+      </section>
+    }
+
+    <main class="content-shell">
+      <router-outlet />
+    </main>
+  </div>
+
+  @if (paletteAbierta()) {
+    <div class="palette-backdrop" (click)="cerrarBusqueda()" aria-hidden="true"></div>
+    <section class="command-palette" role="dialog" aria-modal="true" aria-labelledby="search-title">
+      <header>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" />
+        </svg>
+        <div>
+          <p>Search</p>
+          <h2 id="search-title">Busqueda global</h2>
+        </div>
+        <button type="button" data-search-close aria-label="Cerrar busqueda global" (click)="cerrarBusqueda()">Esc</button>
+      </header>
+      <p class="palette-message">La busqueda global se integrara con Roadmap, Resources y Evidence.</p>
     </section>
   }
-
-  <main class="content-shell">
-    <router-outlet />
-  </main>
 </div>

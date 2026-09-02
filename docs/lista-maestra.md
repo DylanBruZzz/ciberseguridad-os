@@ -574,7 +574,8 @@
 - [x] Integracion con API Personal mediante /api y proxy Angular local.
 - [x] Frontend obtiene UsuarioActual sin login y sin seleccionar UsuarioId.
 - [x] Roadmap real visible desde frontend: 7 Fases y 63 Temas sin usuarioId en requests.
-- [x] Rutas base preparadas: Roadmap, Study, Resources, Evidence y Portfolio.
+- [x] Rutas base preparadas: Dashboard, Roadmap, Study, Resources, Evidence y Portfolio.
+- [x] Visual Shell V1 con dark mode, sidebar vertical, topbar por modulo, Search preparado y responsive base.
 - [ ] Pantalla Roadmap completa con navegacion Tema detallada.
 - [ ] Pantalla Study V1.
 - [ ] Pantalla Resources V1.
@@ -621,6 +622,7 @@
 - [x] GET /api/usuario-actual.
 - [x] API Personal V1 opera sin usuarioId visible para el Frontend en flujos diarios.
 - [x] Frontend Foundation V1.
+- [x] Visual Shell V1.
 - [x] Roadmap real visible desde Frontend sin usuarioId.
 - [x] Apuntes permanentes editables de Tema V1 backend.
 - [x] RoadmapVistaV1 backend/read-side.

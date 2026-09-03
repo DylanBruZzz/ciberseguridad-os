@@ -576,7 +576,11 @@
 - [x] Roadmap real visible desde frontend: 7 Fases y 63 Temas sin usuarioId en requests.
 - [x] Rutas base preparadas: Dashboard, Roadmap, Study, Resources, Evidence y Portfolio.
 - [x] Visual Shell V1 con dark mode, sidebar vertical, topbar por modulo, Search preparado y responsive base.
-- [ ] Pantalla Roadmap completa con navegacion Tema detallada.
+- [x] Pantalla Dashboard V1 funcional sobre RoadmapVistaV1.
+- [x] Pantalla Roadmap V1 funcional sobre RoadmapVistaV1 con timeline, detalle de Fase y Temas accionables.
+- [x] RoadmapService consume `GET /api/roadmap/vista` sin usuarioId y cache runtime en memoria.
+- [x] Ruta `/roadmap/tema/:temaId` preparada como placeholder contextual para Workspace futuro.
+- [ ] Workspace frontend de Tema sobre TemaWorkspaceV1.
 - [ ] Pantalla Study V1.
 - [ ] Pantalla Resources V1.
 - [ ] Pantalla Evidence V1.
@@ -624,6 +628,8 @@
 - [x] Frontend Foundation V1.
 - [x] Visual Shell V1.
 - [x] Roadmap real visible desde Frontend sin usuarioId.
+- [x] Dashboard V1 funcional validado contra RoadmapVistaV1.
+- [x] Roadmap V1 funcional validado contra RoadmapVistaV1.
 - [x] Apuntes permanentes editables de Tema V1 backend.
 - [x] RoadmapVistaV1 backend/read-side.
 - [x] TemaWorkspaceV1 backend/read-side.

@@ -152,6 +152,12 @@ caf832a feat: establish validated initial persistence
 - TEMAWORKSPACEV1 REUTILIZA SEMANTICA ROADMAPVISTAV1 PARA PROGRESO, ESTADO Y REPASO
 - VISUAL SHELL V1 FRONTEND VALIDADO
 - IDENTIDAD CIBERSEGURIDAD OS ESTABLECIDA EN DARK MODE
+- ROADMAP FRONTEND V1 FUNCIONAL VALIDADO CONTRA ROADMAPVISTAV1
+- DASHBOARD FRONTEND V1 FUNCIONAL VALIDADO CONTRA ROADMAPVISTAV1
+- DASHBOARD Y ROADMAP V1 CONSUMEN PROGRESO, FASE ACTUAL Y REPASO DESDE BACKEND SIN RECALCULO DE DOMINIO EN ANGULAR
+- ROADMAP V1 DISTINGUE FASE ACTUAL REAL DE FASE SELECCIONADA LOCALMENTE
+- DASHBOARD V1 USA CONTINUIDAD FACTUAL POR ULTIMA SESION O FALLBACK HONESTO A EXPLORAR FASE ACTUAL
+- STREAK, DEADLINES PUNITIVOS, TIMER, ANALYTICS Y SEARCH GLOBAL REAL SIGUEN DIFERIDOS
 
 ## Migraciones Aplicadas
 
@@ -190,16 +196,22 @@ caf832a feat: establish validated initial persistence
 - Desarrollo frontend: Angular dev server con proxy local hacia http://localhost:64021.
 - No se almacena UsuarioId, Email, connection string ni secretos en el frontend.
 - Usuario actual: GET /api/usuario-actual devuelve Id y Nombre; el Id es informativo y no se usa para construir requests de ownership.
-- Roadmap inicial: GET /api/fases y GET /api/temas se consumen sin usuarioId desde frontend.
+- Roadmap inicial legacy: GET /api/fases y GET /api/temas se consumian sin usuarioId desde frontend.
+- Roadmap/Dashboard funcional V1: GET /api/roadmap/vista se consume sin usuarioId desde frontend.
 - Runtime Personal validado en modo read-only:
   - UsuarioActual: Dylan
   - Fases: 7
   - Temas: 63
 - Navegacion base preparada: Dashboard, Roadmap, Study, Resources, Evidence y Portfolio.
-- Implementacion funcional profunda actual: Roadmap.
-- Dashboard, Study, Resources, Evidence y Portfolio quedan como rutas placeholder limpias hasta sus bloques V1.
+- Implementacion funcional profunda actual: Dashboard y Roadmap.
+- Dashboard V1 consume GET /api/roadmap/vista y GET /api/usuario-actual para saludo, progreso global, linea conectada de Fases, Fase actual y continuidad factual.
+- Roadmap V1 consume GET /api/roadmap/vista para timeline de Fases, detalle de Fase, metadata pedagogica, objetivos, criterios de avance, Temas, progreso, EstadoTema y repaso.
+- RoadmapService usa cache runtime en memoria con refresh explicito; no usa localStorage, sessionStorage, IndexedDB ni state management externo.
+- Ruta `/roadmap/tema/:temaId` queda preparada como placeholder contextual para el siguiente bloque de Workspace frontend; no consume TemaWorkspaceV1 todavia.
+- Study, Resources, Evidence y Portfolio quedan como rutas placeholder limpias hasta sus bloques V1.
 - CORS no se agrego en este bloque; el desarrollo usa proxy Angular especifico. No existe AllowAnyOrigin.
 - Visual Shell V1 validado: dark mode, identidad Ciberseguridad OS, sidebar vertical compacta, topbar por modulo, Search/Ctrl+K preparado, responsive base y estados globales discretos. Light mode, dock inferior y pantallas profundas siguen diferidos.
+- Validacion frontend actual: 27 tests unitarios correctos y `npm run build` correcto.
 
 ## Datos Roadmap V1 Personal
 
@@ -718,7 +730,9 @@ API Personal V1 validada: en modo Personal, la capa HTTP resuelve usuarioId medi
 
 Frontend Foundation V1 validado: Angular standalone vive en frontend/, consume la API Personal via /api y proxy local, obtiene UsuarioActual y muestra las 7 Fases reales y 63 Temas sin que el cliente envie usuarioId. No hay Auth, CORS global, dashboard avanzado ni escritura sobre AprendizajePersonalDb.
 
-Visual Shell V1 frontend validado: la ruta inicial es `/dashboard`; la shell usa identidad `Ciberseguridad OS`, dark mode, sidebar izquierda compacta con Dashboard, Roadmap, Study, Resources, Evidence, Portfolio y Search, topbar con titulo derivado de route data y UsuarioActual cuando esta disponible. Search abre una command palette basica por boton o Ctrl+K sin motor global. Dashboard, Study, Resources, Evidence y Portfolio son placeholders visuales intencionales; Roadmap conserva la integracion existente sin ampliarla a RoadmapVistaV1 profundo. No se agregaron UI frameworks, paquetes, Auth, light mode, dock inferior, analytics screen ni frontend profundo de Workspace/Evidence/Portfolio.
+Visual Shell V1 frontend validado: la ruta inicial es `/dashboard`; la shell usa identidad `Ciberseguridad OS`, dark mode, sidebar izquierda compacta con Dashboard, Roadmap, Study, Resources, Evidence, Portfolio y Search, topbar con titulo derivado de route data y UsuarioActual cuando esta disponible. Search abre una command palette basica por boton o Ctrl+K sin motor global. No se agregaron UI frameworks, paquetes, Auth, light mode, dock inferior, analytics screen ni frontend profundo de Workspace/Evidence/Portfolio.
+
+Roadmap y Dashboard frontend V1 validados: Dashboard y Roadmap consumen `GET /api/roadmap/vista` mediante modelos TypeScript estrictos y cache runtime en memoria. Angular presenta `progresoGlobalPorcentaje`, `progresoPorcentaje`, `faseActualId`, `esFaseActual`, `estado` y `repasoRecomendado` sin recalcular semantica de dominio. Dashboard muestra saludo con UsuarioActual, progreso global, linea conectada de Fases, Fase actual y continuidad factual: ultimo Tema con `ultimaSesion` si existe, o fallback honesto a explorar la Fase actual cuando no hay sesiones porque `RoadmapVistaV1` no expone un orden factual de Tema. Roadmap muestra timeline amplio, detalle de Fase seleccionada, metadata pedagogica, objetivos, criterios de avance y Temas accionables. La seleccion local de Fase puede venir de query param `fase`, pero no cambia la Fase actual real. `/roadmap/tema/:temaId` queda como placeholder contextual para Workspace frontend futuro. Personal fue usado en solo lectura para validar Dylan, 7 Fases, 63 Temas y progreso 0% real por ausencia de criterios completados.
 
 Apuntes permanentes de Tema V1 backend validado: `roadmap.ApunteTema` modela el contenido personal editable 0..1 asociado a un Tema. No reemplaza Tema.Objetivos, Nota append-only, SesionEstudio.Notas ni Recurso.Notas. GET/PUT `/api/temas/{temaId}/apuntes` participan de API Personal y resuelven Usuario actual en el borde HTTP. La migracion `20260901003645_AgregarApuntesPermanentesTema` fue creada y validada sobre AprendizajeTestsDb; AprendizajePersonalDb no fue modificada en este bloque.
 
@@ -728,7 +742,7 @@ TemaWorkspaceV1 backend validado: GET `/api/temas/{temaId}/workspace` participa 
 
 EvidenceListaV1 backend validado: GET `/api/evidence` participa de API Personal y resuelve Usuario actual en el borde HTTP. La respuesta unifica solo en read-side Proyecto, Laboratorio, Writeup, ArtefactoTecnico y CertificacionObtenida con discriminador `TipoEvidenceV1`, titulo normalizado, EstadoMadurez factual, fechas factuales, Temas relacionados y Herramientas solo donde existen relaciones reales. Filtros V1 disponibles: `tipoEvidence`, `estadoMadurez` y `temaId`; CertificacionObtenida se relaciona con Tema a traves de CertificacionTema. Portafolio permanece separado y sigue incluyendo solo ListoPortafolio/Publicado. No crea entidad Evidence generica, no crea writes genericos, no crea migraciones, no implementa UI Evidence y no modifica AprendizajePersonalDb.
 
-Proxima area sugerida: auditoria visual de Visual Shell V1 y luego checkpoint frontend. No implementar Dashboard completo, Roadmap profundo, Workspace frontend, Evidence frontend, Portfolio frontend, light mode ni dock inferior.
+Proxima area sugerida: Workspace frontend de Tema sobre TemaWorkspaceV1, manteniendo Dashboard/Roadmap como read-only factual. No implementar Study, Resources, Evidence, Portfolio, light mode, dock inferior, timer, analytics screen, Search global real ni streak fuera de sus bloques propios.
 
 ## Pendientes Deliberados
 

@@ -1,30 +1,33 @@
 <section class="roadmap-page">
   <header class="page-header">
     <div>
-      <p class="eyebrow">Roadmap personal</p>
-      <h1>Ciberseguridad V1</h1>
+      <p class="eyebrow">Roadmap</p>
+      <h1>Tu ruta de aprendizaje</h1>
     </div>
 
     <div class="summary" aria-label="Resumen del roadmap">
       <span><strong>{{ fases().length }}</strong> fases</span>
       <span><strong>{{ totalTemas() }}</strong> temas</span>
+      <span><strong>{{ temasDominados() }}</strong> dominados</span>
     </div>
   </header>
 
   @if (cargando()) {
-    <section class="state-panel" aria-live="polite">
-      <h2>Cargando roadmap</h2>
-      <p>Conectando con la API Personal local.</p>
+    <section class="state-panel skeleton" aria-live="polite">
+      <span></span>
+      <span></span>
+      <span></span>
+      <p>Cargando roadmap</p>
     </section>
   } @else if (error()) {
     <section class="state-panel error" role="alert">
-      <h2>No se pudo cargar el roadmap</h2>
+      <h2>No pudimos cargar tu roadmap.</h2>
       <p>{{ error() }}</p>
+      <button type="button" (click)="recargar()">Reintentar</button>
     </section>
   } @else if (fases().length === 0) {
     <section class="state-panel">
-      <h2>Roadmap vacio</h2>
-      <p>No hay fases disponibles para el usuario local.</p>
+      <h2>Tu roadmap todavia no contiene fases.</h2>
     </section>
   } @else {
     <div class="roadmap-grid">
@@ -32,11 +35,42 @@
         @for (fase of fases(); track fase.id) {
           <button
             type="button"
-            [class.active]="fase.id === faseSeleccionada().id"
+            [class.selected]="fase.id === faseSeleccionada().id"
+            [class.current]="estadoFase(fase) === 'actual'"
+            [class.completed]="estadoFase(fase) === 'completada'"
+            [attr.aria-selected]="fase.id === faseSeleccionada().id"
+            [attr.aria-current]="estadoFase(fase) === 'actual' ? 'step' : null"
+            [attr.aria-label]="
+              'Fase ' +
+              fase.orden +
+              ': ' +
+              fase.nombre +
+              '. ' +
+              textoEstadoFase(fase) +
+              '. Progreso ' +
+              fase.progresoPorcentaje +
+              '%'
+            "
             (click)="seleccionarFase(fase.id)"
           >
             <span class="phase-order">{{ fase.orden }}</span>
-            <span>{{ fase.nombre }}</span>
+            <span class="phase-copy">
+              <strong>{{ fase.nombre }}</strong>
+              <span>{{ textoEstadoFase(fase) }}</span>
+            </span>
+            <span class="phase-progress">
+              <span
+                class="progress-track"
+                role="progressbar"
+                aria-label="Progreso de fase"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                [attr.aria-valuenow]="fase.progresoPorcentaje"
+              >
+                <span [style.width.%]="fase.progresoPorcentaje"></span>
+              </span>
+              <span>{{ fase.progresoPorcentaje }}%</span>
+            </span>
           </button>
         }
       </aside>
@@ -47,12 +81,32 @@
             <div>
               <p class="eyebrow">Fase {{ fase.orden }}</p>
               <h2>{{ fase.nombre }}</h2>
+              <p class="phase-status">
+                {{ textoEstadoFase(fase) }}
+                @if (fase.id === faseSeleccionadaId() && fase.id !== faseActualId()) {
+                  <span>Seleccionada para explorar</span>
+                }
+              </p>
             </div>
 
             <dl>
               <div>
+                <dt>Progreso</dt>
+                <dd>{{ fase.progresoPorcentaje }}%</dd>
+              </div>
+              <div>
+                <dt>Temas</dt>
+                <dd>{{ fase.temasDominados }} / {{ fase.totalTemas }}</dd>
+              </div>
+              <div>
                 <dt>Meses</dt>
-                <dd>{{ fase.mesInicioRecomendado ?? '-' }} - {{ fase.mesFinRecomendado ?? '-' }}</dd>
+                <dd>
+                  @if (fase.mesInicioRecomendado && fase.mesFinRecomendado) {
+                    {{ fase.mesInicioRecomendado }} - {{ fase.mesFinRecomendado }}
+                  } @else {
+                    No definido
+                  }
+                </dd>
               </div>
               <div>
                 <dt>Carga</dt>
@@ -89,16 +143,98 @@
 
           <section class="detail-block">
             <h3>Temas</h3>
-            @if (temasDeFase().length > 0) {
+            @if (temasRaizDeFase().length > 0) {
               <div class="topic-list">
-                @for (tema of temasDeFase(); track tema.id) {
-                  <article class="topic-item">
-                    <span>{{ tema.tipoConocimiento }}</span>
+                @for (tema of temasRaizDeFase(); track tema.id) {
+                  <article class="topic-group">
+                    <a
+                      class="topic-item"
+                      [routerLink]="['/roadmap/tema', tema.id]"
+                      [attr.aria-label]="
+                        tema.nombre + '. Estado ' + tema.estado + '. Progreso ' + tema.progresoPorcentaje + '%'
+                      "
+                    >
+                      <span class="topic-meta">
+                        <span>{{ tema.tipoConocimiento }}</span>
+                        <span>{{ tema.estado }}</span>
+                        @if (tema.repasoRecomendado) {
+                          <span>Repaso</span>
+                        }
+                      </span>
+                      <strong>{{ tema.nombre }}</strong>
+                      @if (tema.descripcion) {
+                        <p>{{ tema.descripcion }}</p>
+                      }
+                      <span class="topic-progress">
+                        <span
+                          class="progress-track"
+                          role="progressbar"
+                          aria-label="Progreso de tema"
+                          aria-valuemin="0"
+                          aria-valuemax="100"
+                          [attr.aria-valuenow]="tema.progresoPorcentaje"
+                        >
+                          <span [style.width.%]="tema.progresoPorcentaje"></span>
+                        </span>
+                        <span>{{ tema.progresoPorcentaje }}%</span>
+                      </span>
+                    </a>
+
+                    @if (hijosDeTema(tema.id).length > 0) {
+                      <div class="topic-children">
+                        @for (hijo of hijosDeTema(tema.id); track hijo.id) {
+                          <a
+                            class="topic-child"
+                            [routerLink]="['/roadmap/tema', hijo.id]"
+                            [attr.aria-label]="
+                              hijo.nombre + '. Estado ' + hijo.estado + '. Progreso ' + hijo.progresoPorcentaje + '%'
+                            "
+                          >
+                            <span>{{ hijo.estado }}</span>
+                            <strong>{{ hijo.nombre }}</strong>
+                            <span>{{ hijo.progresoPorcentaje }}%</span>
+                          </a>
+                        }
+                      </div>
+                    }
+                  </article>
+                }
+              </div>
+            } @else if (fase.temas.length > 0) {
+              <div class="topic-list">
+                @for (tema of fase.temas; track tema.id) {
+                  <a
+                    class="topic-item"
+                    [routerLink]="['/roadmap/tema', tema.id]"
+                    [attr.aria-label]="
+                      tema.nombre + '. Estado ' + tema.estado + '. Progreso ' + tema.progresoPorcentaje + '%'
+                    "
+                  >
+                    <span class="topic-meta">
+                      <span>{{ tema.tipoConocimiento }}</span>
+                      <span>{{ tema.estado }}</span>
+                      @if (tema.repasoRecomendado) {
+                        <span>Repaso</span>
+                      }
+                    </span>
                     <strong>{{ tema.nombre }}</strong>
                     @if (tema.descripcion) {
                       <p>{{ tema.descripcion }}</p>
                     }
-                  </article>
+                    <span class="topic-progress">
+                      <span
+                        class="progress-track"
+                        role="progressbar"
+                        aria-label="Progreso de tema"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        [attr.aria-valuenow]="tema.progresoPorcentaje"
+                      >
+                        <span [style.width.%]="tema.progresoPorcentaje"></span>
+                      </span>
+                      <span>{{ tema.progresoPorcentaje }}%</span>
+                    </span>
+                  </a>
                 }
               </div>
             } @else {

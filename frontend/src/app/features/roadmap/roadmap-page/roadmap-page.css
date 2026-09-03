@@ -1,6 +1,6 @@
 .roadmap-page {
   display: grid;
-  gap: var(--space-5);
+  gap: var(--space-6);
 }
 
 .page-header {
@@ -29,8 +29,8 @@ p {
 
 h1 {
   color: var(--text-primary);
-  font-size: clamp(2.25rem, 5vw, 4.75rem);
-  line-height: 0.96;
+  font-size: clamp(2rem, 5vw, 4.25rem);
+  line-height: 1;
 }
 
 .summary {
@@ -58,6 +58,8 @@ h1 {
 }
 
 .state-panel {
+  display: grid;
+  gap: var(--space-3);
   padding: var(--space-5);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
@@ -77,29 +79,77 @@ h1 {
   background: rgba(127, 29, 29, 0.26);
 }
 
+.state-panel button {
+  width: fit-content;
+  min-height: 2.35rem;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  color: var(--text-primary);
+  background: var(--bg-surface-2);
+  cursor: pointer;
+}
+
+.skeleton span {
+  display: block;
+  height: 0.85rem;
+  max-width: 44rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--bg-surface-2), var(--bg-surface-3), var(--bg-surface-2));
+}
+
+.skeleton span:nth-child(1) {
+  width: 56%;
+}
+
+.skeleton span:nth-child(2) {
+  width: 84%;
+}
+
+.skeleton span:nth-child(3) {
+  width: 68%;
+}
+
+.skeleton p {
+  color: var(--text-muted);
+}
+
 .roadmap-grid {
   display: grid;
-  grid-template-columns: minmax(13rem, 18rem) minmax(0, 1fr);
-  gap: var(--space-4);
+  grid-template-columns: minmax(24rem, 1.15fr) minmax(0, 0.85fr);
+  gap: var(--space-5);
   align-items: start;
 }
 
 .phase-list {
+  position: relative;
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  padding-left: var(--space-4);
+}
+
+.phase-list::before {
+  position: absolute;
+  top: 1.45rem;
+  bottom: 1.45rem;
+  left: 1.65rem;
+  width: 1px;
+  background: var(--border-strong);
+  content: "";
 }
 
 .phase-list button {
+  position: relative;
   display: grid;
-  grid-template-columns: 2rem 1fr;
+  grid-template-columns: 2.3rem minmax(0, 1fr) minmax(6rem, 9rem);
   gap: var(--space-3);
   align-items: center;
-  min-height: 3.15rem;
-  padding: 0.55rem 0.7rem;
+  min-height: 4.65rem;
+  padding: var(--space-3);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   color: var(--text-secondary);
-  background: var(--bg-surface-1);
+  background: rgba(16, 16, 24, 0.82);
   text-align: left;
   cursor: pointer;
   transition:
@@ -109,10 +159,18 @@ h1 {
 }
 
 .phase-list button:hover,
-.phase-list button.active {
+.phase-list button.selected {
   border-color: rgba(139, 92, 246, 0.46);
   color: var(--text-primary);
   background: var(--bg-surface-2);
+}
+
+.phase-list button.completed {
+  border-color: rgba(34, 197, 94, 0.28);
+}
+
+.phase-list button.current {
+  border-color: rgba(139, 92, 246, 0.52);
 }
 
 .phase-list button:focus-visible {
@@ -122,13 +180,63 @@ h1 {
 
 .phase-order {
   display: grid;
-  width: 2rem;
-  height: 2rem;
+  width: 2.3rem;
+  height: 2.3rem;
   place-items: center;
   border-radius: 7px;
   color: var(--text-primary);
   background: rgba(124, 58, 237, 0.34);
   font-weight: 800;
+}
+
+.completed .phase-order {
+  background: rgba(34, 197, 94, 0.2);
+}
+
+.phase-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.2rem;
+}
+
+.phase-copy strong {
+  overflow: hidden;
+  color: var(--text-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.phase-copy span,
+.phase-status,
+.phase-progress,
+.topic-progress {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.phase-progress,
+.topic-progress {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.progress-track {
+  display: block;
+  height: 0.35rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.18);
+}
+
+.progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent-bright);
+}
+
+.completed .progress-track span {
+  background: var(--success);
 }
 
 .phase-detail {
@@ -149,7 +257,7 @@ h1 {
 
 .phase-heading h2 {
   color: var(--text-primary);
-  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-size: clamp(1.35rem, 3vw, 1.9rem);
 }
 
 .phase-heading dl {
@@ -207,21 +315,54 @@ dd {
 
 .topic-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-  gap: var(--space-3);
+  gap: var(--space-2);
+}
+
+.topic-group {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.topic-item,
+.topic-child {
+  display: grid;
+  min-width: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  color: inherit;
+  background: var(--bg-surface-2);
+  text-decoration: none;
+  transition:
+    border-color var(--motion-fast),
+    background var(--motion-fast);
 }
 
 .topic-item {
-  display: grid;
   gap: var(--space-2);
-  min-height: 5.25rem;
   padding: var(--space-3);
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  background: var(--bg-surface-2);
 }
 
-.topic-item span {
+.topic-item:hover,
+.topic-child:hover {
+  border-color: rgba(139, 92, 246, 0.42);
+  background: var(--bg-surface-3);
+}
+
+.topic-item:focus-visible,
+.topic-child:focus-visible,
+.state-panel button:focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 2px;
+}
+
+.topic-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.topic-meta span,
+.topic-child span {
   color: var(--text-muted);
   font-size: 0.72rem;
   font-weight: 800;
@@ -233,9 +374,37 @@ dd {
   color: var(--text-primary);
 }
 
+.topic-children {
+  display: grid;
+  gap: var(--space-2);
+  padding-left: var(--space-5);
+}
+
+.topic-child {
+  grid-template-columns: minmax(5rem, auto) minmax(0, 1fr) auto;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: 2.7rem;
+  padding: var(--space-2) var(--space-3);
+}
+
+.topic-child strong {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .topic-item p,
 .muted {
   color: var(--text-muted);
+}
+
+@media (max-width: 1040px) {
+  .roadmap-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 860px) {
@@ -250,13 +419,27 @@ dd {
     justify-content: flex-start;
   }
 
-  .roadmap-grid {
-    grid-template-columns: 1fr;
+  .phase-list {
+    padding-left: 0;
+  }
+
+  .phase-list::before {
+    display: none;
+  }
+
+  .phase-list button {
+    grid-template-columns: 2.3rem minmax(0, 1fr);
+  }
+
+  .phase-progress {
+    grid-column: 2;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .phase-list button {
+  .phase-list button,
+  .topic-item,
+  .topic-child {
     transition: none;
   }
 }

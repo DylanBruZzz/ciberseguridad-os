@@ -1,6 +1,7 @@
 using Aprendizaje.Aplicacion.Resource.Recursos.ActualizarRecurso;
 using Aprendizaje.Aplicacion.Resource.Recursos.CrearRecurso;
 using Aprendizaje.Aplicacion.Resource.Recursos.EliminarRecurso;
+using Aprendizaje.Aplicacion.Resource.Recursos;
 using Aprendizaje.Aplicacion.Resource.Recursos.ListarRecursos;
 using Aprendizaje.Aplicacion.Resource.Recursos.ObtenerRecursoPorId;
 using Aprendizaje.Aplicacion.Resource.Recursos.VincularRecursoATema;
@@ -41,10 +42,12 @@ public sealed class RecursosApplicationTests
     [Fact]
     public async Task ObtenerRecursoPorId_DebeRetornarRecursoExistente()
     {
-        var recursos = new FakeRecursoRepository();
         var recurso = CrearRecurso();
-        recursos.Agregar(recurso);
-        var casoUso = new ObtenerRecursoPorIdCasoUso(recursos);
+        var consulta = new FakeConsultaRecursosV1
+        {
+            Detalle = CrearDetalle(recurso, [new RecursoTemaResumen(Guid.CreateVersion7(), "Modelo OSI")])
+        };
+        var casoUso = new ObtenerRecursoPorIdCasoUso(consulta);
 
         var resultado = await casoUso.EjecutarAsync(recurso.Id, CancellationToken);
 
@@ -52,13 +55,14 @@ public sealed class RecursosApplicationTests
         Assert.NotNull(resultado.Recurso);
         Assert.Equal(recurso.Id, resultado.Recurso.Id);
         Assert.Equal(recurso.Titulo, resultado.Recurso.Titulo);
+        Assert.Equal("Modelo OSI", Assert.Single(resultado.Recurso.Temas).Nombre);
     }
 
     [Fact]
     public async Task ObtenerRecursoPorId_DebeRetornarNoEncontrado()
     {
-        var recursos = new FakeRecursoRepository();
-        var casoUso = new ObtenerRecursoPorIdCasoUso(recursos);
+        var consulta = new FakeConsultaRecursosV1();
+        var casoUso = new ObtenerRecursoPorIdCasoUso(consulta);
 
         var resultado = await casoUso.EjecutarAsync(Guid.CreateVersion7(), CancellationToken);
 
@@ -69,12 +73,23 @@ public sealed class RecursosApplicationTests
     [Fact]
     public async Task ListarRecursos_DebeMapearColeccionDelRepository()
     {
-        var recursos = new FakeRecursoRepository();
         var usuarioId = Guid.CreateVersion7();
         var recurso = CrearRecurso(usuarioId);
-        recursos.Agregar(recurso);
-        recursos.Agregar(CrearRecurso(Guid.CreateVersion7()));
-        var casoUso = new ListarRecursosCasoUso(recursos);
+        var consulta = new FakeConsultaRecursosV1
+        {
+            Recursos =
+            [
+                new RecursoResumen(
+                    recurso.Id,
+                    usuarioId,
+                    recurso.Tipo,
+                    recurso.Titulo,
+                    recurso.Url,
+                    recurso.Estado,
+                    [new RecursoTemaResumen(Guid.CreateVersion7(), "Modelo OSI")])
+            ]
+        };
+        var casoUso = new ListarRecursosCasoUso(consulta);
 
         var resultado = await casoUso.EjecutarAsync(new ListarRecursosSolicitud(usuarioId), CancellationToken);
 
@@ -82,6 +97,21 @@ public sealed class RecursosApplicationTests
         Assert.Equal(recurso.Id, resumen.Id);
         Assert.Equal(usuarioId, resumen.UsuarioId);
         Assert.Equal(recurso.Titulo, resumen.Titulo);
+        Assert.Equal("Modelo OSI", Assert.Single(resumen.Temas).Nombre);
+    }
+
+    [Fact]
+    public async Task ListarRecursos_DebePasarTemaIdOpcionalALaConsulta()
+    {
+        var usuarioId = Guid.CreateVersion7();
+        var temaId = Guid.CreateVersion7();
+        var consulta = new FakeConsultaRecursosV1();
+        var casoUso = new ListarRecursosCasoUso(consulta);
+
+        _ = await casoUso.EjecutarAsync(new ListarRecursosSolicitud(usuarioId, temaId), CancellationToken);
+
+        Assert.Equal(usuarioId, consulta.SolicitudRecibida?.UsuarioId);
+        Assert.Equal(temaId, consulta.SolicitudRecibida?.TemaId);
     }
 
     [Fact]
@@ -385,6 +415,22 @@ public sealed class RecursosApplicationTests
     private static Recurso CrearRecurso(Guid? usuarioId = null) =>
         Recurso.Guardar(usuarioId ?? Guid.CreateVersion7(), TipoRecurso.Documentacion, "Documentación modelo OSI");
 
+    private static RecursoDetalle CrearDetalle(
+        Recurso recurso,
+        IReadOnlyCollection<RecursoTemaResumen>? temas = null) =>
+        new(
+            recurso.Id,
+            recurso.UsuarioId,
+            recurso.Tipo,
+            recurso.Titulo,
+            recurso.Url,
+            recurso.Estado,
+            recurso.Rating?.Valor,
+            recurso.Notas,
+            recurso.HerramientaIA,
+            recurso.PromptsUtilizados,
+            temas ?? []);
+
     private static ActualizarRecursoSolicitud SolicitudActualizar(
         Guid recursoId,
         Guid usuarioId,
@@ -403,4 +449,27 @@ public sealed class RecursosApplicationTests
     private static string EmailUnico() => $"resource-{Guid.CreateVersion7():N}@local.test";
 
     private static CancellationToken CancellationToken => TestContext.Current.CancellationToken;
+
+    private sealed class FakeConsultaRecursosV1 : IConsultaRecursosV1
+    {
+        public ListarRecursosSolicitud? SolicitudRecibida { get; private set; }
+
+        public IReadOnlyCollection<RecursoResumen> Recursos { get; init; } = [];
+
+        public RecursoDetalle? Detalle { get; init; }
+
+        public Task<IReadOnlyCollection<RecursoResumen>> ListarAsync(
+            ListarRecursosSolicitud solicitud,
+            CancellationToken cancellationToken = default)
+        {
+            SolicitudRecibida = solicitud;
+
+            return Task.FromResult(Recursos);
+        }
+
+        public Task<RecursoDetalle?> ObtenerDetalleAsync(
+            Guid id,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(Detalle?.Id == id ? Detalle : null);
+    }
 }

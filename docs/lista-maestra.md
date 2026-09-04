@@ -83,8 +83,8 @@
 - [x] CrearRecurso implementado.
 - [x] ActualizarRecurso implementado.
 - [x] EliminarRecurso implementado como soft delete.
-- [x] ObtenerRecursoPorId implementado.
-- [x] ListarRecursos implementado.
+- [x] ObtenerRecursoPorId implementado con Temas relacionados mínimos id/nombre.
+- [x] ListarRecursos implementado con Temas relacionados mínimos id/nombre y filtro opcional temaId.
 - [x] VincularRecursoATema implementado.
 - [x] RegistrarSesionEstudio implementado.
 - [x] ObtenerSesionEstudio implementado.
@@ -185,7 +185,7 @@
 - [x] GET /api/usuario-actual.
 - [x] POST /api/recursos.
 - [x] GET /api/recursos/{id}.
-- [x] GET /api/recursos?usuarioId={id}.
+- [x] GET /api/recursos?usuarioId={id}&temaId={temaId}.
 - [x] PUT /api/recursos/{id}.
 - [x] DELETE /api/recursos/{id}?usuarioId={id}.
 - [x] PUT /api/recursos/{id}/temas/{temaId}.
@@ -488,6 +488,7 @@
 - [x] Tests de Application Roadmap para metadata pedagogica de Fase.
 - [x] Tests fundacionales de Application Resource.
 - [x] Tests de Application Resource Editable V1.
+- [x] Tests de Application Resource Read Contract V1 para Temas en list/detail y filtro temaId.
 - [x] Tests fundacionales de Application Study.
 - [x] Tests de Application Study Corrections V1 para actualizar/eliminar SesionEstudio, ownership y errores de dominio.
 - [x] Tests de Application Evidence Editable + Maturity V1 para actualizar/eliminar Proyecto, Laboratorio, Writeup, ArtefactoTecnico y CertificacionObtenida con ownership.
@@ -534,12 +535,14 @@
 - [x] Tests de Application para UsuarioActualLocal: cardinalidad y soft delete.
 - [x] Tests de integracion para UsuarioActualLocal sobre SQL Server real.
 - [x] Tests de API Personal V1 para resolucion opcional de usuarioId y guardas de ownership en el borde HTTP.
+- [x] Tests de API Personal Resource Read Contract V1 para GET /api/recursos sin usuarioId, temaId y detail con Temas.
 - [x] Tests de ApuntesTema V1 en dominio, aplicacion, API Personal y persistencia SQL.
 - [x] Tests de RoadmapVistaV1 en Application, API Personal e integracion SQL.
 - [x] Tests de TemaWorkspaceV1 en Application, API Personal e integracion SQL.
 - [x] Tests de EvidenceListaV1 en Application, API Personal e integracion SQL.
 - [x] Tests de Application para ImportarRoadmapV1: validacion, usuario inexistente, idempotencia y conflictos.
 - [x] Tests de integracion para ImportarRoadmapV1: dataset real, idempotencia SQL, rollback, no Evidence y CLI controlado.
+- [x] Tests de integracion RecursoTema Read Contract V1: lista global, filtro temaId, Tema ajeno, soft delete de Resource/Tema, ownership, PUT idempotente preservado y ausencia de N+1 obvio.
 - [ ] Tests E2E automatizados.
 - [ ] Tests de concurrencia donde aplique RowVersion.
 - [ ] Concurrencia HTTP/ETag/If-Match para Tema.
@@ -620,7 +623,8 @@
 - [x] Resource soft delete V1 expuesto por API.
 - [x] Ownership explicito de Resource validado en Application e Integration.
 - [x] TipoRecurso permanece no editable en V1 inicial.
-- [ ] Filtros Resource por tema/tipo/estado/texto.
+- [x] Filtro Resource por temaId y exposicion factual de Temas relacionados en LIST/DETAIL.
+- [ ] Filtros Resource por tipo/estado/texto.
 - [x] Study corrections V1: actualizacion de Fecha, DuracionMinutos, Tipo, Notas y TemaId con ownership.
 - [x] Study soft delete V1 expuesto por API.
 - [ ] Filtros Study por fecha/tema/tipo.

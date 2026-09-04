@@ -1,4 +1,5 @@
 using Aprendizaje.Dominio.Resource;
+using Aprendizaje.Aplicacion.Resource.Recursos;
 
 namespace Aprendizaje.Aplicacion.Resource.Recursos.ObtenerRecursoPorId;
 
@@ -12,4 +13,5 @@ public sealed record RecursoDetalle(
     int? Rating,
     string? Notas,
     string? HerramientaIA,
-    string? PromptsUtilizados);
+    string? PromptsUtilizados,
+    IReadOnlyCollection<RecursoTemaResumen> Temas);

@@ -1,14 +1,14 @@
-using Aprendizaje.Dominio.Resource.Repositorios;
+using Aprendizaje.Aplicacion.Resource.Recursos;
 
 namespace Aprendizaje.Aplicacion.Resource.Recursos.ListarRecursos;
 
 public sealed class ListarRecursosCasoUso
 {
-    private readonly IRecursoRepository _recursos;
+    private readonly IConsultaRecursosV1 _consulta;
 
-    public ListarRecursosCasoUso(IRecursoRepository recursos)
+    public ListarRecursosCasoUso(IConsultaRecursosV1 consulta)
     {
-        _recursos = recursos;
+        _consulta = consulta;
     }
 
     public async Task<ListarRecursosResultado> EjecutarAsync(
@@ -18,10 +18,11 @@ public sealed class ListarRecursosCasoUso
         if (solicitud.UsuarioId == Guid.Empty)
             throw new ArgumentException("El usuarioId debe ser un Guid válido.", nameof(solicitud));
 
-        var recursos = await _recursos.ListarPorUsuarioAsync(solicitud.UsuarioId, cancellationToken);
+        if (solicitud.TemaId.HasValue && solicitud.TemaId.Value == Guid.Empty)
+            throw new ArgumentException("El temaId debe ser un Guid válido.", nameof(solicitud));
 
-        return new ListarRecursosResultado(recursos
-            .Select(r => new RecursoResumen(r.Id, r.UsuarioId, r.Tipo, r.Titulo, r.Url, r.Estado))
-            .ToArray());
+        var recursos = await _consulta.ListarAsync(solicitud, cancellationToken);
+
+        return new ListarRecursosResultado(recursos);
     }
 }

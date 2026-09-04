@@ -79,6 +79,7 @@ public static class RecursoEndpoints
 
     private static async Task<IResult> ListarRecursosAsync(
         Guid? usuarioId,
+        Guid? temaId,
         IHostEnvironment environment,
         IUsuarioActual usuarioActual,
         ListarRecursosCasoUso casoUso,
@@ -96,7 +97,7 @@ public static class RecursoEndpoints
                 return usuario.Error!;
 
             var resultado = await casoUso.EjecutarAsync(
-                new ListarRecursosSolicitud(usuario.UsuarioId),
+                new ListarRecursosSolicitud(usuario.UsuarioId, temaId),
                 cancellationToken);
 
             return Results.Ok(resultado.Recursos);

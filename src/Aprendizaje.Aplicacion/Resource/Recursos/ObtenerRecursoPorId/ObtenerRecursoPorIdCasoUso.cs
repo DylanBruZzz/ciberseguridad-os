@@ -1,35 +1,25 @@
-using Aprendizaje.Dominio.Resource.Repositorios;
+using Aprendizaje.Aplicacion.Resource.Recursos;
 
 namespace Aprendizaje.Aplicacion.Resource.Recursos.ObtenerRecursoPorId;
 
 public sealed class ObtenerRecursoPorIdCasoUso
 {
-    private readonly IRecursoRepository _recursos;
+    private readonly IConsultaRecursosV1 _consulta;
 
-    public ObtenerRecursoPorIdCasoUso(IRecursoRepository recursos)
+    public ObtenerRecursoPorIdCasoUso(IConsultaRecursosV1 consulta)
     {
-        _recursos = recursos;
+        _consulta = consulta;
     }
 
     public async Task<ObtenerRecursoPorIdResultado> EjecutarAsync(
         Guid id,
         CancellationToken cancellationToken = default)
     {
-        var recurso = await _recursos.ObtenerPorIdAsync(id, cancellationToken);
+        var recurso = await _consulta.ObtenerDetalleAsync(id, cancellationToken);
 
         if (recurso is null)
             return ObtenerRecursoPorIdResultado.NoEncontrado();
 
-        return ObtenerRecursoPorIdResultado.EncontradoCon(new RecursoDetalle(
-            recurso.Id,
-            recurso.UsuarioId,
-            recurso.Tipo,
-            recurso.Titulo,
-            recurso.Url,
-            recurso.Estado,
-            recurso.Rating?.Valor,
-            recurso.Notas,
-            recurso.HerramientaIA,
-            recurso.PromptsUtilizados));
+        return ObtenerRecursoPorIdResultado.EncontradoCon(recurso);
     }
 }

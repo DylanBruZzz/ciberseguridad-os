@@ -1,0 +1,231 @@
+<section class="topic-workspace">
+  @if (cargando()) {
+    <section class="workspace-skeleton" aria-live="polite">
+      <div class="skeleton-header">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div class="skeleton-grid">
+        <span></span>
+        <span></span>
+      </div>
+      <p>Cargando workspace del tema</p>
+    </section>
+  } @else if (error()) {
+    <section class="state-panel" role="alert">
+      <p class="eyebrow">Workspace del tema</p>
+      <h1>{{ error() === 'Este tema no esta disponible.' ? 'Este tema no esta disponible.' : 'No pudimos cargar este tema.' }}</h1>
+      @if (error() !== 'Este tema no esta disponible.') {
+        <p>{{ error() }}</p>
+      }
+      <div class="state-actions">
+        @if (error() !== 'Este tema no esta disponible.') {
+          <button type="button" (click)="recargar()">Reintentar</button>
+        }
+        <a routerLink="/roadmap">Volver al Roadmap</a>
+      </div>
+    </section>
+  } @else if (workspace(); as actual) {
+    <header class="topic-header">
+      <nav aria-label="Contexto del tema">
+        <a routerLink="/roadmap">Roadmap</a>
+        <span aria-hidden="true">/</span>
+        @if (actual.fase) {
+          <a routerLink="/roadmap" [queryParams]="{ fase: actual.fase.id }">{{ actual.fase.nombre }}</a>
+        } @else {
+          <span>Sin fase</span>
+        }
+      </nav>
+
+      <div class="topic-heading">
+        <div>
+          <p class="eyebrow">Tema · {{ actual.tema.tipoConocimiento }}</p>
+          <h1>{{ actual.tema.nombre }}</h1>
+          @if (actual.tema.descripcion) {
+            <p class="description">{{ actual.tema.descripcion }}</p>
+          }
+        </div>
+
+        <a class="back-link" routerLink="/roadmap" [queryParams]="actual.fase ? { fase: actual.fase.id } : null">
+          {{ textoVolverRoadmap() }}
+        </a>
+      </div>
+
+      <dl class="topic-facts" aria-label="Resumen del tema">
+        <div>
+          <dt>Estado</dt>
+          <dd>{{ actual.tema.estado }}</dd>
+        </div>
+        <div>
+          <dt>Progreso</dt>
+          <dd>{{ actual.tema.progresoPorcentaje }}%</dd>
+        </div>
+        <div>
+          <dt>Criterios</dt>
+          <dd>{{ actual.tema.criteriosCumplidos }} / {{ actual.tema.criteriosTotal }}</dd>
+        </div>
+        <div>
+          <dt>Percepcion</dt>
+          <dd>{{ textoPercepcion(actual.tema.confianza, 'Confianza') }}</dd>
+        </div>
+        <div>
+          <dt>Ultima sesion</dt>
+          <dd>{{ actual.ultimaSesion ? fechaSimple(actual.ultimaSesion.fecha) : 'Sin sesiones' }}</dd>
+        </div>
+      </dl>
+    </header>
+
+    <div class="workspace-grid">
+      <main class="primary-column">
+        <section class="content-block">
+          <h2>Objetivos</h2>
+          @if (actual.tema.objetivos.length > 0) {
+            <ul class="objective-list">
+              @for (objetivo of actual.tema.objetivos; track objetivo) {
+                <li>{{ objetivo }}</li>
+              }
+            </ul>
+          } @else {
+            <p class="muted">Este tema todavia no tiene objetivos definidos.</p>
+          }
+        </section>
+
+        <section class="content-block">
+          <div class="section-heading">
+            <h2>Criterios de dominio</h2>
+            <span>{{ actual.tema.criteriosCumplidos }} de {{ actual.tema.criteriosTotal }}</span>
+          </div>
+
+          @if (actual.tema.criterios.length > 0) {
+            <ul class="criteria-list">
+              @for (criterio of actual.tema.criterios; track trackByCriterio($index, criterio)) {
+                <li [class.done]="criterio.cumplido">
+                  <span class="criterion-status">{{ criterio.cumplido ? 'Cumplido' : 'Pendiente' }}</span>
+                  <span class="criterion-type">{{ criterio.tipo }}</span>
+                  <span class="criterion-date">{{ criterio.cumplido ? fechaHora(criterio.fechaCumplidoUtc) : 'Sin fecha de cumplimiento' }}</span>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="muted">Este tema todavia no tiene criterios definidos.</p>
+          }
+        </section>
+
+        <section class="content-block notes-block">
+          <div class="section-heading">
+            <div>
+              <h2>Apuntes</h2>
+              <p>Conocimiento que quieres conservar sobre este tema.</p>
+            </div>
+            <span>Ultimo guardado: {{ fechaHora(actual.apuntes.fechaModificacionUtc) }}</span>
+          </div>
+
+          <label class="notes-editor">
+            <span>Apuntes permanentes</span>
+            <textarea
+              [value]="borradorApuntes()"
+              (input)="onApuntesInput($event)"
+              rows="12"
+              placeholder="Todavia no hay apuntes permanentes para este tema."
+            ></textarea>
+          </label>
+
+          <div class="notes-actions">
+            <button
+              type="button"
+              [disabled]="!hayCambiosApuntes() || estadoGuardado() === 'guardando'"
+              (click)="guardarApuntes()"
+            >
+              {{ estadoGuardado() === 'guardando' ? 'Guardando...' : 'Guardar' }}
+            </button>
+            <p aria-live="polite">
+              @if (estadoGuardado() === 'guardado') {
+                Guardado
+              } @else if (estadoGuardado() === 'error') {
+                {{ errorGuardado() }}
+              } @else if (hayCambiosApuntes()) {
+                Cambios sin guardar
+              }
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <aside class="context-panel" aria-label="Panel contextual del tema">
+        <section>
+          <div class="context-head">
+            <h2>Progreso</h2>
+            <strong>{{ actual.tema.progresoPorcentaje }}%</strong>
+          </div>
+          <span
+            class="progress-track"
+            role="progressbar"
+            aria-label="Progreso del tema"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            [attr.aria-valuenow]="actual.tema.progresoPorcentaje"
+          >
+            <span [style.width.%]="actual.tema.progresoPorcentaje"></span>
+          </span>
+          <p>{{ actual.tema.criteriosCumplidos }} de {{ actual.tema.criteriosTotal }} criterios cumplidos</p>
+          @if (actual.repaso.repasoRecomendado) {
+            <p class="review-note">Conviene repasar este tema.</p>
+          }
+        </section>
+
+        <section>
+          <h2>Percepcion</h2>
+          <dl class="compact-list">
+            <div>
+              <dt>Dificultad</dt>
+              <dd>{{ textoPercepcion(actual.tema.dificultadPercibida, 'Dificultad') }}</dd>
+            </div>
+            <div>
+              <dt>Confianza</dt>
+              <dd>{{ textoPercepcion(actual.tema.confianza, 'Confianza') }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section>
+          <h2>Estudio</h2>
+          <dl class="compact-list">
+            <div>
+              <dt>Ultima sesion</dt>
+              <dd>{{ textoUltimaSesion() }}</dd>
+            </div>
+            <div>
+              <dt>Proximo repaso</dt>
+              <dd>{{ textoProximoRepaso() }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <a class="primary-action" [routerLink]="['/study']" [queryParams]="{ temaId: actual.tema.id }">
+          {{ actual.ultimaSesion ? 'Continuar estudiando' : 'Comenzar a estudiar' }}
+        </a>
+      </aside>
+    </div>
+
+    <section class="related-strip" aria-label="Contexto vinculado del tema">
+      <a [routerLink]="['/resources']" [queryParams]="{ temaId: actual.tema.id }">
+        <span>Resources</span>
+        <strong>{{ actual.resourcesResumen.total }} recursos vinculados</strong>
+        <em>Ver recursos</em>
+      </a>
+
+      <a [routerLink]="['/study']" [queryParams]="{ temaId: actual.tema.id }">
+        <span>Sesiones</span>
+        <strong>{{ actual.sesionesResumen.total }} sesiones · {{ actual.sesionesResumen.totalMinutos }} min</strong>
+        <em>Ver estudio</em>
+      </a>
+
+      <a [routerLink]="['/evidence']" [queryParams]="{ temaId: actual.tema.id }">
+        <span>Evidence</span>
+        <strong>{{ actual.evidenceResumen.total }} elementos vinculados</strong>
+        <em>{{ evidenciaDesglose(actual.evidenceResumen) }}</em>
+      </a>
+    </section>
+  }
+</section>

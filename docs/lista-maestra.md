@@ -50,6 +50,7 @@
 - [x] AprendizajePersonalDb creada mediante migrations existentes para uso personal V1.
 - [x] AprendizajePersonalDb validada con migrations Inicial, HacerObjetivosTemaNullable y AgregarMetadataPedagogicaFase.
 - [x] Migracion AgregarApuntesPermanentesTema creada y validada por tests contra AprendizajeTestsDb.
+- [x] Migracion AgregarApuntesPermanentesTema aplicada controladamente a AprendizajePersonalDb con backup previo y SQL auditado.
 - [ ] Crear migraciones futuras solo con auditoria previa.
 
 ## 5. Tooling / entorno
@@ -579,8 +580,13 @@
 - [x] Pantalla Dashboard V1 funcional sobre RoadmapVistaV1.
 - [x] Pantalla Roadmap V1 funcional sobre RoadmapVistaV1 con timeline, detalle de Fase y Temas accionables.
 - [x] RoadmapService consume `GET /api/roadmap/vista` sin usuarioId y cache runtime en memoria.
-- [x] Ruta `/roadmap/tema/:temaId` preparada como placeholder contextual para Workspace futuro.
-- [ ] Workspace frontend de Tema sobre TemaWorkspaceV1.
+- [x] Ruta `/roadmap/tema/:temaId` reemplazada por Workspace funcional de Tema.
+- [x] Workspace frontend de Tema sobre TemaWorkspaceV1.
+- [x] TemaWorkspaceService consume `GET /api/temas/{temaId}/workspace` sin usuarioId.
+- [x] Tema Workspace muestra objetivos, criterios, progreso, EstadoTema, percepcion, ultima sesion, repaso, apuntes permanentes y resumenes contextuales.
+- [x] Tema Workspace mantiene progreso, EstadoTema y repaso como datos del backend sin recalculo de dominio en Angular.
+- [x] Editor de ApuntesTema implementado con texto plano, dirty state, guardado manual y PUT sin usuarioId.
+- [x] Runtime Personal de Tema Workspace validado contra AprendizajePersonalDb con `roadmap.ApunteTema` aplicado.
 - [ ] Pantalla Study V1.
 - [ ] Pantalla Resources V1.
 - [ ] Pantalla Evidence V1.

@@ -17,8 +17,8 @@ export const routes: Routes = [
   {
     path: 'roadmap/tema/:temaId',
     loadComponent: () =>
-      import('./features/roadmap/topic-placeholder-page/topic-placeholder-page').then(
-        (m) => m.TopicPlaceholderPage,
+      import('./features/roadmap/topic-workspace/topic-workspace-page').then(
+        (m) => m.TopicWorkspacePage,
       ),
     data: { title: 'Roadmap' },
   },

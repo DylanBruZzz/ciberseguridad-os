@@ -22,7 +22,12 @@ export const routes: Routes = [
       ),
     data: { title: 'Roadmap' },
   },
-  { path: 'study', component: PlaceholderPage, data: { title: 'Study' } },
+  {
+    path: 'study',
+    loadComponent: () =>
+      import('./features/study/study-page/study-page').then((m) => m.StudyPage),
+    data: { title: 'Study' },
+  },
   { path: 'resources', component: PlaceholderPage, data: { title: 'Resources' } },
   { path: 'evidence', component: PlaceholderPage, data: { title: 'Evidence' } },
   { path: 'portfolio', component: PlaceholderPage, data: { title: 'Portfolio' } },

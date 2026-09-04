@@ -587,7 +587,13 @@
 - [x] Tema Workspace mantiene progreso, EstadoTema y repaso como datos del backend sin recalculo de dominio en Angular.
 - [x] Editor de ApuntesTema implementado con texto plano, dirty state, guardado manual y PUT sin usuarioId.
 - [x] Runtime Personal de Tema Workspace validado contra AprendizajePersonalDb con `roadmap.ApunteTema` aplicado.
-- [ ] Pantalla Study V1.
+- [x] Pantalla Study V1.
+- [x] Study Frontend V1 registra sesiones manuales con Tema, Fecha, DuracionMinutos, Tipo y Notas.
+- [x] Study Frontend V1 soporta `/study` global y `/study?temaId=...` contextual con Tema preseleccionado.
+- [x] Study Frontend V1 crea, edita y elimina SesionEstudio contra API Personal sin usuarioId.
+- [x] Study Frontend V1 invalida RoadmapVistaV1 despues de writes para coherencia con Dashboard, Roadmap y Workspace.
+- [x] Study Frontend V1 mantiene notas de sesion separadas de ApuntesTema permanentes.
+- [x] Runtime Personal de Study validado con create/edit/refresh/delete real y limpieza por soft delete via API.
 - [ ] Pantalla Resources V1.
 - [ ] Pantalla Evidence V1.
 - [ ] Pantalla Portfolio V1.
@@ -636,6 +642,7 @@
 - [x] Roadmap real visible desde Frontend sin usuarioId.
 - [x] Dashboard V1 funcional validado contra RoadmapVistaV1.
 - [x] Roadmap V1 funcional validado contra RoadmapVistaV1.
+- [x] Study Frontend V1 funcional validado contra SesionEstudio API Personal y RoadmapVistaV1.
 - [x] Apuntes permanentes editables de Tema V1 backend.
 - [x] RoadmapVistaV1 backend/read-side.
 - [x] TemaWorkspaceV1 backend/read-side.

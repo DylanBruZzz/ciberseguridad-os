@@ -1,0 +1,254 @@
+<section class="study-page">
+  <header class="study-header">
+    <div>
+      <p class="eyebrow">Study</p>
+      <h1>Registra y revisa tus sesiones de aprendizaje</h1>
+      <p>
+        Guarda lo que estudiaste fuera o dentro de la aplicacion, con tiempo, tema y notas de esa sesion.
+      </p>
+    </div>
+
+    <dl class="study-summary" aria-label="Resumen de actividad">
+      <div>
+        <dt>Sesiones</dt>
+        <dd>{{ sesionesVisibles().length }}</dd>
+      </div>
+      <div>
+        <dt>Tiempo</dt>
+        <dd>{{ formatearDuracion(totalMinutos()) }}</dd>
+      </div>
+    </dl>
+  </header>
+
+  @if (cargando()) {
+    <section class="study-skeleton" aria-live="polite">
+      <span></span>
+      <span></span>
+      <span></span>
+      <p>Cargando Study</p>
+    </section>
+  } @else {
+    <div class="study-grid">
+      <aside class="context-panel" aria-label="Contexto de Study">
+        @if (temaContextual(); as tema) {
+          <section>
+            <p class="eyebrow">Contexto del tema</p>
+            <h2>Estudiando: {{ tema.nombre }}</h2>
+            @if (faseDeTema(tema.id); as fase) {
+              <p>{{ fase.nombre }}</p>
+            }
+            <a [routerLink]="['/roadmap/tema', tema.id]">Volver al tema</a>
+          </section>
+        } @else if (contextoInvalido()) {
+          <section class="context-warning" role="alert">
+            <p class="eyebrow">Contexto no disponible</p>
+            <h2>No encontramos el tema solicitado.</h2>
+            <p>Puedes registrar una sesion seleccionando otro tema del roadmap.</p>
+          </section>
+        } @else {
+          <section>
+            <p class="eyebrow">Study global</p>
+            <h2>Registro manual</h2>
+            <p>Elige un tema y registra actividades hechas en cursos, libros, laboratorios o herramientas externas.</p>
+          </section>
+        }
+
+        @if (ultimaSesion(); as sesion) {
+          <section>
+            <p class="eyebrow">Ultima sesion</p>
+            <h2>{{ nombreTema(sesion.temaId) }}</h2>
+            <p>{{ formatearFecha(sesion.fecha) }} · {{ formatearDuracion(sesion.duracionMinutos) }}</p>
+          </section>
+        }
+
+        @if (temaContextual(); as tema) {
+          <section class="context-links">
+            <a [routerLink]="['/resources']" [queryParams]="{ temaId: tema.id }">Ver recursos del tema</a>
+            <a [routerLink]="['/evidence']" [queryParams]="{ temaId: tema.id }">Ver evidence del tema</a>
+          </section>
+        }
+      </aside>
+
+      <main class="study-form-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">{{ modoEdicion() ? 'Editar sesion' : 'Nueva sesion' }}</p>
+            <h2>{{ modoEdicion() ? 'Actualizar registro' : 'Registrar sesion' }}</h2>
+          </div>
+          @if (modoEdicion()) {
+            <button type="button" class="ghost-button" (click)="cancelarEdicion()">Cancelar</button>
+          }
+        </div>
+
+        @if (errorRoadmap()) {
+          <section class="inline-error" role="alert">
+            <strong>No pudimos cargar los temas.</strong>
+            <span>{{ errorRoadmap() }}</span>
+          </section>
+        }
+
+        <form (submit)="$event.preventDefault(); guardarSesion()" novalidate>
+          <label>
+            <span>Tema</span>
+            <select
+              [value]="formTemaId()"
+              (change)="onTemaChange($event)"
+              [attr.aria-invalid]="erroresFormulario().temaId ? true : null"
+              aria-describedby="study-tema-error"
+            >
+              <option value="">Selecciona un tema</option>
+              @for (tema of temasDisponibles(); track tema.id) {
+                <option value="{{ tema.id }}" [attr.selected]="formTemaId() === tema.id ? true : null">
+                  {{ tema.nombre }}
+                </option>
+              }
+            </select>
+          </label>
+          @if (erroresFormulario().temaId) {
+            <p id="study-tema-error" class="field-error">{{ erroresFormulario().temaId }}</p>
+          }
+
+          <div class="form-row">
+            <label>
+              <span>Fecha</span>
+              <input
+                type="date"
+                [value]="formFecha()"
+                (input)="onFechaInput($event)"
+                [attr.aria-invalid]="erroresFormulario().fecha ? true : null"
+                aria-describedby="study-fecha-error"
+              />
+            </label>
+
+            <label>
+              <span>Duracion</span>
+              <input
+                type="number"
+                min="1"
+                step="1"
+                inputmode="numeric"
+                [value]="formDuracionMinutos()"
+                (input)="onDuracionInput($event)"
+                [attr.aria-invalid]="erroresFormulario().duracionMinutos ? true : null"
+                aria-describedby="study-duracion-error"
+              />
+            </label>
+          </div>
+          @if (erroresFormulario().fecha) {
+            <p id="study-fecha-error" class="field-error">{{ erroresFormulario().fecha }}</p>
+          }
+          @if (erroresFormulario().duracionMinutos) {
+            <p id="study-duracion-error" class="field-error">{{ erroresFormulario().duracionMinutos }}</p>
+          }
+
+          <label>
+            <span>Tipo de sesion</span>
+            <select
+              [value]="formTipo()"
+              (change)="onTipoChange($event)"
+              [attr.aria-invalid]="erroresFormulario().tipo ? true : null"
+              aria-describedby="study-tipo-error"
+            >
+              @for (tipo of tiposSesion; track tipo) {
+                <option value="{{ tipo }}" [attr.selected]="formTipo() === tipo ? true : null">
+                  {{ etiquetaTipo(tipo) }}
+                </option>
+              }
+            </select>
+          </label>
+          @if (erroresFormulario().tipo) {
+            <p id="study-tipo-error" class="field-error">{{ erroresFormulario().tipo }}</p>
+          }
+
+          <label>
+            <span>Notas de sesion</span>
+            <textarea
+              rows="8"
+              [value]="formNotas()"
+              (input)="onNotasInput($event)"
+              placeholder="Anota que estudiaste, que practicabas o que quedo pendiente."
+            ></textarea>
+          </label>
+
+          <p class="notes-help">
+            Estas notas describen lo ocurrido en esta sesion. Los apuntes duraderos siguen en el Workspace del tema.
+          </p>
+
+          <div class="form-actions">
+            <button type="submit" [disabled]="estadoWrite() === 'guardando' || temasDisponibles().length === 0">
+              {{ estadoWrite() === 'guardando' ? 'Guardando...' : modoEdicion() ? 'Guardar cambios' : 'Guardar sesion' }}
+            </button>
+            <p aria-live="polite">
+              @if (estadoWrite() === 'guardado' || estadoWrite() === 'error') {
+                {{ mensajeWrite() }}
+              }
+            </p>
+          </div>
+        </form>
+      </main>
+
+      <section class="history-panel" aria-label="Historial de sesiones">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Historial</p>
+            <h2>{{ temaContextual() ? 'Sesiones del tema' : 'Sesiones recientes' }}</h2>
+          </div>
+          <button type="button" class="ghost-button" (click)="recargar()">Reintentar</button>
+        </div>
+
+        @if (errorSesiones()) {
+          <section class="inline-error" role="alert">
+            <strong>No pudimos cargar el historial.</strong>
+            <span>{{ errorSesiones() }}</span>
+          </section>
+        } @else if (sesionesVisibles().length === 0) {
+          <section class="empty-state">
+            <h3>
+              {{
+                temaContextual()
+                  ? 'Aun no registraste sesiones para este tema.'
+                  : 'Aun no has registrado sesiones de estudio.'
+              }}
+            </h3>
+            <p>El formulario queda listo para registrar la primera actividad factual.</p>
+          </section>
+        } @else {
+          <ol class="session-list">
+            @for (sesion of sesionesVisibles(); track trackById($index, sesion)) {
+              <li>
+                <article [class.editing]="sesionEditando()?.id === sesion.id">
+                  <div class="session-main">
+                    <time [attr.datetime]="sesion.fecha">{{ formatearFecha(sesion.fecha) }}</time>
+                    <h3>{{ nombreTema(sesion.temaId) }}</h3>
+                    <p>{{ etiquetaTipo(sesion.tipo) }} · {{ formatearDuracion(sesion.duracionMinutos) }}</p>
+                    @if (sesion.notas) {
+                      <p class="session-notes">{{ sesion.notas }}</p>
+                    }
+                  </div>
+
+                  <div class="session-actions">
+                    <button type="button" (click)="editarSesion(sesion)">Editar</button>
+                    <button type="button" class="danger-button" (click)="pedirEliminar(sesion)">Eliminar</button>
+                  </div>
+
+                  @if (sesionAEliminar()?.id === sesion.id) {
+                    <div class="delete-confirm" role="group" aria-label="Confirmar eliminacion">
+                      <strong>Eliminar esta sesion?</strong>
+                      <p>Dejara de aparecer en tu historial.</p>
+                      <button type="button" (click)="cancelarEliminar()">Cancelar</button>
+                      <button type="button" class="danger-button" (click)="confirmarEliminar(sesion)">Eliminar</button>
+                    </div>
+                  }
+                </article>
+              </li>
+            }
+          </ol>
+        }
+
+        @if (errorEliminar()) {
+          <p class="delete-error" role="alert">{{ errorEliminar() }}</p>
+        }
+      </section>
+    </div>
+  }
+</section>

@@ -1,0 +1,391 @@
+<section class="resources-page">
+  <header class="resources-header">
+    <div>
+      <p class="eyebrow">Resources</p>
+      <h1>{{ tituloContexto() }}</h1>
+      <p>
+        Biblioteca personal para ubicar documentacion, cursos, laboratorios y referencias que apoyan tu roadmap.
+      </p>
+      @if (temaContextual(); as tema) {
+        <a class="context-return" [routerLink]="['/roadmap/tema', tema.id]">Volver al tema</a>
+      } @else if (temaIdContextual()) {
+        <a class="context-return" [routerLink]="['/roadmap/tema', temaIdContextual()]">Volver al tema</a>
+      }
+    </div>
+
+    <button type="button" class="primary-button" (click)="abrirCrear()">+ Anadir recurso</button>
+  </header>
+
+  @if (temaIdMalformado()) {
+    <section class="inline-warning" role="alert">
+      <strong>Contexto no disponible.</strong>
+      <span>El identificador de tema no tiene un formato valido; se muestra la biblioteca global.</span>
+    </section>
+  }
+
+  @if (errorRoadmap() && temaIdContextual()) {
+    <section class="inline-warning" role="status">
+      <strong>No pudimos resolver el nombre del tema.</strong>
+      <span>{{ errorRoadmap() }}</span>
+    </section>
+  }
+
+  @if (mensajeWrite()) {
+    <section class="inline-write" [class.error]="estadoWrite() === 'error'" aria-live="polite">
+      {{ mensajeWrite() }}
+    </section>
+  }
+
+  <section class="toolbar" aria-label="Filtros de Resources">
+    <label class="search-field">
+      <span>Buscar recurso</span>
+      <input
+        type="search"
+        [value]="busqueda()"
+        (input)="onBusquedaInput($event)"
+        placeholder="Titulo o URL"
+      />
+    </label>
+
+    <label>
+      <span>Estado</span>
+      <select [value]="estadoFiltro()" (change)="onEstadoFiltroChange($event)">
+        <option value="">Todos</option>
+        @for (estado of estadosRecurso; track estado) {
+          <option value="{{ estado }}">{{ etiquetaEstado(estado) }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      <span>Tipo</span>
+      <select [value]="tipoFiltro()" (change)="onTipoFiltroChange($event)">
+        <option value="">Todos</option>
+        @for (tipo of tiposRecurso; track tipo) {
+          <option value="{{ tipo }}">{{ etiquetaTipo(tipo) }}</option>
+        }
+      </select>
+    </label>
+
+    @if (hayFiltrosLocales()) {
+      <button type="button" class="ghost-button" (click)="limpiarFiltros()">Limpiar filtros</button>
+    }
+  </section>
+
+  <div class="resources-layout">
+    <main class="list-panel" aria-label="Biblioteca de recursos">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">{{ temaIdContextual() ? 'Biblioteca contextual' : 'Biblioteca global' }}</p>
+          <h2>{{ recursosFiltrados().length }} recursos</h2>
+        </div>
+        <button type="button" class="ghost-button" (click)="recargarLista()">Reintentar</button>
+      </div>
+
+      @if (cargandoLista()) {
+        <section class="resources-skeleton" aria-live="polite">
+          <span></span>
+          <span></span>
+          <span></span>
+          <p>Cargando Resources</p>
+        </section>
+      } @else if (errorLista()) {
+        <section class="state-panel" role="alert">
+          <h3>No pudimos cargar la biblioteca.</h3>
+          <p>{{ errorLista() }}</p>
+        </section>
+      } @else if (recursos().length === 0) {
+        <section class="empty-state">
+          <h3>
+            {{
+              temaIdContextual()
+                ? 'Aun no hay recursos vinculados a este tema.'
+                : 'Aun no tienes recursos en tu biblioteca.'
+            }}
+          </h3>
+          <p>El formulario queda listo para registrar el primer recurso factual.</p>
+        </section>
+      } @else if (recursosFiltrados().length === 0) {
+        <section class="empty-state">
+          <h3>No encontramos recursos con estos filtros.</h3>
+          <p>La busqueda local combina texto, estado y tipo sobre la lista cargada.</p>
+        </section>
+      } @else {
+        <ol class="resource-list">
+          @for (recurso of recursosFiltrados(); track trackById($index, recurso)) {
+            <li>
+              <article [class.selected]="recursoSeleccionadoId() === recurso.id">
+                <button
+                  type="button"
+                  class="resource-open"
+                  [attr.aria-label]="'Abrir detalle de ' + recurso.titulo"
+                  (click)="abrirDetalle(recurso.id)"
+                >
+                  <span class="resource-title">{{ recurso.titulo }}</span>
+                  <span class="resource-meta">
+                    <span>{{ etiquetaTipo(recurso.tipo) }}</span>
+                    <span>{{ etiquetaEstado(recurso.estado) }}</span>
+                    <span>{{ dominioUrl(recurso.url) }}</span>
+                  </span>
+                </button>
+
+                <div class="resource-topics" [attr.aria-label]="'Temas de ' + recurso.titulo">
+                  @if (recurso.temas.length === 0) {
+                    <span>Sin tema vinculado</span>
+                  } @else {
+                    @for (tema of recurso.temas; track tema.id) {
+                      <a [routerLink]="['/roadmap/tema', tema.id]">{{ tema.nombre }}</a>
+                    }
+                  }
+                </div>
+              </article>
+            </li>
+          }
+        </ol>
+      }
+    </main>
+
+    <aside class="detail-panel" aria-label="Detalle del recurso">
+      @if (modoFormulario(); as modo) {
+        <section class="form-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">{{ modo === 'crear' ? 'Nuevo recurso' : 'Editar recurso' }}</p>
+              <h2>{{ modo === 'crear' ? 'Anadir recurso' : 'Actualizar recurso' }}</h2>
+            </div>
+            <button type="button" class="ghost-button" (click)="cancelarFormulario()">Cancelar</button>
+          </div>
+
+          @if (modo === 'crear' && temaContextual(); as tema) {
+            <p class="context-note">Se vinculara a {{ tema.nombre }}.</p>
+          } @else if (modo === 'crear' && temaIdContextual()) {
+            <p class="context-note">Se vinculara al tema contextual.</p>
+          }
+
+          <form (submit)="$event.preventDefault(); guardarFormulario()" novalidate>
+            @if (modo === 'crear') {
+              <label>
+                <span>Tipo</span>
+                <select
+                  [value]="formTipo()"
+                  (change)="onTipoChange($event)"
+                  [attr.aria-invalid]="erroresFormulario().tipo ? true : null"
+                  aria-describedby="resource-tipo-error"
+                >
+                  @for (tipo of tiposRecurso; track tipo) {
+                    <option value="{{ tipo }}">{{ etiquetaTipo(tipo) }}</option>
+                  }
+                </select>
+              </label>
+              @if (erroresFormulario().tipo) {
+                <p id="resource-tipo-error" class="field-error">{{ erroresFormulario().tipo }}</p>
+              }
+            } @else if (detalle(); as actual) {
+              <div class="readonly-field">
+                <span>Tipo</span>
+                <strong>{{ etiquetaTipo(actual.tipo) }}</strong>
+                <p>El tipo se define al crear el recurso.</p>
+              </div>
+            }
+
+            <label>
+              <span>Titulo</span>
+              <input
+                type="text"
+                [value]="formTitulo()"
+                (input)="onTituloInput($event)"
+                [attr.aria-invalid]="erroresFormulario().titulo ? true : null"
+                aria-describedby="resource-titulo-error"
+              />
+            </label>
+            @if (erroresFormulario().titulo) {
+              <p id="resource-titulo-error" class="field-error">{{ erroresFormulario().titulo }}</p>
+            }
+
+            <label>
+              <span>URL</span>
+              <input
+                type="url"
+                [value]="formUrl()"
+                (input)="onUrlInput($event)"
+                placeholder="https://example.com/recurso"
+                [attr.aria-invalid]="erroresFormulario().url ? true : null"
+                aria-describedby="resource-url-error"
+              />
+            </label>
+            @if (erroresFormulario().url) {
+              <p id="resource-url-error" class="field-error">{{ erroresFormulario().url }}</p>
+            }
+
+            @if (modo === 'editar') {
+              <label>
+                <span>Estado</span>
+                <select
+                  [value]="formEstado()"
+                  (change)="onEstadoChange($event)"
+                  [attr.aria-invalid]="erroresFormulario().estado ? true : null"
+                  aria-describedby="resource-estado-error"
+                >
+                  @for (estado of estadosRecurso; track estado) {
+                    <option value="{{ estado }}">{{ etiquetaEstado(estado) }}</option>
+                  }
+                </select>
+              </label>
+              @if (erroresFormulario().estado) {
+                <p id="resource-estado-error" class="field-error">{{ erroresFormulario().estado }}</p>
+              }
+
+              <label>
+                <span>Rating</span>
+                <select
+                  [value]="formRating() ?? ''"
+                  (change)="onRatingChange($event)"
+                  [attr.aria-invalid]="erroresFormulario().rating ? true : null"
+                  aria-describedby="resource-rating-error"
+                >
+                  @for (rating of ratingOpciones; track rating) {
+                    <option value="{{ rating }}">{{ rating === '' ? 'Sin valoracion' : rating }}</option>
+                  }
+                </select>
+              </label>
+              @if (erroresFormulario().rating) {
+                <p id="resource-rating-error" class="field-error">{{ erroresFormulario().rating }}</p>
+              }
+
+              <label>
+                <span>Notas</span>
+                <textarea
+                  rows="5"
+                  [value]="formNotas()"
+                  (input)="onNotasInput($event)"
+                  placeholder="Observaciones sobre como usar este recurso o que tan util resulto."
+                ></textarea>
+              </label>
+              <p class="notes-help">
+                Guarda observaciones sobre como usar este recurso o que tan util te resulto.
+              </p>
+
+              <label>
+                <span>Herramienta IA</span>
+                <input type="text" [value]="formHerramientaIA()" (input)="onHerramientaIAInput($event)" />
+              </label>
+
+              <label>
+                <span>Prompts utilizados</span>
+                <textarea rows="5" [value]="formPromptsUtilizados()" (input)="onPromptsInput($event)"></textarea>
+              </label>
+            }
+
+            <div class="form-actions">
+              <button type="submit" [disabled]="estadoWrite() === 'guardando'">
+                {{ estadoWrite() === 'guardando' ? 'Guardando...' : modo === 'crear' ? 'Crear recurso' : 'Guardar cambios' }}
+              </button>
+              <p aria-live="polite">
+                @if (estadoWrite() === 'guardado' || estadoWrite() === 'error') {
+                  {{ mensajeWrite() }}
+                }
+              </p>
+            </div>
+          </form>
+        </section>
+      } @else if (cargandoDetalle()) {
+        <section class="detail-state" aria-live="polite">
+          <span class="loader-line"></span>
+          <span class="loader-line short"></span>
+          <p>Cargando detalle</p>
+        </section>
+      } @else if (errorDetalle()) {
+        <section class="state-panel" role="alert">
+          <h2>No pudimos abrir el recurso.</h2>
+          <p>{{ errorDetalle() }}</p>
+        </section>
+      } @else if (detalle(); as actual) {
+        <section class="resource-detail">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Detalle</p>
+              <h2>{{ actual.titulo }}</h2>
+            </div>
+            <div class="detail-actions">
+              <button type="button" (click)="editarDetalle()">Editar</button>
+              <button type="button" class="danger-button" (click)="pedirEliminar()">Eliminar</button>
+            </div>
+          </div>
+
+          <dl class="detail-facts">
+            <div>
+              <dt>Tipo</dt>
+              <dd>{{ etiquetaTipo(actual.tipo) }}</dd>
+            </div>
+            <div>
+              <dt>Estado</dt>
+              <dd>{{ etiquetaEstado(actual.estado) }}</dd>
+            </div>
+            <div>
+              <dt>Rating</dt>
+              <dd>{{ textoRating(actual.rating) }}</dd>
+            </div>
+          </dl>
+
+          <section>
+            <h3>URL</h3>
+            @if (actual.url) {
+              <a class="external-link" [href]="actual.url" target="_blank" rel="noopener noreferrer">
+                Abrir {{ dominioUrl(actual.url) }}
+              </a>
+            } @else {
+              <p class="muted">Sin URL registrada.</p>
+            }
+          </section>
+
+          <section>
+            <h3>Temas relacionados</h3>
+            @if (actual.temas.length === 0) {
+              <p class="muted">Sin tema vinculado</p>
+            } @else {
+              <div class="topic-links">
+                @for (tema of actual.temas; track tema.id) {
+                  <a [routerLink]="['/roadmap/tema', tema.id]">{{ tema.nombre }}</a>
+                }
+              </div>
+            }
+          </section>
+
+          <section>
+            <h3>Notas</h3>
+            <p>{{ actual.notas ?? 'Sin notas.' }}</p>
+          </section>
+
+          <section>
+            <h3>Herramienta IA</h3>
+            <p>{{ actual.herramientaIA ?? 'Sin herramienta registrada.' }}</p>
+          </section>
+
+          <section>
+            <h3>Prompts utilizados</h3>
+            <p>{{ actual.promptsUtilizados ?? 'Sin prompts registrados.' }}</p>
+          </section>
+
+          @if (confirmandoEliminar()) {
+            <div class="delete-confirm" role="group" aria-label="Confirmar eliminacion">
+              <strong>Eliminar este recurso?</strong>
+              <p>Dejara de aparecer en tu biblioteca.</p>
+              <button type="button" (click)="cancelarEliminar()">Cancelar</button>
+              <button type="button" class="danger-button" (click)="confirmarEliminar()">Eliminar</button>
+            </div>
+          }
+
+          @if (errorEliminar()) {
+            <p class="delete-error" role="alert">{{ errorEliminar() }}</p>
+          }
+        </section>
+      } @else {
+        <section class="empty-detail">
+          <p class="eyebrow">Detalle</p>
+          <h2>Selecciona un recurso</h2>
+          <p>El panel mostrara rating, notas, herramienta IA, prompts y temas relacionados.</p>
+        </section>
+      }
+    </aside>
+  </div>
+</section>

@@ -173,6 +173,11 @@ caf832a feat: establish validated initial persistence
 - LIST Y DETAIL DE RESOURCE EXPONEN TEMAS RELACIONADOS COMO ID/NOMBRE
 - CRUD RESOURCE, TIPO RECURSO INMUTABLE Y WRITE DE VINCULO RECURSOTEMA PRESERVADOS
 - UNLINK RECURSOTEMA SIGUE DIFERIDO
+- RESOURCES FRONTEND V1 IMPLEMENTADO COMO BIBLIOTECA GLOBAL Y CONTEXTUAL POR TEMA
+- RESOURCES FRONTEND V1 CONSUME RECURSOTEMA FACTUAL EN LIST Y DETAIL
+- RESOURCES FRONTEND V1 SOPORTA SEARCH LOCAL, FILTRO ESTADO, FILTRO TIPO, DETAIL, CREATE, EDIT Y SOFT DELETE
+- RESOURCES FRONTEND V1 MANTIENE TIPO RECURSO INMUTABLE, RELACIONES TEMA READ-ONLY Y RATING SOLO EN DETAIL
+- NOTAS, HERRAMIENTA IA Y PROMPTS DE RESOURCE QUEDAN COMO CAMPOS MANUALES
 - STREAK, DEADLINES PUNITIVOS, TIMER, ANALYTICS Y SEARCH GLOBAL REAL SIGUEN DIFERIDOS
 
 ## Migraciones Aplicadas
@@ -220,7 +225,7 @@ caf832a feat: establish validated initial persistence
   - Fases: 7
   - Temas: 63
 - Navegacion base preparada: Dashboard, Roadmap, Study, Resources, Evidence y Portfolio.
-- Implementacion funcional profunda actual: Dashboard, Roadmap, Tema Workspace y Study.
+- Implementacion funcional profunda actual: Dashboard, Roadmap, Tema Workspace, Study y Resources.
 - Dashboard V1 consume GET /api/roadmap/vista y GET /api/usuario-actual para saludo, progreso global, linea conectada de Fases, Fase actual y continuidad factual.
 - Roadmap V1 consume GET /api/roadmap/vista para timeline de Fases, detalle de Fase, metadata pedagogica, objetivos, criterios de avance, Temas, progreso, EstadoTema y repaso.
 - RoadmapService usa cache runtime en memoria con refresh explicito; no usa localStorage, sessionStorage, IndexedDB ni state management externo.
@@ -229,17 +234,22 @@ caf832a feat: establish validated initial persistence
 - Progreso, EstadoTema y repaso en Tema Workspace V1 vienen de TemaWorkspaceV1; Angular no recalcula semantica de dominio.
 - Criterios y percepcion quedan read-only en Workspace V1 aunque existen endpoints de backend; la edicion interactiva queda diferida para no mezclar progreso/percepcion con el bloque de centro de trabajo y memoria.
 - Apuntes permanentes tienen editor de texto plano con dirty state y guardado manual contra `PUT /api/temas/{temaId}/apuntes`, sin autosave y sin enviar usuarioId. Write real contra AprendizajePersonalDb fue validado con prueba controlada y limpieza por API/UI.
-- Resources, Sesiones y Evidence se muestran solo como resumen contextual con enlaces filtrados por `temaId`; las pantallas profundas siguen diferidas.
+- Resources, Sesiones y Evidence se muestran como resumen contextual con enlaces filtrados por `temaId`; Resources ya tiene pantalla profunda V1 global/contextual y Evidence sigue diferida.
 - Runtime Personal validado: `GET /api/roadmap/vista`, `GET /api/temas/{temaId}/workspace`, `GET /api/temas/{temaId}/apuntes` y `PUT /api/temas/{temaId}/apuntes` funcionan contra AprendizajePersonalDb alineada.
 - Study Frontend V1 reemplaza el placeholder por una pantalla funcional de registro manual de sesiones: lista historial, crea, edita y elimina sesiones con soft delete via API, soporta `/study` global y `/study?temaId=...` contextual, preselecciona Tema cuando viene desde Workspace, muestra resumen factual de sesiones/minutos y no almacena usuarioId.
 - Study Frontend V1 usa `GET/POST/PUT/DELETE /api/sesiones-estudio` sin usuarioId en Personal y `GET /api/roadmap/vista` para nombres de Tema y selector; no implementa herramientas de sesion porque el DTO de listado no las expone.
 - Despues de crear, editar o eliminar sesiones, Study invoca `RoadmapService.refrescarVista()` y recarga historial para mantener coherentes Dashboard, Roadmap y Workspace al volver a sus pantallas.
 - Las notas de sesion describen que ocurrio durante una actividad puntual; ApuntesTema permanece como conocimiento duradero editable en Workspace.
 - Runtime Personal validado con write real controlado sobre `Bash scripting`: crear sesion, editar duracion/notas, refrescar y eliminar via API normal; la sesion de prueba quedo fuera de listados/read-sides tras soft delete, sin SQL manual.
-- Resources, Evidence y Portfolio quedan como rutas placeholder limpias hasta sus bloques V1.
+- Resources Frontend V1 reemplaza el placeholder por una biblioteca de aprendizaje lista-first: `/resources` consume `GET /api/recursos` sin usuarioId, `/resources?temaId=...` consume `GET /api/recursos?temaId=...` de forma factual, resuelve nombre de Tema via `RoadmapVistaV1` y mantiene link de vuelta a Workspace.
+- Resources Frontend V1 implementa search local por titulo/URL, filtros locales combinados por Estado y Tipo, listado enriquecido con Temas relacionados, detail panel, create, edit y delete/soft delete. Rating queda visible/editable solo en detail para evitar N+1; no hay filtro rating en LIST V1.
+- Create contextual de Resources usa `POST /api/recursos` y, con el `id` devuelto por `201 Created`, ejecuta `PUT /api/recursos/{recursoId}/temas/{temaId}`. Si falla el vinculo, informa que el recurso fue creado pero no vinculado. Relaciones Tema permanecen read-only; unlink RecursoTema sigue diferido.
+- Notas Resource, Herramienta IA y Prompts utilizados son campos manuales en edicion; no hay IA automatica, scraping, previews web, favoritos, tags nuevos ni recomendaciones.
+- Runtime Personal de Resources validado con recurso controlado sobre `Bash scripting`: create contextual, vinculo factual, detail, edit UI, refresh, filtros, delete/soft delete y vuelta de Workspace count a baseline sin SQL manual.
+- Evidence y Portfolio quedan como rutas placeholder limpias hasta sus bloques V1.
 - CORS no se agrego en este bloque; el desarrollo usa proxy Angular especifico. No existe AllowAnyOrigin.
 - Visual Shell V1 validado: dark mode, identidad Ciberseguridad OS, sidebar vertical compacta, topbar por modulo, Search/Ctrl+K preparado, responsive base y estados globales discretos. Light mode, dock inferior y pantallas profundas siguen diferidos.
-- Validacion frontend actual: 63 tests unitarios correctos y `npm run build` correcto.
+- Validacion frontend actual: 91 tests unitarios correctos y `npm run build` correcto.
 
 ## Datos Roadmap V1 Personal
 
@@ -760,7 +770,7 @@ Contexto single-user local V1 validado: Environment Personal usa AprendizajePers
 
 API Personal V1 validada: en modo Personal, la capa HTTP resuelve usuarioId mediante IUsuarioActual para flujos diarios de Roadmap, Resource, Study, Evidence, Analytics y Portafolio. No introduce Auth, JWT, Identity, migraciones ni paquetes. Los endpoints explicit-user legacy se conservan temporalmente para Development/tests y compatibilidad; si en Personal se envia un usuarioId explicito divergente, la API responde conflicto. GET /api/fases y GET /api/portafolio fueron validados en runtime Personal contra AprendizajePersonalDb en modo read-only.
 
-Frontend Foundation V1 validado: Angular standalone vive en frontend/, consume la API Personal via /api y proxy local, obtiene UsuarioActual y muestra las 7 Fases reales y 63 Temas sin que el cliente envie usuarioId. No hay Auth, CORS global, dashboard avanzado ni escritura sobre AprendizajePersonalDb.
+Frontend Foundation V1 validado: Angular standalone vive en frontend/, consume la API Personal via /api y proxy local, obtiene UsuarioActual y muestra las 7 Fases reales y 63 Temas sin que el cliente envie usuarioId. No hay Auth ni CORS global.
 
 Visual Shell V1 frontend validado: la ruta inicial es `/dashboard`; la shell usa identidad `Ciberseguridad OS`, dark mode, sidebar izquierda compacta con Dashboard, Roadmap, Study, Resources, Evidence, Portfolio y Search, topbar con titulo derivado de route data y UsuarioActual cuando esta disponible. Search abre una command palette basica por boton o Ctrl+K sin motor global. No se agregaron UI frameworks, paquetes, Auth, light mode, dock inferior, analytics screen ni frontend profundo de Workspace/Evidence/Portfolio.
 
@@ -770,6 +780,8 @@ Tema Workspace frontend V1 validado: `/roadmap/tema/:temaId` consume `GET /api/t
 
 Study frontend V1 validado: `/study` consume `GET /api/sesiones-estudio` y `GET /api/roadmap/vista` sin usuarioId. La pantalla muestra registro manual de sesiones, historial reciente, resumen factual de sesiones/minutos, estados loading/error/empty, create/edit/delete, validacion de Tema/Fecha/Duracion/Tipo, y modo contextual `/study?temaId=...` con Tema preseleccionado y enlace de vuelta a Workspace. El formulario usa los valores reales `Teoria`, `Practica`, `Laboratorio` y `Repaso`; no implementa timer, Pomodoro, sesion activa, herramientas ni tracking automatico. Los writes invalidan `RoadmapService.refrescarVista()` y recargan historial. Runtime Personal fue validado con una sesion de prueba creada, editada, refrescada y eliminada por API normal, quedando excluida de Study, Workspace, Dashboard y Roadmap tras soft delete.
 
+Resources frontend V1 validado: `/resources` y `/resources?temaId=...` consumen `GET /api/recursos` sin usuarioId y con `temaId` factual cuando corresponde. La pantalla prioriza lista enriquecida, search local por titulo/URL, filtros combinados Estado/Tipo, Temas relacionados visibles con links a Workspace, detail panel, create global/contextual, edit de Titulo/URL/Estado/Rating/Notas/HerramientaIA/PromptsUtilizados y delete/soft delete. TipoRecurso se muestra immutable en edicion; Temas son read-only y no hay unlink ni editor de asociaciones. Rating no se filtra en LIST V1 porque el contrato de lista no lo expone y no se carga detail de todos los recursos. Runtime Personal validado con recurso de prueba creado y vinculado a `Bash scripting`, editado desde UI y eliminado por API normal; global, contextual y Workspace volvieron al baseline.
+
 Apuntes permanentes de Tema V1 backend validado: `roadmap.ApunteTema` modela el contenido personal editable 0..1 asociado a un Tema. No reemplaza Tema.Objetivos, Nota append-only, SesionEstudio.Notas ni Recurso.Notas. GET/PUT `/api/temas/{temaId}/apuntes` participan de API Personal y resuelven Usuario actual en el borde HTTP. La migracion `20260901003645_AgregarApuntesPermanentesTema` fue creada y validada sobre AprendizajeTestsDb; posteriormente fue aplicada controladamente a AprendizajePersonalDb con backup previo, SQL auditado y preservacion de datos existentes.
 
 RoadmapVistaV1 backend validado: GET `/api/roadmap/vista` participa de API Personal y resuelve Usuario actual en el borde HTTP. La respuesta entrega Fases ordenadas con metadata pedagogica, Temas planos por Fase con TemaPadreId, criterios total/cumplidos, progreso de Tema, EstadoTema, proxima fecha de repaso si existe ultima sesion, repaso recomendado, progreso de Fase y progreso global. Progreso de Tema = criterios cumplidos / criterios totales, 0% si no hay criterios; no hay pesos. Progreso de Fase y Global = promedio de progreso de Temas evaluables asociados a Fases; un Tema padre con hijos y 0 criterios se trata como nodo organizativo para no degradar el avance de sus hijos. Fase actual = primera Fase por Orden no completada; una Fase se completa solo si tiene Temas evaluables y todos estan estructuralmente completos por criterios, aunque alguno este en EstadoTema.EnRepaso; si todas estan completas se devuelve la ultima. CriteriosAvance de Fase permanecen como metadata descriptiva, no progreso. No crea migraciones, SnapshotProgreso, vw_TemaEstado ni Dashboard.
@@ -778,9 +790,9 @@ TemaWorkspaceV1 backend validado: GET `/api/temas/{temaId}/workspace` participa 
 
 EvidenceListaV1 backend validado: GET `/api/evidence` participa de API Personal y resuelve Usuario actual en el borde HTTP. La respuesta unifica solo en read-side Proyecto, Laboratorio, Writeup, ArtefactoTecnico y CertificacionObtenida con discriminador `TipoEvidenceV1`, titulo normalizado, EstadoMadurez factual, fechas factuales, Temas relacionados y Herramientas solo donde existen relaciones reales. Filtros V1 disponibles: `tipoEvidence`, `estadoMadurez` y `temaId`; CertificacionObtenida se relaciona con Tema a traves de CertificacionTema. Portafolio permanece separado y sigue incluyendo solo ListoPortafolio/Publicado. No crea entidad Evidence generica, no crea writes genericos, no crea migraciones, no implementa UI Evidence y no modifica AprendizajePersonalDb.
 
-RecursoTema Read Contract V1 backend validado: GET `/api/recursos` participa de API Personal y resuelve Usuario actual en el borde HTTP; acepta filtro opcional `temaId` y devuelve solo Recursos visibles vinculados a ese Tema. LIST y DETAIL exponen `temas` como coleccion minima `{ id, nombre }`, basada en relaciones reales `resource.RecursoTema`. Si `temaId` no existe, es ajeno o esta eliminado logicamente, el listado contextual devuelve `[]`; detail sigue devolviendo 404 cuando el Recurso no existe o no pertenece al Usuario actual. La lectura usa proyeccion + batch lookup para evitar N+1 obvio. CRUD Resource no cambia, TipoRecurso sigue inmutable, `PUT /api/recursos/{recursoId}/temas/{temaId}` conserva idempotencia y unlink RecursoTema queda diferido. No crea migraciones, tablas, paquetes ni frontend.
+RecursoTema Read Contract V1 backend validado: GET `/api/recursos` participa de API Personal y resuelve Usuario actual en el borde HTTP; acepta filtro opcional `temaId` y devuelve solo Recursos visibles vinculados a ese Tema. LIST y DETAIL exponen `temas` como coleccion minima `{ id, nombre }`, basada en relaciones reales `resource.RecursoTema`. Si `temaId` no existe, es ajeno o esta eliminado logicamente, el listado contextual devuelve `[]`; detail sigue devolviendo 404 cuando el Recurso no existe o no pertenece al Usuario actual. La lectura usa proyeccion + batch lookup para evitar N+1 obvio. CRUD Resource no cambia, TipoRecurso sigue inmutable, `PUT /api/recursos/{recursoId}/temas/{temaId}` conserva idempotencia y unlink RecursoTema queda diferido.
 
-Proxima area sugerida: Resources Frontend V1 queda desbloqueado para planificacion/implementacion sobre contrato factual RecursoTema. Evidence, Portfolio, light mode, dock inferior, timer, analytics screen, Search global real y streak siguen diferidos fuera de sus bloques propios.
+Proxima area sugerida: Evidence Frontend V1 o Portfolio Frontend V1 quedan como siguientes bloques naturales. Unlink RecursoTema, filtro rating en LIST, Search global real, IA automation, recomendaciones, Evidence profundo, Portfolio, light mode, dock inferior, analytics screen y streak siguen diferidos fuera de sus bloques propios.
 
 ## Pendientes Deliberados
 
@@ -803,11 +815,9 @@ Proxima area sugerida: Resources Frontend V1 queda desbloqueado para planificaci
 - auth;
 - SnapshotProgreso operativo;
 - integrations;
-- pantallas frontend V1 completas;
-- formularios frontend Resource/Study/Evidence;
+- pantallas frontend V1 completas para Evidence y Portfolio;
+- formularios frontend Evidence;
 - Portafolio frontend completo;
-- filtros Resource;
 - filtros Study;
 - edicion EntradaBitacora;
-- TipoRecurso editable;
 - GitHub remote.

@@ -28,7 +28,12 @@ export const routes: Routes = [
       import('./features/study/study-page/study-page').then((m) => m.StudyPage),
     data: { title: 'Study' },
   },
-  { path: 'resources', component: PlaceholderPage, data: { title: 'Resources' } },
+  {
+    path: 'resources',
+    loadComponent: () =>
+      import('./features/resources/resources-page/resources-page').then((m) => m.ResourcesPage),
+    data: { title: 'Resources' },
+  },
   { path: 'evidence', component: PlaceholderPage, data: { title: 'Evidence' } },
   { path: 'portfolio', component: PlaceholderPage, data: { title: 'Portfolio' } },
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },

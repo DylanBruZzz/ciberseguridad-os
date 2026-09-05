@@ -597,7 +597,16 @@
 - [x] Study Frontend V1 invalida RoadmapVistaV1 despues de writes para coherencia con Dashboard, Roadmap y Workspace.
 - [x] Study Frontend V1 mantiene notas de sesion separadas de ApuntesTema permanentes.
 - [x] Runtime Personal de Study validado con create/edit/refresh/delete real y limpieza por soft delete via API.
-- [ ] Pantalla Resources V1.
+- [x] Pantalla Resources V1.
+- [x] Resources Frontend V1 soporta biblioteca global `/resources` sin usuarioId.
+- [x] Resources Frontend V1 soporta biblioteca contextual `/resources?temaId=...` consumiendo filtro backend factual.
+- [x] Resources Frontend V1 muestra Temas relacionados en LIST/DETAIL y navega a Workspace.
+- [x] Resources Frontend V1 crea, edita y elimina Recursos contra API Personal sin usuarioId.
+- [x] Resources Frontend V1 vincula Tema automaticamente solo al crear recurso nuevo desde contexto.
+- [x] Resources Frontend V1 mantiene TipoRecurso immutable y relaciones Tema read-only.
+- [x] Resources Frontend V1 deja Rating solo en detail/edit, sin filtro LIST ni N+1 frontend.
+- [x] Resources Frontend V1 mantiene Notas, Herramienta IA y Prompts como campos manuales.
+- [x] Runtime Personal de Resources validado con create/edit/delete real y limpieza por soft delete via API.
 - [ ] Pantalla Evidence V1.
 - [ ] Pantalla Portfolio V1.
 - [ ] CORS/runtime publish definido para Frontend Foundation fuera de dev proxy.
@@ -624,7 +633,7 @@
 - [x] Ownership explicito de Resource validado en Application e Integration.
 - [x] TipoRecurso permanece no editable en V1 inicial.
 - [x] Filtro Resource por temaId y exposicion factual de Temas relacionados en LIST/DETAIL.
-- [ ] Filtros Resource por tipo/estado/texto.
+- [x] Filtros Resource por tipo/estado/texto en frontend V1.
 - [x] Study corrections V1: actualizacion de Fecha, DuracionMinutos, Tipo, Notas y TemaId con ownership.
 - [x] Study soft delete V1 expuesto por API.
 - [ ] Filtros Study por fecha/tema/tipo.
@@ -647,6 +656,7 @@
 - [x] Dashboard V1 funcional validado contra RoadmapVistaV1.
 - [x] Roadmap V1 funcional validado contra RoadmapVistaV1.
 - [x] Study Frontend V1 funcional validado contra SesionEstudio API Personal y RoadmapVistaV1.
+- [x] Resources Frontend V1 funcional validado contra Resource API Personal y RecursoTema Read Contract V1.
 - [x] Apuntes permanentes editables de Tema V1 backend.
 - [x] RoadmapVistaV1 backend/read-side.
 - [x] TemaWorkspaceV1 backend/read-side.

@@ -178,6 +178,13 @@ caf832a feat: establish validated initial persistence
 - RESOURCES FRONTEND V1 SOPORTA SEARCH LOCAL, FILTRO ESTADO, FILTRO TIPO, DETAIL, CREATE, EDIT Y SOFT DELETE
 - RESOURCES FRONTEND V1 MANTIENE TIPO RECURSO INMUTABLE, RELACIONES TEMA READ-ONLY Y RATING SOLO EN DETAIL
 - NOTAS, HERRAMIENTA IA Y PROMPTS DE RESOURCE QUEDAN COMO CAMPOS MANUALES
+- EVIDENCE FRONTEND V1 IMPLEMENTADO COMO VISTA UNIFICADA SOBRE EVIDENCELISTAV1
+- EVIDENCE FRONTEND V1 SOPORTA MODO GLOBAL Y CONTEXTUAL POR TEMA MEDIANTE FILTRO BACKEND FACTUAL
+- EVIDENCE FRONTEND V1 SOPORTA FILTROS SERVER-SIDE POR TIPOEVIDENCE Y ESTADOMADUREZ, SEARCH LOCAL, LISTA COMPACTA, DETAIL POR AR, CREATE, EDIT Y SOFT DELETE
+- EVIDENCE FRONTEND V1 RESPETA LOS CINCO AGGREGATE ROOTS REALES SIN CREAR ENTIDAD GENERICA NI WRITE GENERICO
+- NOTAS APPEND-ONLY INTEGRADAS PARA PROYECTO, LABORATORIO, WRITEUP Y ARTEFACTOTECNICO; CERTIFICACIONOBTENIDA PERMANECE SIN NOTAS POR CONTRATO ACTUAL
+- CERTIFICACIONOBTENIDA SE CREA/EDITA SOBRE CERTIFICACION GLOBAL Y NO INVENTA VINCULO DIRECTO A TEMA
+- PORTFOLIO PERMANECE SEPARADO DE EVIDENCE FRONTEND V1
 - STREAK, DEADLINES PUNITIVOS, TIMER, ANALYTICS Y SEARCH GLOBAL REAL SIGUEN DIFERIDOS
 
 ## Migraciones Aplicadas
@@ -246,10 +253,10 @@ caf832a feat: establish validated initial persistence
 - Create contextual de Resources usa `POST /api/recursos` y, con el `id` devuelto por `201 Created`, ejecuta `PUT /api/recursos/{recursoId}/temas/{temaId}`. Si falla el vinculo, informa que el recurso fue creado pero no vinculado. Relaciones Tema permanecen read-only; unlink RecursoTema sigue diferido.
 - Notas Resource, Herramienta IA y Prompts utilizados son campos manuales en edicion; no hay IA automatica, scraping, previews web, favoritos, tags nuevos ni recomendaciones.
 - Runtime Personal de Resources validado con recurso controlado sobre `Bash scripting`: create contextual, vinculo factual, detail, edit UI, refresh, filtros, delete/soft delete y vuelta de Workspace count a baseline sin SQL manual.
-- Evidence y Portfolio quedan como rutas placeholder limpias hasta sus bloques V1.
+- Evidence reemplaza el placeholder por Evidence Frontend V1; Portfolio queda como ruta placeholder limpia hasta su bloque V1.
 - CORS no se agrego en este bloque; el desarrollo usa proxy Angular especifico. No existe AllowAnyOrigin.
 - Visual Shell V1 validado: dark mode, identidad Ciberseguridad OS, sidebar vertical compacta, topbar por modulo, Search/Ctrl+K preparado, responsive base y estados globales discretos. Light mode, dock inferior y pantallas profundas siguen diferidos.
-- Validacion frontend actual: 91 tests unitarios correctos y `npm run build` correcto.
+- Validacion frontend actual: 116 tests unitarios correctos y `npm run build` correcto.
 
 ## Datos Roadmap V1 Personal
 
@@ -782,6 +789,8 @@ Study frontend V1 validado: `/study` consume `GET /api/sesiones-estudio` y `GET 
 
 Resources frontend V1 validado: `/resources` y `/resources?temaId=...` consumen `GET /api/recursos` sin usuarioId y con `temaId` factual cuando corresponde. La pantalla prioriza lista enriquecida, search local por titulo/URL, filtros combinados Estado/Tipo, Temas relacionados visibles con links a Workspace, detail panel, create global/contextual, edit de Titulo/URL/Estado/Rating/Notas/HerramientaIA/PromptsUtilizados y delete/soft delete. TipoRecurso se muestra immutable en edicion; Temas son read-only y no hay unlink ni editor de asociaciones. Rating no se filtra en LIST V1 porque el contrato de lista no lo expone y no se carga detail de todos los recursos. Runtime Personal validado con recurso de prueba creado y vinculado a `Bash scripting`, editado desde UI y eliminado por API normal; global, contextual y Workspace volvieron al baseline.
 
+Evidence frontend V1 validado: `/evidence` consume `GET /api/evidence` sin usuarioId, con filtros server-side `temaId`, `tipoEvidence` y `estadoMadurez`; search local opera solo sobre campos del read-side cargado. Detail despacha por `TipoEvidenceV1` hacia endpoints especificos de Proyecto, Laboratorio, Writeup, ArtefactoTecnico y CertificacionObtenida. Create/edit/delete usan contratos reales por AR; Proyecto, Laboratorio, Writeup y ArtefactoTecnico pueden vincularse al Tema contextual mediante endpoint real, mientras CertificacionObtenida permanece ligada al catalogo global y no inventa relacion directa a Tema. Nota append-only queda disponible solo donde existe endpoint real. Runtime Personal validado con Laboratorio de prueba vinculado a `Bash scripting`, editado, con Nota append-only creada, eliminado por API normal y excluido de Evidence contextual y Workspace tras soft delete.
+
 Apuntes permanentes de Tema V1 backend validado: `roadmap.ApunteTema` modela el contenido personal editable 0..1 asociado a un Tema. No reemplaza Tema.Objetivos, Nota append-only, SesionEstudio.Notas ni Recurso.Notas. GET/PUT `/api/temas/{temaId}/apuntes` participan de API Personal y resuelven Usuario actual en el borde HTTP. La migracion `20260901003645_AgregarApuntesPermanentesTema` fue creada y validada sobre AprendizajeTestsDb; posteriormente fue aplicada controladamente a AprendizajePersonalDb con backup previo, SQL auditado y preservacion de datos existentes.
 
 RoadmapVistaV1 backend validado: GET `/api/roadmap/vista` participa de API Personal y resuelve Usuario actual en el borde HTTP. La respuesta entrega Fases ordenadas con metadata pedagogica, Temas planos por Fase con TemaPadreId, criterios total/cumplidos, progreso de Tema, EstadoTema, proxima fecha de repaso si existe ultima sesion, repaso recomendado, progreso de Fase y progreso global. Progreso de Tema = criterios cumplidos / criterios totales, 0% si no hay criterios; no hay pesos. Progreso de Fase y Global = promedio de progreso de Temas evaluables asociados a Fases; un Tema padre con hijos y 0 criterios se trata como nodo organizativo para no degradar el avance de sus hijos. Fase actual = primera Fase por Orden no completada; una Fase se completa solo si tiene Temas evaluables y todos estan estructuralmente completos por criterios, aunque alguno este en EstadoTema.EnRepaso; si todas estan completas se devuelve la ultima. CriteriosAvance de Fase permanecen como metadata descriptiva, no progreso. No crea migraciones, SnapshotProgreso, vw_TemaEstado ni Dashboard.
@@ -792,7 +801,7 @@ EvidenceListaV1 backend validado: GET `/api/evidence` participa de API Personal 
 
 RecursoTema Read Contract V1 backend validado: GET `/api/recursos` participa de API Personal y resuelve Usuario actual en el borde HTTP; acepta filtro opcional `temaId` y devuelve solo Recursos visibles vinculados a ese Tema. LIST y DETAIL exponen `temas` como coleccion minima `{ id, nombre }`, basada en relaciones reales `resource.RecursoTema`. Si `temaId` no existe, es ajeno o esta eliminado logicamente, el listado contextual devuelve `[]`; detail sigue devolviendo 404 cuando el Recurso no existe o no pertenece al Usuario actual. La lectura usa proyeccion + batch lookup para evitar N+1 obvio. CRUD Resource no cambia, TipoRecurso sigue inmutable, `PUT /api/recursos/{recursoId}/temas/{temaId}` conserva idempotencia y unlink RecursoTema queda diferido.
 
-Proxima area sugerida: Evidence Frontend V1 o Portfolio Frontend V1 quedan como siguientes bloques naturales. Unlink RecursoTema, filtro rating en LIST, Search global real, IA automation, recomendaciones, Evidence profundo, Portfolio, light mode, dock inferior, analytics screen y streak siguen diferidos fuera de sus bloques propios.
+Proxima area sugerida: Portfolio Frontend V1 queda como siguiente bloque natural. Unlink RecursoTema, filtro rating en LIST, Search global real, IA automation, recomendaciones, Evidence profundo, Portfolio, light mode, dock inferior, analytics screen y streak siguen diferidos fuera de sus bloques propios.
 
 ## Pendientes Deliberados
 
@@ -815,7 +824,7 @@ Proxima area sugerida: Evidence Frontend V1 o Portfolio Frontend V1 quedan como 
 - auth;
 - SnapshotProgreso operativo;
 - integrations;
-- pantallas frontend V1 completas para Evidence y Portfolio;
+- pantalla frontend V1 completa para Portfolio;
 - formularios frontend Evidence;
 - Portafolio frontend completo;
 - filtros Study;

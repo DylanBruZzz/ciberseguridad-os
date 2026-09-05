@@ -607,7 +607,14 @@
 - [x] Resources Frontend V1 deja Rating solo en detail/edit, sin filtro LIST ni N+1 frontend.
 - [x] Resources Frontend V1 mantiene Notas, Herramienta IA y Prompts como campos manuales.
 - [x] Runtime Personal de Resources validado con create/edit/delete real y limpieza por soft delete via API.
-- [ ] Pantalla Evidence V1.
+- [x] Pantalla Evidence V1.
+- [x] Evidence Frontend V1 consume `GET /api/evidence` sin usuarioId con filtros `temaId`, `tipoEvidence` y `estadoMadurez`.
+- [x] Evidence Frontend V1 muestra vista global y contextual `/evidence?temaId=...` con navegacion de vuelta a Workspace.
+- [x] Evidence Frontend V1 despacha detail, create, edit y soft delete por endpoint especifico de Proyecto, Laboratorio, Writeup, ArtefactoTecnico y CertificacionObtenida.
+- [x] Evidence Frontend V1 mantiene EstadoMadurez como semantica factual, no como progreso.
+- [x] Evidence Frontend V1 integra Nota append-only solo para tipos con endpoint real.
+- [x] Evidence Frontend V1 mantiene Portfolio separado.
+- [x] Runtime Personal de Evidence validado con create/edit/nota append-only/delete real y limpieza visible por soft delete via API.
 - [ ] Pantalla Portfolio V1.
 - [ ] CORS/runtime publish definido para Frontend Foundation fuera de dev proxy.
 
@@ -657,6 +664,7 @@
 - [x] Roadmap V1 funcional validado contra RoadmapVistaV1.
 - [x] Study Frontend V1 funcional validado contra SesionEstudio API Personal y RoadmapVistaV1.
 - [x] Resources Frontend V1 funcional validado contra Resource API Personal y RecursoTema Read Contract V1.
+- [x] Evidence Frontend V1 funcional validado contra EvidenceListaV1 y endpoints especificos de los cinco AR reales.
 - [x] Apuntes permanentes editables de Tema V1 backend.
 - [x] RoadmapVistaV1 backend/read-side.
 - [x] TemaWorkspaceV1 backend/read-side.

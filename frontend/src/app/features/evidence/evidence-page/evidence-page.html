@@ -1,0 +1,674 @@
+<section class="evidence-page">
+  <header class="evidence-header">
+    <div>
+      <p class="eyebrow">Evidence</p>
+      <h1>{{ tituloContexto() }}</h1>
+      <p>Registra resultados verificables de aprendizaje sin mezclarlo con Portfolio.</p>
+      @if (temaContextual(); as tema) {
+        <a class="context-return" [routerLink]="['/roadmap/tema', tema.id]">Volver al tema</a>
+      } @else if (temaIdContextual()) {
+        <a class="context-return" [routerLink]="['/roadmap/tema', temaIdContextual()]">Volver al tema</a>
+      }
+    </div>
+
+    <button type="button" class="primary-button" (click)="abrirCrear()">+ Nueva evidencia</button>
+  </header>
+
+  @if (temaIdMalformado()) {
+    <section class="inline-warning" role="alert">
+      <strong>Contexto no disponible.</strong>
+      <span>El identificador de tema no tiene un formato valido; se muestra Evidence global.</span>
+    </section>
+  }
+
+  @if (errorRoadmap() && temaIdContextual()) {
+    <section class="inline-warning" role="status">
+      <strong>No pudimos resolver el nombre del tema.</strong>
+      <span>{{ errorRoadmap() }}</span>
+    </section>
+  }
+
+  @if (mensajeWrite()) {
+    <section class="inline-write" [class.error]="estadoWrite() === 'error'" aria-live="polite">
+      {{ mensajeWrite() }}
+    </section>
+  }
+
+  <section class="toolbar" aria-label="Filtros de Evidence">
+    <label class="search-field">
+      <span>Buscar evidencia</span>
+      <input
+        type="search"
+        [value]="busqueda()"
+        (input)="onBusquedaInput($event)"
+        placeholder="Titulo, tipo, tema o herramienta"
+      />
+    </label>
+
+    <label>
+      <span>Tipo</span>
+      <select [value]="tipoFiltro()" (change)="onTipoFiltroChange($event)">
+        <option value="">Todos</option>
+        @for (tipo of tiposEvidence; track tipo) {
+          <option value="{{ tipo }}">{{ etiquetaTipo(tipo) }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      <span>Madurez</span>
+      <select [value]="madurezFiltro()" (change)="onMadurezFiltroChange($event)">
+        <option value="">Todos</option>
+        @for (estado of estadosMadurez; track estado) {
+          <option value="{{ estado }}">{{ etiquetaMadurez(estado) }}</option>
+        }
+      </select>
+    </label>
+
+    @if (hayFiltros()) {
+      <button type="button" class="ghost-button" (click)="limpiarFiltros()">Limpiar filtros</button>
+    }
+  </section>
+
+  <div class="evidence-layout">
+    <main class="list-panel" aria-label="Lista de evidencias">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">{{ temaIdContextual() ? 'Evidence contextual' : 'Evidence global' }}</p>
+          <h2>{{ evidenciasFiltradas().length }} de {{ totalServidor() }} evidencias</h2>
+        </div>
+        <button type="button" class="ghost-button" (click)="recargarLista()">Reintentar</button>
+      </div>
+
+      @if (cargandoLista()) {
+        <section class="evidence-skeleton" aria-live="polite">
+          <span></span>
+          <span></span>
+          <span></span>
+          <p>Cargando Evidence</p>
+        </section>
+      } @else if (errorLista()) {
+        <section class="state-panel" role="alert">
+          <h3>No pudimos cargar Evidence.</h3>
+          <p>{{ errorLista() }}</p>
+        </section>
+      } @else if (lista().length === 0) {
+        <section class="empty-state">
+          <h3>
+            {{
+              temaIdContextual()
+                ? 'Aun no hay evidencias vinculadas a este tema.'
+                : 'Aun no has registrado evidencias.'
+            }}
+          </h3>
+          <p>Cuando exista evidencia factual aparecera en esta vista unificada.</p>
+        </section>
+      } @else if (evidenciasFiltradas().length === 0) {
+        <section class="empty-state">
+          <h3>No encontramos evidencias con estos filtros.</h3>
+          <p>La busqueda local usa los campos ya cargados por el read-side.</p>
+        </section>
+      } @else {
+        <ol class="evidence-list">
+          @for (item of evidenciasFiltradas(); track trackById($index, item)) {
+            <li>
+              <article [class.selected]="seleccionado()?.id === item.id">
+                <button
+                  type="button"
+                  class="evidence-open"
+                  [attr.aria-label]="'Abrir detalle de ' + item.titulo"
+                  (click)="abrirDetalle(item)"
+                >
+                  <span class="type-dot" [class]="item.tipoEvidence"></span>
+                  <span class="evidence-copy">
+                    <span class="evidence-title">{{ item.titulo }}</span>
+                    <span class="evidence-meta">
+                      <span>{{ etiquetaTipo(item.tipoEvidence) }}</span>
+                      <span class="madurez" [class]="item.estadoMadurez">{{ etiquetaMadurez(item.estadoMadurez) }}</span>
+                      <span>{{ fechaCorta(item.fechaActividadUtc) }}</span>
+                    </span>
+                  </span>
+                </button>
+
+                <div class="relations" [attr.aria-label]="'Relaciones de ' + item.titulo">
+                  @if (item.temas.length > 0) {
+                    @for (tema of item.temas; track tema.id) {
+                      <a [routerLink]="['/roadmap/tema', tema.id]">{{ tema.nombre }}</a>
+                    }
+                  }
+                  @if (item.herramientas.length > 0) {
+                    @for (herramienta of item.herramientas; track herramienta.id) {
+                      <span>{{ herramienta.nombre }}</span>
+                    }
+                  }
+                </div>
+              </article>
+            </li>
+          }
+        </ol>
+      }
+    </main>
+
+    <aside class="detail-panel" aria-label="Detalle de Evidence">
+      @if (modoFormulario(); as modo) {
+        <section class="form-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">{{ modo === 'crear' ? 'Nueva evidencia' : 'Editar evidencia' }}</p>
+              <h2>{{ modo === 'crear' ? etiquetaTipo(formTipoEvidence()) : detalle()?.item?.titulo }}</h2>
+            </div>
+            <button type="button" class="ghost-button" (click)="cancelarFormulario()">Cancelar</button>
+          </div>
+
+          @if (modo === 'crear' && temaContextual(); as tema) {
+            @if (puedeVincularTema(formTipoEvidence())) {
+              <p class="context-note">Se vinculara a {{ tema.nombre }}.</p>
+            } @else {
+              <p class="context-note">Certificacion obtenida se registra sobre el catalogo global.</p>
+            }
+          }
+
+          <form (submit)="$event.preventDefault(); guardarFormulario()" novalidate>
+            @if (modo === 'crear') {
+              <label>
+                <span>Tipo de evidencia</span>
+                <select
+                  [value]="formTipoEvidence()"
+                  (change)="onTipoEvidenceChange($event)"
+                  aria-describedby="evidence-tipo-error"
+                >
+                  @for (tipo of tiposEvidence; track tipo) {
+                    <option value="{{ tipo }}">{{ etiquetaTipo(tipo) }}</option>
+                  }
+                </select>
+              </label>
+              @if (erroresFormulario().tipoEvidence) {
+                <p id="evidence-tipo-error" class="field-error">{{ erroresFormulario().tipoEvidence }}</p>
+              }
+            } @else {
+              <div class="readonly-field">
+                <span>Tipo de evidencia</span>
+                <strong>{{ etiquetaTipo(formTipoEvidence()) }}</strong>
+                <p>El tipo permanece fijo despues de crear la evidencia.</p>
+              </div>
+            }
+
+            @switch (formTipoEvidence()) {
+              @case ('Proyecto') {
+                <label>
+                  <span>Nombre</span>
+                  <input
+                    type="text"
+                    [value]="formNombre()"
+                    (input)="onTextInput($event, 'nombre')"
+                    [attr.aria-invalid]="erroresFormulario().nombre ? true : null"
+                    aria-describedby="evidence-nombre-error"
+                  />
+                </label>
+                @if (erroresFormulario().nombre) {
+                  <p id="evidence-nombre-error" class="field-error">{{ erroresFormulario().nombre }}</p>
+                }
+
+                @if (modo === 'editar') {
+                  <label>
+                    <span>Descripcion</span>
+                    <textarea rows="4" [value]="formDescripcion()" (input)="onTextInput($event, 'descripcion')"></textarea>
+                  </label>
+                  <label>
+                    <span>Estado del proyecto</span>
+                    <select [value]="formEstadoProyecto()" (change)="onEstadoProyectoChange($event)">
+                      @for (estado of estadosProyecto; track estado) {
+                        <option value="{{ estado }}">{{ etiquetaEstadoProyecto(estado) }}</option>
+                      }
+                    </select>
+                  </label>
+                  <label>
+                    <span>Repositorio URL</span>
+                    <input
+                      type="url"
+                      [value]="formRepositorioUrl()"
+                      (input)="onTextInput($event, 'repositorioUrl')"
+                      [attr.aria-invalid]="erroresFormulario().url ? true : null"
+                    />
+                  </label>
+                  <div class="form-row">
+                    <label>
+                      <span>Fecha inicio</span>
+                      <input type="date" [value]="formFechaInicio()" (input)="onTextInput($event, 'fechaInicio')" />
+                    </label>
+                    <label>
+                      <span>Fecha fin</span>
+                      <input
+                        type="date"
+                        [value]="formFechaFin()"
+                        (input)="onTextInput($event, 'fechaFin')"
+                        [attr.aria-invalid]="erroresFormulario().fechaFin ? true : null"
+                      />
+                    </label>
+                  </div>
+                  @if (erroresFormulario().fechaFin) {
+                    <p class="field-error">{{ erroresFormulario().fechaFin }}</p>
+                  }
+                }
+              }
+              @case ('Laboratorio') {
+                <label>
+                  <span>Nombre</span>
+                  <input
+                    type="text"
+                    [value]="formNombre()"
+                    (input)="onTextInput($event, 'nombre')"
+                    [attr.aria-invalid]="erroresFormulario().nombre ? true : null"
+                  />
+                </label>
+                @if (erroresFormulario().nombre) {
+                  <p class="field-error">{{ erroresFormulario().nombre }}</p>
+                }
+                <label>
+                  <span>Objetivo</span>
+                  <textarea rows="3" [value]="formObjetivo()" (input)="onTextInput($event, 'objetivo')"></textarea>
+                </label>
+                <label>
+                  <span>Entorno VMs</span>
+                  <input type="text" [value]="formEntornoVms()" (input)="onTextInput($event, 'entornoVms')" />
+                </label>
+                <label>
+                  <span>Hallazgos</span>
+                  <textarea rows="4" [value]="formHallazgos()" (input)="onTextInput($event, 'hallazgos')"></textarea>
+                </label>
+                <div class="form-row">
+                  <label>
+                    <span>Minutos</span>
+                    <input
+                      type="number"
+                      min="0"
+                      [value]="formTiempoInvertidoMinutos()"
+                      (input)="onTextInput($event, 'tiempoInvertidoMinutos')"
+                      [attr.aria-invalid]="erroresFormulario().tiempoInvertidoMinutos ? true : null"
+                    />
+                  </label>
+                  <label>
+                    <span>Fecha</span>
+                    <input type="date" [value]="formFecha()" (input)="onTextInput($event, 'fecha')" />
+                  </label>
+                </div>
+                @if (erroresFormulario().tiempoInvertidoMinutos) {
+                  <p class="field-error">{{ erroresFormulario().tiempoInvertidoMinutos }}</p>
+                }
+              }
+              @case ('Writeup') {
+                <label>
+                  <span>Titulo</span>
+                  <input
+                    type="text"
+                    [value]="formTitulo()"
+                    (input)="onTextInput($event, 'titulo')"
+                    [attr.aria-invalid]="erroresFormulario().titulo ? true : null"
+                  />
+                </label>
+                @if (erroresFormulario().titulo) {
+                  <p class="field-error">{{ erroresFormulario().titulo }}</p>
+                }
+                @if (modo === 'editar') {
+                  <label>
+                    <span>Plataforma origen</span>
+                    <input type="text" [value]="formPlataformaOrigen()" (input)="onTextInput($event, 'plataformaOrigen')" />
+                  </label>
+                  <label>
+                    <span>URL</span>
+                    <input
+                      type="url"
+                      [value]="formUrl()"
+                      (input)="onTextInput($event, 'url')"
+                      [attr.aria-invalid]="erroresFormulario().url ? true : null"
+                    />
+                  </label>
+                  <label>
+                    <span>Fecha</span>
+                    <input type="date" [value]="formFecha()" (input)="onTextInput($event, 'fecha')" />
+                  </label>
+                }
+              }
+              @case ('ArtefactoTecnico') {
+                <label>
+                  <span>Tipo artefacto</span>
+                  <select [value]="formTipoArtefacto()" (change)="onTipoArtefactoChange($event)">
+                    @for (tipo of tiposArtefacto; track tipo) {
+                      <option value="{{ tipo }}">{{ etiquetaTipoArtefacto(tipo) }}</option>
+                    }
+                  </select>
+                </label>
+                <label>
+                  <span>Nombre</span>
+                  <input
+                    type="text"
+                    [value]="formNombre()"
+                    (input)="onTextInput($event, 'nombre')"
+                    [attr.aria-invalid]="erroresFormulario().nombre ? true : null"
+                  />
+                </label>
+                @if (erroresFormulario().nombre) {
+                  <p class="field-error">{{ erroresFormulario().nombre }}</p>
+                }
+                @if (modo === 'editar') {
+                  <label>
+                    <span>Contenido o URL</span>
+                    <textarea
+                      rows="4"
+                      [value]="formContenidoOUrl()"
+                      (input)="onTextInput($event, 'contenidoOUrl')"
+                      [attr.aria-invalid]="erroresFormulario().url ? true : null"
+                    ></textarea>
+                  </label>
+                  <label>
+                    <span>Lenguaje o tecnologia</span>
+                    <input
+                      type="text"
+                      [value]="formLenguajeTecnologia()"
+                      (input)="onTextInput($event, 'lenguajeTecnologia')"
+                    />
+                  </label>
+                }
+              }
+              @case ('CertificacionObtenida') {
+                @if (modo === 'crear') {
+                  <label>
+                    <span>Certificacion</span>
+                    <select
+                      [value]="formCertificacionId()"
+                      (change)="onCertificacionChange($event)"
+                      [attr.aria-invalid]="erroresFormulario().certificacionId ? true : null"
+                    >
+                      <option value="">Seleccionar</option>
+                      @for (certificacion of certificaciones(); track certificacion.id) {
+                        <option value="{{ certificacion.id }}">{{ certificacion.nombre }}</option>
+                      }
+                    </select>
+                  </label>
+                  @if (erroresFormulario().certificacionId) {
+                    <p class="field-error">{{ erroresFormulario().certificacionId }}</p>
+                  }
+                  @if (errorCertificaciones()) {
+                    <p class="field-error">{{ errorCertificaciones() }}</p>
+                  }
+                } @else if (detalle()?.tipoEvidence === 'CertificacionObtenida') {
+                  <div class="readonly-field">
+                    <span>Certificacion</span>
+                    <strong>{{ certificacionNombre(formCertificacionId()) }}</strong>
+                    <p>La certificacion base no se modifica desde esta evidencia.</p>
+                  </div>
+                }
+                <label>
+                  <span>Fecha obtencion</span>
+                  <input
+                    type="date"
+                    [value]="formFechaObtencion()"
+                    (input)="onTextInput($event, 'fechaObtencion')"
+                    [disabled]="modo === 'editar'"
+                    [attr.aria-invalid]="erroresFormulario().fecha ? true : null"
+                  />
+                </label>
+                @if (erroresFormulario().fecha) {
+                  <p class="field-error">{{ erroresFormulario().fecha }}</p>
+                }
+                @if (modo === 'editar') {
+                  <label>
+                    <span>Evidencia URL</span>
+                    <input
+                      type="url"
+                      [value]="formEvidenciaUrl()"
+                      (input)="onTextInput($event, 'evidenciaUrl')"
+                      [attr.aria-invalid]="erroresFormulario().url ? true : null"
+                    />
+                  </label>
+                }
+              }
+            }
+
+            @if (modo === 'editar') {
+              <label>
+                <span>Estado madurez</span>
+                <select [value]="formEstadoMadurez()" (change)="onEstadoMadurezChange($event)">
+                  @for (estado of estadosMadurez; track estado) {
+                    <option value="{{ estado }}">{{ etiquetaMadurez(estado) }}</option>
+                  }
+                </select>
+              </label>
+            }
+
+            @if (erroresFormulario().url) {
+              <p class="field-error">{{ erroresFormulario().url }}</p>
+            }
+
+            <div class="form-actions">
+              <button type="submit" [disabled]="estadoWrite() === 'guardando'">
+                {{
+                  estadoWrite() === 'guardando'
+                    ? 'Guardando...'
+                    : modo === 'crear'
+                      ? 'Crear evidencia'
+                      : 'Guardar cambios'
+                }}
+              </button>
+              <p aria-live="polite">
+                @if (estadoWrite() === 'guardado' || estadoWrite() === 'error') {
+                  {{ mensajeWrite() }}
+                }
+              </p>
+            </div>
+          </form>
+        </section>
+      } @else if (cargandoDetalle()) {
+        <section class="detail-state" aria-live="polite">
+          <span class="loader-line"></span>
+          <span class="loader-line short"></span>
+          <p>Cargando detalle</p>
+        </section>
+      } @else if (errorDetalle()) {
+        <section class="state-panel" role="alert">
+          <h2>No pudimos abrir la evidencia.</h2>
+          <p>{{ errorDetalle() }}</p>
+        </section>
+      } @else if (detalle(); as actual) {
+        <section class="evidence-detail">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Detalle</p>
+              <h2>{{ actual.item.titulo }}</h2>
+            </div>
+            <div class="detail-actions">
+              <button type="button" (click)="editarDetalle()">Editar</button>
+              <button type="button" class="danger-button" (click)="pedirEliminar()">Eliminar</button>
+            </div>
+          </div>
+
+          <dl class="detail-facts">
+            <div>
+              <dt>Tipo</dt>
+              <dd>{{ etiquetaTipo(actual.tipoEvidence) }}</dd>
+            </div>
+            <div>
+              <dt>Madurez</dt>
+              <dd>{{ etiquetaMadurez(actual.item.estadoMadurez) }}</dd>
+            </div>
+            <div>
+              <dt>Actividad</dt>
+              <dd>{{ fechaCorta(actual.item.fechaActividadUtc) }}</dd>
+            </div>
+          </dl>
+
+          <section>
+            <h3>Temas relacionados</h3>
+            @if (actual.item.temas.length === 0) {
+              <p class="muted">Sin tema vinculado</p>
+            } @else {
+              <div class="topic-links">
+                @for (tema of actual.item.temas; track tema.id) {
+                  <a [routerLink]="['/roadmap/tema', tema.id]">{{ tema.nombre }}</a>
+                }
+              </div>
+            }
+          </section>
+
+          @if (actual.item.herramientas.length > 0) {
+            <section>
+              <h3>Herramientas</h3>
+              <div class="topic-links">
+                @for (herramienta of actual.item.herramientas; track herramienta.id) {
+                  <span>{{ herramienta.nombre }}</span>
+                }
+              </div>
+            </section>
+          }
+
+          @switch (actual.tipoEvidence) {
+            @case ('Proyecto') {
+              <section>
+                <h3>Proyecto</h3>
+                <p>{{ actual.datos.descripcion ?? 'Sin descripcion.' }}</p>
+                <dl class="specific-facts">
+                  <div><dt>Estado</dt><dd>{{ etiquetaEstadoProyecto(actual.datos.estado) }}</dd></div>
+                  <div><dt>Inicio</dt><dd>{{ fechaCorta(actual.datos.fechaInicio) }}</dd></div>
+                  <div><dt>Fin</dt><dd>{{ fechaCorta(actual.datos.fechaFin) }}</dd></div>
+                </dl>
+                @if (actual.datos.repositorioUrl) {
+                  <a class="external-link" [href]="actual.datos.repositorioUrl" target="_blank" rel="noopener noreferrer">
+                    Abrir repositorio
+                  </a>
+                }
+              </section>
+            }
+            @case ('Laboratorio') {
+              <section>
+                <h3>Laboratorio</h3>
+                <p>{{ actual.datos.objetivo ?? 'Sin objetivo.' }}</p>
+                <dl class="specific-facts">
+                  <div><dt>Fecha</dt><dd>{{ fechaCorta(actual.datos.fecha) }}</dd></div>
+                  <div><dt>Minutos</dt><dd>{{ actual.datos.tiempoInvertidoMinutos ?? 'Sin registro' }}</dd></div>
+                  <div><dt>Entorno</dt><dd>{{ actual.datos.entornoVms ?? 'Sin entorno' }}</dd></div>
+                </dl>
+                <h3>Hallazgos</h3>
+                <p>{{ actual.datos.hallazgos ?? 'Sin hallazgos.' }}</p>
+              </section>
+            }
+            @case ('Writeup') {
+              <section>
+                <h3>Writeup</h3>
+                <dl class="specific-facts">
+                  <div><dt>Plataforma</dt><dd>{{ actual.datos.plataformaOrigen ?? 'Sin plataforma' }}</dd></div>
+                  <div><dt>Fecha</dt><dd>{{ fechaCorta(actual.datos.fecha) }}</dd></div>
+                </dl>
+                @if (actual.datos.url) {
+                  <a class="external-link" [href]="actual.datos.url" target="_blank" rel="noopener noreferrer">
+                    Abrir writeup
+                  </a>
+                }
+              </section>
+            }
+            @case ('ArtefactoTecnico') {
+              <section>
+                <h3>Artefacto tecnico</h3>
+                <dl class="specific-facts">
+                  <div><dt>Tipo artefacto</dt><dd>{{ etiquetaTipoArtefacto(actual.datos.tipoArtefacto) }}</dd></div>
+                  <div><dt>Tecnologia</dt><dd>{{ actual.datos.lenguajeTecnologia ?? 'Sin tecnologia' }}</dd></div>
+                </dl>
+                <p>{{ actual.datos.contenidoOUrl ?? 'Sin contenido o URL.' }}</p>
+              </section>
+            }
+            @case ('CertificacionObtenida') {
+              <section>
+                <h3>Certificacion obtenida</h3>
+                <dl class="specific-facts">
+                  <div><dt>Certificacion</dt><dd>{{ certificacionNombre(actual.datos.certificacionId) }}</dd></div>
+                  <div><dt>Fecha obtencion</dt><dd>{{ fechaCorta(actual.datos.fechaObtencion) }}</dd></div>
+                </dl>
+                @if (actual.datos.evidenciaUrl) {
+                  <a class="external-link" [href]="actual.datos.evidenciaUrl" target="_blank" rel="noopener noreferrer">
+                    Abrir evidencia
+                  </a>
+                }
+              </section>
+            }
+          }
+
+          @if (soportaNotas(actual.tipoEvidence)) {
+            <section class="notes-panel">
+              <div class="section-heading compact">
+                <div>
+                  <p class="eyebrow">Notas</p>
+                  <h3>{{ notasDetalle().length }} append-only</h3>
+                </div>
+              </div>
+
+              @if (cargandoNotas()) {
+                <p class="muted">Cargando notas</p>
+              } @else if (errorNotas()) {
+                <p class="field-error">{{ errorNotas() }}</p>
+              } @else if (notasDetalle().length === 0) {
+                <p class="muted">Sin notas para esta evidencia.</p>
+              } @else {
+                <ol class="notes-list">
+                  @for (nota of notasDetalle(); track nota.id) {
+                    <li>
+                      <strong>{{ etiquetaNota(nota.tipo) }}</strong>
+                      <time>{{ fechaCorta(nota.fecha) }}</time>
+                      <p>{{ nota.texto }}</p>
+                    </li>
+                  }
+                </ol>
+              }
+
+              <form class="note-form" (submit)="$event.preventDefault(); agregarNota()" novalidate>
+                <label>
+                  <span>Tipo nota</span>
+                  <select [value]="notaTipo()" (change)="onNotaTipoChange($event)">
+                    @for (tipo of tiposNota; track tipo) {
+                      <option value="{{ tipo }}">{{ etiquetaNota(tipo) }}</option>
+                    }
+                  </select>
+                </label>
+                <label>
+                  <span>Agregar nota</span>
+                  <textarea
+                    rows="4"
+                    [value]="notaTexto()"
+                    (input)="onNotaTextoInput($event)"
+                    [attr.aria-invalid]="erroresFormulario().notaTexto ? true : null"
+                  ></textarea>
+                </label>
+                @if (erroresFormulario().notaTexto) {
+                  <p class="field-error">{{ erroresFormulario().notaTexto }}</p>
+                }
+                <div class="form-actions">
+                  <button type="submit" [disabled]="estadoNota() === 'guardando'">
+                    {{ estadoNota() === 'guardando' ? 'Agregando...' : 'Agregar nota' }}
+                  </button>
+                  <p aria-live="polite">{{ mensajeNota() }}</p>
+                </div>
+              </form>
+            </section>
+          }
+
+          @if (confirmandoEliminar()) {
+            <div class="delete-confirm" role="group" aria-label="Confirmar eliminacion">
+              <strong>Eliminar esta evidencia?</strong>
+              <p>Dejara de aparecer en Evidence y, si correspondia, en Portfolio.</p>
+              <button type="button" (click)="cancelarEliminar()">Cancelar</button>
+              <button type="button" class="danger-button" (click)="confirmarEliminar()">Eliminar</button>
+            </div>
+          }
+
+          @if (errorEliminar()) {
+            <p class="delete-error" role="alert">{{ errorEliminar() }}</p>
+          }
+        </section>
+      } @else {
+        <section class="empty-detail">
+          <p class="eyebrow">Detalle</p>
+          <h2>Selecciona una evidencia</h2>
+          <p>El panel abre el endpoint real de Proyecto, Laboratorio, Writeup, Artefacto o Certificacion obtenida.</p>
+        </section>
+      }
+    </aside>
+  </div>
+</section>

@@ -1,0 +1,372 @@
+<section class="portfolio-page">
+  <header class="portfolio-header">
+    <div>
+      <p class="eyebrow">Portfolio</p>
+      <h1>Portfolio</h1>
+      <p>Evidencias listas para mostrar y publicadas desde el read-side curado.</p>
+    </div>
+
+    @if (portafolio(); as datos) {
+      <dl class="summary-strip" aria-label="Resumen de Portfolio">
+        <div>
+          <dt>Total</dt>
+          <dd>{{ datos.resumen.total }}</dd>
+        </div>
+        <div>
+          <dt>Listas</dt>
+          <dd>{{ datos.resumen.listosPortafolio }}</dd>
+        </div>
+        <div>
+          <dt>Publicadas</dt>
+          <dd>{{ datos.resumen.publicados }}</dd>
+        </div>
+      </dl>
+    }
+  </header>
+
+  <section class="toolbar" aria-label="Filtros de Portfolio">
+    <label class="search-field">
+      <span>Buscar en Portfolio</span>
+      <input
+        type="search"
+        [value]="busqueda()"
+        (input)="onBusquedaInput($event)"
+        placeholder="Titulo, tema o herramienta"
+      />
+    </label>
+
+    <label>
+      <span>Tipo</span>
+      <select [value]="tipoFiltro()" (change)="onTipoFiltroChange($event)">
+        <option value="">Todos</option>
+        @for (tipo of tiposPortfolio; track tipo) {
+          <option value="{{ tipo }}">{{ etiquetaTipo(tipo) }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      <span>Estado</span>
+      <select [value]="madurezFiltro()" (change)="onMadurezFiltroChange($event)">
+        <option value="">Todos</option>
+        @for (estado of estadosPortfolio; track estado) {
+          <option value="{{ estado }}">{{ etiquetaMadurez(estado) }}</option>
+        }
+      </select>
+    </label>
+
+    @if (hayFiltros()) {
+      <button type="button" class="ghost-button" (click)="limpiarFiltros()">Limpiar filtros</button>
+    }
+  </section>
+
+  <div class="portfolio-layout">
+    <main class="list-panel" aria-label="Lista de Portfolio">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Read-side curado</p>
+          <h2>{{ itemsVisibles().length }} de {{ totalServidor() }} elementos</h2>
+        </div>
+        <button type="button" class="ghost-button" (click)="recargarLista()">Reintentar</button>
+      </div>
+
+      @if (cargandoLista()) {
+        <section class="portfolio-skeleton" aria-live="polite">
+          <span></span>
+          <span></span>
+          <span></span>
+          <p>Cargando Portfolio</p>
+        </section>
+      } @else if (errorLista()) {
+        <section class="state-panel" role="alert">
+          <h3>No pudimos cargar Portfolio.</h3>
+          <p>{{ errorLista() }}</p>
+          <button type="button" (click)="recargarLista()">Reintentar</button>
+        </section>
+      } @else if (items().length === 0 && !hayFiltros()) {
+        <section class="empty-state">
+          <h3>Aun no tienes evidencias listas para Portfolio.</h3>
+          <p>Cuando una evidencia alcance 'Listo para Portfolio' o 'Publicado', aparecera aqui.</p>
+          <a [routerLink]="['/evidence']">Ver Evidence</a>
+        </section>
+      } @else if (itemsVisibles().length === 0) {
+        <section class="empty-state">
+          <h3>No encontramos elementos con estos filtros.</h3>
+          <p>La busqueda local usa solo campos presentes en el read-side de Portfolio.</p>
+        </section>
+      } @else {
+        @if (listos().length > 0) {
+          <section class="portfolio-group" aria-labelledby="portfolio-listos-title">
+            <h3 id="portfolio-listos-title">Listo para Portfolio</h3>
+            <ol class="portfolio-list">
+              @for (item of listos(); track trackById($index, item)) {
+                <li>
+                  <article [class.selected]="seleccionado()?.id === item.id">
+                    <button
+                      type="button"
+                      class="portfolio-open"
+                      [attr.aria-label]="'Abrir detalle de ' + item.titulo"
+                      (click)="abrirDetalle(item)"
+                    >
+                      <span class="type-mark" aria-hidden="true">{{ etiquetaTipo(item.tipoEvidence).slice(0, 2) }}</span>
+                      <span class="item-copy">
+                        <span class="item-title">{{ item.titulo }}</span>
+                        <span class="item-meta">
+                          <span>{{ etiquetaTipo(item.tipoEvidence) }}</span>
+                          <span class="madurez listo">{{ etiquetaMadurez(item.estadoMadurez) }}</span>
+                          <span>{{ item.fechaEtiqueta }}: {{ fechaCorta(item.fechaPrincipal) }}</span>
+                        </span>
+                      </span>
+                    </button>
+                    <p class="item-summary">{{ item.resumen ?? 'Sin resumen adicional.' }}</p>
+                    <div class="relations" [attr.aria-label]="'Relaciones de ' + item.titulo">
+                      @if (item.temas.length > 0) {
+                        @for (tema of item.temas; track tema.id) {
+                          <a [routerLink]="['/roadmap/tema', tema.id]">{{ tema.nombre }}</a>
+                        }
+                      } @else {
+                        <span>{{ textoTemas(item) }}</span>
+                      }
+                      @if (item.herramientas.length > 0) {
+                        @for (herramienta of item.herramientas; track herramienta.id) {
+                          <span>{{ herramienta.nombre }}</span>
+                        }
+                      }
+                    </div>
+                  </article>
+                </li>
+              }
+            </ol>
+          </section>
+        }
+
+        @if (publicados().length > 0) {
+          <section class="portfolio-group" aria-labelledby="portfolio-publicados-title">
+            <h3 id="portfolio-publicados-title">Publicado</h3>
+            <ol class="portfolio-list">
+              @for (item of publicados(); track trackById($index, item)) {
+                <li>
+                  <article [class.selected]="seleccionado()?.id === item.id">
+                    <button
+                      type="button"
+                      class="portfolio-open"
+                      [attr.aria-label]="'Abrir detalle de ' + item.titulo"
+                      (click)="abrirDetalle(item)"
+                    >
+                      <span class="type-mark published" aria-hidden="true">{{ etiquetaTipo(item.tipoEvidence).slice(0, 2) }}</span>
+                      <span class="item-copy">
+                        <span class="item-title">{{ item.titulo }}</span>
+                        <span class="item-meta">
+                          <span>{{ etiquetaTipo(item.tipoEvidence) }}</span>
+                          <span class="madurez publicado">{{ etiquetaMadurez(item.estadoMadurez) }}</span>
+                          <span>{{ item.fechaEtiqueta }}: {{ fechaCorta(item.fechaPrincipal) }}</span>
+                        </span>
+                      </span>
+                    </button>
+                    <p class="item-summary">{{ item.resumen ?? 'Sin resumen adicional.' }}</p>
+                    <div class="relations" [attr.aria-label]="'Relaciones de ' + item.titulo">
+                      @if (item.temas.length > 0) {
+                        @for (tema of item.temas; track tema.id) {
+                          <a [routerLink]="['/roadmap/tema', tema.id]">{{ tema.nombre }}</a>
+                        }
+                      } @else {
+                        <span>{{ textoTemas(item) }}</span>
+                      }
+                      @if (item.herramientas.length > 0) {
+                        @for (herramienta of item.herramientas; track herramienta.id) {
+                          <span>{{ herramienta.nombre }}</span>
+                        }
+                      }
+                    </div>
+                  </article>
+                </li>
+              }
+            </ol>
+          </section>
+        }
+      }
+    </main>
+
+    <aside class="detail-panel" aria-label="Detalle de Portfolio">
+      @if (cargandoDetalle()) {
+        <section class="detail-state" aria-live="polite">
+          <span class="loader-line"></span>
+          <span class="loader-line short"></span>
+          <p>Cargando detalle</p>
+        </section>
+      } @else if (errorDetalle()) {
+        <section class="state-panel" role="alert">
+          <h2>No pudimos abrir el detalle.</h2>
+          <p>{{ errorDetalle() }}</p>
+          @if (seleccionado(); as item) {
+            <button type="button" (click)="abrirDetalle(item)">Reintentar detalle</button>
+          }
+        </section>
+      } @else if (detalle(); as actual) {
+        <section class="portfolio-detail" aria-labelledby="portfolio-detail-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Detalle read-only</p>
+              <h2 id="portfolio-detail-title">{{ actual.item.titulo }}</h2>
+            </div>
+            <a [routerLink]="['/evidence']">Ver en Evidence</a>
+          </div>
+
+          <dl class="detail-facts">
+            <div>
+              <dt>Tipo</dt>
+              <dd>{{ etiquetaTipo(actual.tipoEvidence) }}</dd>
+            </div>
+            <div>
+              <dt>Estado</dt>
+              <dd>{{ etiquetaMadurez(actual.item.estadoMadurez) }}</dd>
+            </div>
+            <div>
+              <dt>Fecha</dt>
+              <dd>{{ fechaCorta(actual.item.fechaReferencia) }}</dd>
+            </div>
+          </dl>
+
+          <section>
+            <h3>Temas relacionados</h3>
+            @if (actual.item.temas.length === 0) {
+              <p class="muted">Sin tema vinculado</p>
+            } @else {
+              <div class="topic-links">
+                @for (tema of actual.item.temas; track tema.id) {
+                  <a [routerLink]="['/roadmap/tema', tema.id]">{{ tema.nombre }}</a>
+                }
+              </div>
+            }
+          </section>
+
+          @if (actual.item.herramientas.length > 0) {
+            <section>
+              <h3>Herramientas</h3>
+              <div class="topic-links">
+                @for (herramienta of actual.item.herramientas; track herramienta.id) {
+                  <span>{{ herramienta.nombre }}</span>
+                }
+              </div>
+            </section>
+          }
+
+          @switch (actual.tipoEvidence) {
+            @case ('Proyecto') {
+              @if (proyectoDetalle(actual); as datos) {
+                <section>
+                  <h3>Proyecto</h3>
+                  <p>{{ datos.descripcion ?? 'Sin descripcion.' }}</p>
+                  <dl class="specific-facts">
+                    <div><dt>Estado proyecto</dt><dd>{{ datos.estado }}</dd></div>
+                    <div><dt>Inicio</dt><dd>{{ fechaCorta(datos.fechaInicio) }}</dd></div>
+                    <div><dt>Fin</dt><dd>{{ fechaCorta(datos.fechaFin) }}</dd></div>
+                  </dl>
+                  @if (datos.repositorioUrl) {
+                    <a class="external-link" [href]="datos.repositorioUrl" target="_blank" rel="noopener noreferrer">
+                      Abrir repositorio
+                    </a>
+                  }
+                </section>
+              }
+            }
+            @case ('Laboratorio') {
+              @if (laboratorioDetalle(actual); as datos) {
+                <section>
+                  <h3>Laboratorio</h3>
+                  <p>{{ datos.objetivo ?? 'Sin objetivo.' }}</p>
+                  <dl class="specific-facts">
+                    <div><dt>Fecha</dt><dd>{{ fechaCorta(datos.fecha) }}</dd></div>
+                    <div><dt>Minutos</dt><dd>{{ datos.tiempoInvertidoMinutos ?? 'Sin registro' }}</dd></div>
+                    <div><dt>Entorno</dt><dd>{{ datos.entornoVms ?? 'Sin entorno' }}</dd></div>
+                  </dl>
+                  <h3>Hallazgos</h3>
+                  <p>{{ datos.hallazgos ?? 'Sin hallazgos.' }}</p>
+                </section>
+              }
+            }
+            @case ('Writeup') {
+              @if (writeupDetalle(actual); as datos) {
+                <section>
+                  <h3>Writeup</h3>
+                  <dl class="specific-facts">
+                    <div><dt>Plataforma</dt><dd>{{ datos.plataformaOrigen ?? 'Sin plataforma' }}</dd></div>
+                    <div><dt>Fecha</dt><dd>{{ fechaCorta(datos.fecha) }}</dd></div>
+                  </dl>
+                  @if (datos.url) {
+                    <a class="external-link" [href]="datos.url" target="_blank" rel="noopener noreferrer">
+                      Abrir writeup
+                    </a>
+                  }
+                </section>
+              }
+            }
+            @case ('ArtefactoTecnico') {
+              @if (artefactoDetalle(actual); as datos) {
+                <section>
+                  <h3>Artefacto tecnico</h3>
+                  <dl class="specific-facts">
+                    <div><dt>Tipo artefacto</dt><dd>{{ etiquetaTipoArtefacto(datos.tipoArtefacto) }}</dd></div>
+                    <div><dt>Tecnologia</dt><dd>{{ datos.lenguajeTecnologia ?? 'Sin tecnologia' }}</dd></div>
+                  </dl>
+                  <p>{{ datos.contenidoOUrl ?? 'Sin contenido o URL.' }}</p>
+                </section>
+              }
+            }
+            @case ('CertificacionObtenida') {
+              @if (certificacionDetalle(actual); as datos) {
+                <section>
+                  <h3>Certificacion obtenida</h3>
+                  <dl class="specific-facts">
+                    <div><dt>CertificacionId</dt><dd>{{ datos.certificacionId }}</dd></div>
+                    <div><dt>Fecha obtencion</dt><dd>{{ fechaCorta(datos.fechaObtencion) }}</dd></div>
+                  </dl>
+                  @if (datos.evidenciaUrl) {
+                    <a class="external-link" [href]="datos.evidenciaUrl" target="_blank" rel="noopener noreferrer">
+                      Abrir evidencia
+                    </a>
+                  }
+                </section>
+              }
+            }
+          }
+
+          @if (soportaNotas(actual.tipoEvidence)) {
+            <section class="notes-panel">
+              <div class="section-heading compact">
+                <div>
+                  <p class="eyebrow">Notas</p>
+                  <h3>{{ notasDetalle().length }} read-only</h3>
+                </div>
+              </div>
+
+              @if (cargandoNotas()) {
+                <p class="muted">Cargando notas</p>
+              } @else if (errorNotas()) {
+                <p class="field-error">{{ errorNotas() }}</p>
+              } @else if (notasDetalle().length === 0) {
+                <p class="muted">Sin notas para esta evidencia.</p>
+              } @else {
+                <ol class="notes-list">
+                  @for (nota of notasDetalle(); track nota.id) {
+                    <li>
+                      <strong>{{ nota.tipo }}</strong>
+                      <time>{{ fechaCorta(nota.fecha) }}</time>
+                      <p>{{ nota.texto }}</p>
+                    </li>
+                  }
+                </ol>
+              }
+            </section>
+          }
+        </section>
+      } @else {
+        <section class="empty-detail">
+          <p class="eyebrow">Detalle</p>
+          <h2>Selecciona una evidencia</h2>
+          <p>El panel abre el endpoint real del Aggregate Root y lo presenta sin acciones de escritura.</p>
+        </section>
+      }
+    </aside>
+  </div>
+</section>

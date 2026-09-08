@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { PlaceholderPage } from './shared/placeholder-page/placeholder-page';
 
 export const routes: Routes = [
   {
@@ -40,7 +39,12 @@ export const routes: Routes = [
       import('./features/evidence/evidence-page/evidence-page').then((m) => m.EvidencePage),
     data: { title: 'Evidence' },
   },
-  { path: 'portfolio', component: PlaceholderPage, data: { title: 'Portfolio' } },
+  {
+    path: 'portfolio',
+    loadComponent: () =>
+      import('./features/portfolio/portfolio-page/portfolio-page').then((m) => m.PortfolioPage),
+    data: { title: 'Portfolio' },
+  },
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   { path: '**', redirectTo: 'dashboard' },
 ];

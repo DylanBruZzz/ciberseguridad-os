@@ -185,6 +185,9 @@ caf832a feat: establish validated initial persistence
 - NOTAS APPEND-ONLY INTEGRADAS PARA PROYECTO, LABORATORIO, WRITEUP Y ARTEFACTOTECNICO; CERTIFICACIONOBTENIDA PERMANECE SIN NOTAS POR CONTRATO ACTUAL
 - CERTIFICACIONOBTENIDA SE CREA/EDITA SOBRE CERTIFICACION GLOBAL Y NO INVENTA VINCULO DIRECTO A TEMA
 - PORTFOLIO PERMANECE SEPARADO DE EVIDENCE FRONTEND V1
+- PORTFOLIO FRONTEND V1 IMPLEMENTADO COMO VISTA GLOBAL READ-ONLY SOBRE PORTAFOLIO V1 READ SIDE
+- PORTFOLIO FRONTEND V1 MUESTRA UNICAMENTE LISTOPORTAFOLIO Y PUBLICADO, CON FILTROS REALES POR TIPOEVIDENCE Y ESTADOMADUREZ
+- PORTFOLIO FRONTEND V1 USA DETAIL FACTUAL POR AGGREGATE ROOT Y MANTIENE LA GESTION EN EVIDENCE
 - STREAK, DEADLINES PUNITIVOS, TIMER, ANALYTICS Y SEARCH GLOBAL REAL SIGUEN DIFERIDOS
 
 ## Migraciones Aplicadas
@@ -253,10 +256,13 @@ caf832a feat: establish validated initial persistence
 - Create contextual de Resources usa `POST /api/recursos` y, con el `id` devuelto por `201 Created`, ejecuta `PUT /api/recursos/{recursoId}/temas/{temaId}`. Si falla el vinculo, informa que el recurso fue creado pero no vinculado. Relaciones Tema permanecen read-only; unlink RecursoTema sigue diferido.
 - Notas Resource, Herramienta IA y Prompts utilizados son campos manuales en edicion; no hay IA automatica, scraping, previews web, favoritos, tags nuevos ni recomendaciones.
 - Runtime Personal de Resources validado con recurso controlado sobre `Bash scripting`: create contextual, vinculo factual, detail, edit UI, refresh, filtros, delete/soft delete y vuelta de Workspace count a baseline sin SQL manual.
-- Evidence reemplaza el placeholder por Evidence Frontend V1; Portfolio queda como ruta placeholder limpia hasta su bloque V1.
+- Portfolio reemplaza el placeholder por Portfolio Frontend V1: `/portfolio` consume `GET /api/portafolio` sin usuarioId, con filtros server-side reales `tipoEvidence` y `estadoMadurez`, presenta separacion visual Listo para Portfolio/Publicado, search local sobre campos presentes, empty/loading/error y detail read-only por endpoint especifico de cada Aggregate Root.
+- Portfolio Frontend V1 no crea, edita, elimina, publica, reordena ni persiste estado Portfolio en Angular. La navegacion de gestion permanece como `Ver en Evidence` hacia `/evidence`; los Temas presentes en el read-side enlazan a `/roadmap/tema/{temaId}`.
+- CertificacionObtenida en Portfolio usa titulo factual de Certificacion, no inventa Herramientas ni Tema directo, no modifica Certificacion base y no muestra notas porque el contrato actual no la expone como padre de Nota.
+- Runtime Personal de Portfolio validado en modo empty/read-only mediante frontend y read-side: si AprendizajePersonalDb no tiene Evidence elegible, `/portfolio` muestra el empty state intencional sin crear datos.
 - CORS no se agrego en este bloque; el desarrollo usa proxy Angular especifico. No existe AllowAnyOrigin.
 - Visual Shell V1 validado: dark mode, identidad Ciberseguridad OS, sidebar vertical compacta, topbar por modulo, Search/Ctrl+K preparado, responsive base y estados globales discretos. Light mode, dock inferior y pantallas profundas siguen diferidos.
-- Validacion frontend actual: 116 tests unitarios correctos y `npm run build` correcto.
+- Validacion frontend actual: 142 tests unitarios correctos y `npm run build` correcto.
 
 ## Datos Roadmap V1 Personal
 
@@ -801,7 +807,9 @@ EvidenceListaV1 backend validado: GET `/api/evidence` participa de API Personal 
 
 RecursoTema Read Contract V1 backend validado: GET `/api/recursos` participa de API Personal y resuelve Usuario actual en el borde HTTP; acepta filtro opcional `temaId` y devuelve solo Recursos visibles vinculados a ese Tema. LIST y DETAIL exponen `temas` como coleccion minima `{ id, nombre }`, basada en relaciones reales `resource.RecursoTema`. Si `temaId` no existe, es ajeno o esta eliminado logicamente, el listado contextual devuelve `[]`; detail sigue devolviendo 404 cuando el Recurso no existe o no pertenece al Usuario actual. La lectura usa proyeccion + batch lookup para evitar N+1 obvio. CRUD Resource no cambia, TipoRecurso sigue inmutable, `PUT /api/recursos/{recursoId}/temas/{temaId}` conserva idempotencia y unlink RecursoTema queda diferido.
 
-Proxima area sugerida: Portfolio Frontend V1 queda como siguiente bloque natural. Unlink RecursoTema, filtro rating en LIST, Search global real, IA automation, recomendaciones, Evidence profundo, Portfolio, light mode, dock inferior, analytics screen y streak siguen diferidos fuera de sus bloques propios.
+Portfolio Frontend V1 validado: GET `/api/portafolio` es el unico read-side de lista; filtros usados por Angular son solo `tipoEvidence` y `estadoMadurez` con estados elegibles. La UI aplana las colecciones reales solo para presentacion local, conserva la separacion conceptual entre ListoPortafolio y Publicado, defiende visualmente contra estados no elegibles en mocks/tests, reutiliza `EvidenceService.obtenerDetalle()` para detail factual por Proyecto, Laboratorio, Writeup, ArtefactoTecnico y CertificacionObtenida, y carga Notas en modo read-only solo para los tipos que ya las soportan desde Evidence.
+
+Proxima area sugerida: Unlink RecursoTema, filtro rating en LIST, Search global real, IA automation, recomendaciones, light mode, dock inferior, analytics screen y streak siguen diferidos fuera de sus bloques propios.
 
 ## Pendientes Deliberados
 
@@ -824,9 +832,7 @@ Proxima area sugerida: Portfolio Frontend V1 queda como siguiente bloque natural
 - auth;
 - SnapshotProgreso operativo;
 - integrations;
-- pantalla frontend V1 completa para Portfolio;
 - formularios frontend Evidence;
-- Portafolio frontend completo;
 - filtros Study;
 - edicion EntradaBitacora;
 - GitHub remote.

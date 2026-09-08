@@ -615,7 +615,14 @@
 - [x] Evidence Frontend V1 integra Nota append-only solo para tipos con endpoint real.
 - [x] Evidence Frontend V1 mantiene Portfolio separado.
 - [x] Runtime Personal de Evidence validado con create/edit/nota append-only/delete real y limpieza visible por soft delete via API.
-- [ ] Pantalla Portfolio V1.
+- [x] Pantalla Portfolio V1.
+- [x] Portfolio Frontend V1 consume `GET /api/portafolio` sin usuarioId con filtros reales `tipoEvidence` y `estadoMadurez`.
+- [x] Portfolio Frontend V1 muestra solo ListoPortafolio y Publicado como vista global read-only.
+- [x] Portfolio Frontend V1 agrupa visualmente Listo para Portfolio y Publicado sin crear galerias falsas ni thumbnails inventados.
+- [x] Portfolio Frontend V1 despacha detail factual por Aggregate Root reutilizando endpoints especificos de Evidence.
+- [x] Portfolio Frontend V1 mantiene gestion, cambios de madurez y notas append-only en Evidence; en Portfolio las notas existentes son read-only.
+- [x] Portfolio Frontend V1 enlaza a `/evidence` para gestion y a `/roadmap/tema/{temaId}` cuando el read-side trae Temas.
+- [x] Runtime Personal de Portfolio validado en empty state read-only sin crear datos.
 - [ ] CORS/runtime publish definido para Frontend Foundation fuera de dev proxy.
 
 ## 14. Importacion Roadmap original
@@ -665,6 +672,7 @@
 - [x] Study Frontend V1 funcional validado contra SesionEstudio API Personal y RoadmapVistaV1.
 - [x] Resources Frontend V1 funcional validado contra Resource API Personal y RecursoTema Read Contract V1.
 - [x] Evidence Frontend V1 funcional validado contra EvidenceListaV1 y endpoints especificos de los cinco AR reales.
+- [x] Portfolio Frontend V1 funcional validado contra Portafolio V1 read side y endpoints especificos de los cinco AR reales en modo read-only.
 - [x] Apuntes permanentes editables de Tema V1 backend.
 - [x] RoadmapVistaV1 backend/read-side.
 - [x] TemaWorkspaceV1 backend/read-side.

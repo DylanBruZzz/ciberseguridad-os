@@ -331,6 +331,7 @@ describe('PortfolioPage', () => {
     abrirItem('CertificacionObtenida');
 
     expect(evidence.listarNotas).not.toHaveBeenCalled();
+    expect(text()).not.toContain(certificacionId);
     expect(text()).not.toContain('Notas');
   });
 

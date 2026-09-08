@@ -1,6 +1,7 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { of } from 'rxjs';
+import { Subscription, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { RoadmapVistaV1, TemaRoadmapVistaV1 } from '../../roadmap/roadmap.models';
 import { RoadmapService } from '../../roadmap/roadmap.service';
@@ -26,6 +27,9 @@ type CampoFormulario = 'titulo' | 'tipo' | 'estado' | 'rating' | 'url';
   styleUrl: './resources-page.css',
 })
 export class ResourcesPage implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+  private solicitudLista?: Subscription;
+  private solicitudDetalle?: Subscription;
   private static readonly guidRegex =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -42,6 +46,7 @@ export class ResourcesPage implements OnInit {
   protected readonly errorDetalle = signal<string | null>(null);
   protected readonly temaIdContextual = signal<string | null>(null);
   protected readonly temaIdMalformado = signal(false);
+  private readonly recursoEnlacePendiente = signal<string | null>(null);
   protected readonly vista = signal<RoadmapVistaV1 | null>(null);
   protected readonly errorRoadmap = signal<string | null>(null);
   protected readonly busqueda = signal('');
@@ -111,16 +116,27 @@ export class ResourcesPage implements OnInit {
   ) {}
 
   public ngOnInit(): void {
-    this.route.queryParamMap.subscribe((params) => {
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       this.aplicarTemaContextual(params.get('temaId'));
-      this.cargarLista();
+      this.solicitudDetalle?.unsubscribe();
+      this.detalle.set(null);
+      this.recursoSeleccionadoId.set(null);
+      this.cargandoDetalle.set(false);
+      this.errorDetalle.set(null);
+      this.modoFormulario.set(null);
+      const recursoId = params.get('recursoId');
+      if (recursoId) this.limpiarFiltros();
+      const valido = !!recursoId && ResourcesPage.guidRegex.test(recursoId);
+      this.recursoEnlacePendiente.set(valido ? recursoId : null);
+      if (recursoId && !valido) this.errorDetalle.set('El enlace del recurso no es valido.');
+      this.cargarLista(true, valido ? recursoId : null);
     });
 
     this.cargarRoadmap();
   }
 
   protected recargarLista(): void {
-    this.cargarLista();
+    this.cargarLista(true, this.recursoEnlacePendiente());
     this.cargarRoadmap(true);
   }
 
@@ -138,6 +154,7 @@ export class ResourcesPage implements OnInit {
   }
 
   protected abrirDetalle(recursoId: string): void {
+    this.solicitudDetalle?.unsubscribe();
     this.recursoSeleccionadoId.set(recursoId);
     this.detalle.set(null);
     this.modoFormulario.set(null);
@@ -146,7 +163,7 @@ export class ResourcesPage implements OnInit {
     this.errorEliminar.set(null);
     this.confirmandoEliminar.set(false);
 
-    this.resources.obtenerDetalle(recursoId).subscribe({
+    this.solicitudDetalle = this.resources.obtenerDetalle(recursoId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (detalle) => {
         this.detalle.set(detalle);
         this.cargandoDetalle.set(false);
@@ -400,7 +417,8 @@ export class ResourcesPage implements OnInit {
     return item.id;
   }
 
-  private cargarLista(mostrarLoading = true): void {
+  private cargarLista(mostrarLoading = true, abrirId: string | null = null): void {
+    this.solicitudLista?.unsubscribe();
     const temaId = this.temaIdContextual();
 
     if (mostrarLoading) {
@@ -409,10 +427,17 @@ export class ResourcesPage implements OnInit {
 
     this.errorLista.set(null);
 
-    this.resources.listar(temaId).subscribe({
+    this.solicitudLista = this.resources.listar(temaId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (recursos) => {
         this.recursos.set(recursos);
         this.cargandoLista.set(false);
+
+        if (abrirId) {
+          const item = recursos.find((recurso) => recurso.id.toLowerCase() === abrirId.toLowerCase());
+          if (item) this.abrirDetalle(item.id);
+          else this.errorDetalle.set('El recurso del enlace ya no esta disponible en esta lista.');
+          return;
+        }
 
         const seleccionadoId = this.recursoSeleccionadoId();
 

@@ -1,5 +1,5 @@
 <div class="app-shell" [class.search-open]="paletteAbierta()">
-  <aside class="sidebar" aria-label="Navegacion principal">
+  <aside class="sidebar" aria-label="Navegacion principal" [inert]="paletteAbierta()">
     <a class="brand" routerLink="/dashboard" aria-label="Ciberseguridad OS">
       <span class="brand-mark" aria-hidden="true">
         <svg viewBox="0 0 24 24" focusable="false">
@@ -34,6 +34,8 @@
       class="search-trigger"
       aria-label="Abrir busqueda global"
       title="Search"
+      aria-haspopup="dialog"
+      [attr.aria-expanded]="paletteAbierta()"
       (click)="abrirBusqueda()"
     >
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -43,7 +45,7 @@
     </button>
   </aside>
 
-  <div class="workspace">
+  <div class="workspace" [inert]="paletteAbierta()">
     <header class="topbar">
       <div class="module-title">
         <span class="topbar-mark" aria-hidden="true">⬡</span>
@@ -77,19 +79,6 @@
   </div>
 
   @if (paletteAbierta()) {
-    <div class="palette-backdrop" (click)="cerrarBusqueda()" aria-hidden="true"></div>
-    <section class="command-palette" role="dialog" aria-modal="true" aria-labelledby="search-title">
-      <header>
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" />
-        </svg>
-        <div>
-          <p>Search</p>
-          <h2 id="search-title">Busqueda global</h2>
-        </div>
-        <button type="button" data-search-close aria-label="Cerrar busqueda global" (click)="cerrarBusqueda()">Esc</button>
-      </header>
-      <p class="palette-message">La busqueda global se integrara con Roadmap, Resources y Evidence.</p>
-    </section>
+    <app-search-palette (cerrar)="cerrarBusqueda()" />
   }
 </div>

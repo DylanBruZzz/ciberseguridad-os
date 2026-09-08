@@ -1,4 +1,5 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { FaseRoadmapVistaV1, RoadmapVistaV1, TemaRoadmapVistaV1 } from '../roadmap.models';
 import { RoadmapService } from '../roadmap.service';
@@ -11,6 +12,7 @@ import { RoadmapService } from '../roadmap.service';
 })
 export class RoadmapPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly vista = signal<RoadmapVistaV1 | null>(null);
   protected readonly faseSeleccionadaId = signal<string | null>(null);
@@ -56,6 +58,10 @@ export class RoadmapPage implements OnInit {
   public constructor(private readonly roadmap: RoadmapService) {}
 
   public ngOnInit(): void {
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      const vista = this.vista();
+      if (vista) this.seleccionarFaseInicial(vista);
+    });
     this.cargarVista();
   }
 

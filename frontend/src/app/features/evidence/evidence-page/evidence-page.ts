@@ -1,6 +1,7 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { of } from 'rxjs';
+import { Subscription, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { RoadmapVistaV1, TemaRoadmapVistaV1 } from '../../roadmap/roadmap.models';
 import { RoadmapService } from '../../roadmap/roadmap.service';
@@ -46,6 +47,9 @@ type CampoFormulario =
   styleUrl: './evidence-page.css',
 })
 export class EvidencePage implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+  private solicitudLista?: Subscription;
+  private solicitudDetalle?: Subscription;
   private static readonly guidRegex =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -65,6 +69,7 @@ export class EvidencePage implements OnInit {
   protected readonly errorDetalle = signal<string | null>(null);
   protected readonly temaIdContextual = signal<string | null>(null);
   protected readonly temaIdMalformado = signal(false);
+  private readonly evidenceEnlacePendiente = signal<{ id: string; tipo: TipoEvidenceV1 } | null>(null);
   protected readonly vista = signal<RoadmapVistaV1 | null>(null);
   protected readonly errorRoadmap = signal<string | null>(null);
   protected readonly certificaciones = signal<CertificacionResumen[]>([]);
@@ -169,9 +174,27 @@ export class EvidencePage implements OnInit {
   ) {}
 
   public ngOnInit(): void {
-    this.route.queryParamMap.subscribe((params) => {
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       this.aplicarTemaContextual(params.get('temaId'));
-      this.cargarLista();
+      this.solicitudDetalle?.unsubscribe();
+      this.detalle.set(null);
+      this.seleccionado.set(null);
+      this.cargandoDetalle.set(false);
+      this.errorDetalle.set(null);
+      this.modoFormulario.set(null);
+      this.limpiarNotaState();
+      const id = params.get('evidenceId');
+      const tipo = params.get('tipoEvidence');
+      const valido = !!id && EvidencePage.guidRegex.test(id) && TIPOS_EVIDENCE.includes(tipo as TipoEvidenceV1);
+      const enlace = valido ? { id, tipo: tipo as TipoEvidenceV1 } : null;
+      this.evidenceEnlacePendiente.set(enlace);
+      if (id || tipo) {
+        this.busqueda.set('');
+        this.tipoFiltro.set('');
+        this.madurezFiltro.set('');
+        if (!valido) this.errorDetalle.set('El enlace de Evidence no es valido.');
+      }
+      this.cargarLista(true, null, enlace);
     });
 
     this.cargarRoadmap();
@@ -179,7 +202,7 @@ export class EvidencePage implements OnInit {
   }
 
   protected recargarLista(): void {
-    this.cargarLista();
+    this.cargarLista(true, null, this.evidenceEnlacePendiente());
     this.cargarRoadmap(true);
   }
 
@@ -197,6 +220,7 @@ export class EvidencePage implements OnInit {
   }
 
   protected abrirDetalle(item: EvidenceItemV1): void {
+    this.solicitudDetalle?.unsubscribe();
     this.seleccionado.set(item);
     this.detalle.set(null);
     this.modoFormulario.set(null);
@@ -206,7 +230,7 @@ export class EvidencePage implements OnInit {
     this.confirmandoEliminar.set(false);
     this.limpiarNotaState();
 
-    this.evidence.obtenerDetalle(item).subscribe({
+    this.solicitudDetalle = this.evidence.obtenerDetalle(item).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (detalle) => {
         this.detalle.set(detalle);
         this.cargandoDetalle.set(false);
@@ -539,24 +563,33 @@ export class EvidencePage implements OnInit {
     return item.id;
   }
 
-  private cargarLista(mostrarLoading = true, reabrirId: string | null = null): void {
+  private cargarLista(mostrarLoading = true, reabrirId: string | null = null, enlace: { id: string; tipo: TipoEvidenceV1 } | null = null): void {
+    this.solicitudLista?.unsubscribe();
     if (mostrarLoading) {
       this.cargandoLista.set(true);
     }
 
     this.errorLista.set(null);
 
-    this.evidence
+    this.solicitudLista = this.evidence
       .listar({
         temaId: this.temaIdContextual(),
         tipoEvidence: this.tipoFiltro(),
         estadoMadurez: this.madurezFiltro(),
       })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (lista) => {
           this.lista.set(lista.items);
           this.totalServidor.set(lista.total);
           this.cargandoLista.set(false);
+
+          if (enlace) {
+            const item = lista.items.find((candidate) => candidate.id.toLowerCase() === enlace.id.toLowerCase() && candidate.tipoEvidence === enlace.tipo);
+            if (item) this.abrirDetalle(item);
+            else this.errorDetalle.set('La Evidence del enlace ya no esta disponible en esta lista.');
+            return;
+          }
 
           if (reabrirId) {
             const item = lista.items.find((candidate) => candidate.id === reabrirId);

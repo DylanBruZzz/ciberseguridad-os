@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
-import { NEVER, of, throwError } from 'rxjs';
+import { ActivatedRoute, ParamMap, convertToParamMap, provideRouter } from '@angular/router';
+import { BehaviorSubject, NEVER, Subject, of, throwError } from 'rxjs';
 import { RoadmapVistaV1 } from '../../roadmap/roadmap.models';
 import { RoadmapService } from '../../roadmap/roadmap.service';
 import { RecursoDetalle, RecursoResumen } from '../resources.models';
@@ -133,6 +133,7 @@ const detalleSinRating: RecursoDetalle = {
 
 describe('ResourcesPage', () => {
   let fixture: ComponentFixture<ResourcesPage>;
+  let queryParamMap: BehaviorSubject<ParamMap>;
   let resourcesService: {
     listar: ReturnType<typeof vi.fn>;
     obtenerDetalle: ReturnType<typeof vi.fn>;
@@ -146,8 +147,11 @@ describe('ResourcesPage', () => {
     refrescarVista: ReturnType<typeof vi.fn>;
   };
 
-  async function configure(queryTemaId: string | null = null, lista: RecursoResumen[] = recursos): Promise<void> {
+  type QueryParams = string | null | Record<string, string>;
+
+  async function configure(query: QueryParams = null, lista: RecursoResumen[] = recursos): Promise<void> {
     TestBed.resetTestingModule();
+    queryParamMap = new BehaviorSubject(convertToParamMap(parametros(query)));
 
     resourcesService = {
       listar: vi.fn(() => of(lista)),
@@ -178,13 +182,18 @@ describe('ResourcesPage', () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            queryParamMap: of(convertToParamMap(queryTemaId ? { temaId: queryTemaId } : {})),
+            queryParamMap: queryParamMap.asObservable(),
           },
         },
         { provide: ResourcesService, useValue: resourcesService },
         { provide: RoadmapService, useValue: roadmap },
       ],
     }).compileComponents();
+  }
+
+  function parametros(query: QueryParams): Record<string, string> {
+    if (query === null) return {};
+    return typeof query === 'string' ? { temaId: query } : query;
   }
 
   it('muestra loading estructural', async () => {
@@ -343,6 +352,73 @@ describe('ResourcesPage', () => {
     fixture.detectChanges();
 
     expect(text()).toContain('No pudimos abrir el recurso.');
+    expect(listaText()).toContain('Cisco OSI Guide');
+  });
+
+  it('abre detail desde recursoId factual sin temaId inventado', async () => {
+    await configure({ recursoId: recursoDosId });
+
+    fixture = TestBed.createComponent(ResourcesPage);
+    fixture.detectChanges();
+
+    expect(resourcesService.listar).toHaveBeenCalledWith(null);
+    expect(resourcesService.obtenerDetalle).toHaveBeenCalledWith(recursoDosId);
+    expect(text()).toContain('Linux CLI Lab');
+    expect(text()).not.toContain('Usar para contrastar capas.');
+  });
+
+  it('mantiene el recursoId de enlace al reintentar la lista', async () => {
+    await configure({ recursoId: recursoDosId });
+    resourcesService.listar
+      .mockReturnValueOnce(throwError(() => new Error('No pudimos cargar la biblioteca.')))
+      .mockReturnValueOnce(of(recursos));
+
+    fixture = TestBed.createComponent(ResourcesPage);
+    fixture.detectChanges();
+    expect(text()).toContain('No pudimos cargar la biblioteca.');
+
+    clickPorTexto('Reintentar');
+
+    expect(resourcesService.listar).toHaveBeenCalledTimes(2);
+    expect(resourcesService.obtenerDetalle).toHaveBeenCalledWith(recursoDosId);
+  });
+
+  it('cancela detail anterior cuando cambia recursoId en la misma ruta', async () => {
+    await configure();
+    const detallePendiente = new Subject<RecursoDetalle>();
+    resourcesService.obtenerDetalle.mockImplementation((id: string) =>
+      id === recursoId ? detallePendiente.asObservable() : of(detalleSinRating),
+    );
+
+    fixture = TestBed.createComponent(ResourcesPage);
+    fixture.detectChanges();
+    abrirPrimerRecurso();
+
+    queryParamMap.next(convertToParamMap({ recursoId: recursoDosId }));
+    fixture.detectChanges();
+    detallePendiente.next(detalle);
+    detallePendiente.complete();
+    fixture.detectChanges();
+
+    expect(resourcesService.obtenerDetalle).toHaveBeenLastCalledWith(recursoDosId);
+    expect(text()).toContain('Linux CLI Lab');
+    expect(text()).not.toContain('Usar para contrastar capas.');
+  });
+
+  it('reporta recursoId invalido o ausente sin romper la lista', async () => {
+    await configure({ recursoId: 'id-invalido' });
+
+    fixture = TestBed.createComponent(ResourcesPage);
+    fixture.detectChanges();
+
+    expect(resourcesService.obtenerDetalle).not.toHaveBeenCalled();
+    expect(text()).toContain('El enlace del recurso no es valido.');
+    expect(listaText()).toContain('Cisco OSI Guide');
+
+    queryParamMap.next(convertToParamMap({ recursoId: nuevoRecursoId }));
+    fixture.detectChanges();
+
+    expect(text()).toContain('El recurso del enlace ya no esta disponible en esta lista.');
     expect(listaText()).toContain('Cisco OSI Guide');
   });
 

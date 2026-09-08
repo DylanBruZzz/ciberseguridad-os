@@ -3,6 +3,7 @@ import { Component, HostListener, OnInit, computed, inject, signal } from '@angu
 import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { UsuarioActual, UsuarioActualService } from './core/usuario-actual.service';
+import { SearchPalette } from './shared/search/search-palette';
 
 interface NavItem {
   readonly label: string;
@@ -13,12 +14,13 @@ interface NavItem {
 
 @Component({
   selector: 'app-root',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, SearchPalette],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App implements OnInit {
   private readonly documento = inject(DOCUMENT);
+  private focoAnterior: HTMLElement | null = null;
   protected readonly usuario = signal<UsuarioActual | null>(null);
   protected readonly cargandoUsuario = signal(true);
   protected readonly errorUsuario = signal<string | null>(null);
@@ -75,7 +77,10 @@ export class App implements OnInit {
     this.actualizarModuloActual();
     this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
-      .subscribe(() => this.actualizarModuloActual());
+      .subscribe(() => {
+        this.actualizarModuloActual();
+        if (this.paletteAbierta()) this.cerrarBusqueda();
+      });
 
     this.usuarioActual.obtener().subscribe({
       next: (usuario) => {
@@ -93,7 +98,7 @@ export class App implements OnInit {
 
   @HostListener('window:keydown', ['$event'])
   protected manejarAtajoGlobal(event: KeyboardEvent): void {
-    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+    if (!event.isComposing && !event.altKey && !event.repeat && (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
       event.preventDefault();
       this.abrirBusqueda();
     }
@@ -104,12 +109,20 @@ export class App implements OnInit {
   }
 
   protected abrirBusqueda(): void {
+    if (this.paletteAbierta()) return;
+    this.focoAnterior = this.documento.activeElement instanceof HTMLElement ? this.documento.activeElement : null;
     this.paletteAbierta.set(true);
-    setTimeout(() => this.documento.querySelector<HTMLElement>('[data-search-close]')?.focus());
   }
 
   protected cerrarBusqueda(): void {
     this.paletteAbierta.set(false);
+    setTimeout(() => {
+      if (this.paletteAbierta()) return;
+      const anterior = this.focoAnterior;
+      const destino = anterior?.isConnected && anterior !== this.documento.body
+        ? anterior : this.documento.querySelector<HTMLElement>('.search-trigger');
+      destino?.focus();
+    });
   }
 
   private actualizarModuloActual(): void {

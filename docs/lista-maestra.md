@@ -579,7 +579,7 @@
 - [x] Frontend obtiene UsuarioActual sin login y sin seleccionar UsuarioId.
 - [x] Roadmap real visible desde frontend: 7 Fases y 63 Temas sin usuarioId en requests.
 - [x] Rutas base preparadas: Dashboard, Roadmap, Study, Resources, Evidence y Portfolio.
-- [x] Visual Shell V1 con dark mode, sidebar vertical, topbar por modulo, Search preparado y responsive base.
+- [x] Visual Shell V1 con dark mode, sidebar vertical, topbar por modulo, Search real V1 y responsive base.
 - [x] Pantalla Dashboard V1 funcional sobre RoadmapVistaV1.
 - [x] Pantalla Roadmap V1 funcional sobre RoadmapVistaV1 con timeline, detalle de Fase y Temas accionables.
 - [x] RoadmapService consume `GET /api/roadmap/vista` sin usuarioId y cache runtime en memoria.
@@ -623,6 +623,15 @@
 - [x] Portfolio Frontend V1 mantiene gestion, cambios de madurez y notas append-only en Evidence; en Portfolio las notas existentes son read-only.
 - [x] Portfolio Frontend V1 enlaza a `/evidence` para gestion y a `/roadmap/tema/{temaId}` cuando el read-side trae Temas.
 - [x] Runtime Personal de Portfolio validado en empty state read-only sin crear datos.
+- [x] Search Global V1 implementado como frontend aggregator sobre `RoadmapVistaV1`, Resources LIST y `EvidenceListaV1`.
+- [x] Search Global V1 indexa Temas, Fases, Resources y Evidence sin duplicar Portfolio ni convertir Study en historico buscable.
+- [x] Search Global V1 usa matching local case-insensitive con normalizacion de tildes, ranking simple y limite por categoria.
+- [x] Search Global V1 abre desde un unico boton Search y Ctrl/Cmd+K, con dialog/combobox/listbox, foco inicial, ArrowUp/ArrowDown, Enter y Escape.
+- [x] Search Global V1 navega a Tema, Fase, Resource y Evidence mediante rutas existentes y deep links frontend pequeños para detail.
+- [x] Resources Frontend V1 soporta deep link `/resources?recursoId=...` sin detail stale ni N+1 de detail.
+- [x] Evidence Frontend V1 soporta deep link `/evidence?evidenceId=...&tipoEvidence=...` usando dispatch por Aggregate Root.
+- [x] Roadmap Frontend V1 actualiza fase seleccionada al cambiar `?fase=` dentro de la misma ruta.
+- [x] Runtime Personal de Search Global V1 validado read-only con Bash, OSI y Resource real, sin usuarioId en requests ni writes.
 - [ ] CORS/runtime publish definido para Frontend Foundation fuera de dev proxy.
 
 ## 14. Importacion Roadmap original

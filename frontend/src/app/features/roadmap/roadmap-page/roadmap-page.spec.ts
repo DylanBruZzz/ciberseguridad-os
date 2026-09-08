@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter, Router } from '@angular/router';
-import { NEVER, of, throwError } from 'rxjs';
+import { ActivatedRoute, ParamMap, Router, convertToParamMap, provideRouter } from '@angular/router';
+import { BehaviorSubject, NEVER, of, throwError } from 'rxjs';
 import { RoadmapVistaV1 } from '../roadmap.models';
 import { RoadmapService } from '../roadmap.service';
 import { RoadmapPage } from './roadmap-page';
@@ -110,6 +110,7 @@ describe('RoadmapPage', () => {
   let fixture: ComponentFixture<RoadmapPage>;
 
   function configure(roadmap: Partial<RoadmapService>): Promise<void> {
+    TestBed.resetTestingModule();
     return TestBed.configureTestingModule({
       imports: [RoadmapPage],
       providers: [
@@ -239,5 +240,34 @@ describe('RoadmapPage', () => {
     fixture.detectChanges();
 
     expect(navigateSpy).toHaveBeenCalled();
+  });
+
+  it('actualiza la fase seleccionada cuando cambia ?fase= en la misma ruta', async () => {
+    TestBed.resetTestingModule();
+    const params = new BehaviorSubject<ParamMap>(convertToParamMap({ fase: 'fase-1' }));
+    const route = {
+      queryParamMap: params.asObservable(),
+      get snapshot() {
+        return { queryParamMap: params.value };
+      },
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [RoadmapPage],
+      providers: [
+        provideRouter([{ path: 'roadmap/tema/:temaId', component: RoadmapPage }]),
+        { provide: ActivatedRoute, useValue: route },
+        { provide: RoadmapService, useValue: { obtenerVista: () => of(vista) } },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(RoadmapPage);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Fundamentos de Informatica y Redes');
+
+    params.next(convertToParamMap({ fase: 'fase-2' }));
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Linux y CLI');
   });
 });

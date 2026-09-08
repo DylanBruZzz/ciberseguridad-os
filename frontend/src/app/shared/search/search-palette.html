@@ -1,0 +1,39 @@
+<button class="palette-backdrop" type="button" tabindex="-1" aria-label="Cerrar busqueda" (click)="cerrar.emit()"></button>
+<section #dialog class="command-palette" role="dialog" aria-modal="true" aria-label="Busqueda global" (keydown)="teclado($event)">
+  <header>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" /></svg>
+    <input #queryInput type="text" role="combobox" aria-label="Buscar en Ciberseguridad OS" placeholder="Buscar en Ciberseguridad OS..." autocomplete="off" spellcheck="false" aria-autocomplete="list" aria-expanded="true" aria-controls="search-results" [attr.aria-activedescendant]="activoId()" [value]="query()" (input)="escribir($event)" />
+    <button class="close-search" type="button" aria-label="Cerrar busqueda global" title="Cerrar busqueda" (click)="cerrar.emit()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6" /></svg></button>
+  </header>
+  <div class="search-body">
+    <div class="search-status" role="status" aria-live="polite">
+      @if (search.cargando()) { <p>Cargando fuentes...</p> }
+      @if (!query().trim()) {
+        <p>Escribe para buscar.</p>
+      } @else if (resultados().length) {
+        <p>{{ resultados().length }} resultado{{ resultados().length === 1 ? '' : 's' }}{{ search.errores().length ? ' en las fuentes disponibles' : '' }}.</p>
+      } @else if (!search.cargando()) {
+        <p>No encontramos resultados para "{{ query().trim() }}".</p>
+      }
+      @for (fuente of search.errores(); track fuente) { <p>No pudimos cargar {{ fuente }}.</p> }
+      @if (errorNavegacion()) { <p>No pudimos abrir el resultado. Intentalo de nuevo.</p> }
+    </div>
+    @if (search.errores().length) {
+      <button class="retry" type="button" (click)="reintentar()">Reintentar fuentes</button>
+    }
+    <div id="search-results" role="listbox" aria-label="Resultados de busqueda">
+      @for (grupo of grupos(); track grupo.tipo) {
+        <section role="group" [attr.aria-labelledby]="'search-group-' + grupo.tipo">
+          <h2 [id]="'search-group-' + grupo.tipo">{{ grupo.nombre }} <span>{{ grupo.total }}</span></h2>
+          @for (item of grupo.items; track optionId(item)) {
+            <button type="button" role="option" tabindex="-1" [id]="optionId(item)" [attr.aria-selected]="activoId() === optionId(item)" [class.active]="activoId() === optionId(item)" (click)="abrir(item)">
+              <span class="result-text"><strong>{{ item.titulo }}</strong><span>{{ item.contexto }}</span></span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" /></svg>
+            </button>
+          }
+        </section>
+      }
+    </div>
+    @if (hayMas()) { <p class="more-results">Mas resultados disponibles. Precisa la busqueda.</p> }
+  </div>
+</section>

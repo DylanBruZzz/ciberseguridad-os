@@ -188,7 +188,9 @@ caf832a feat: establish validated initial persistence
 - PORTFOLIO FRONTEND V1 IMPLEMENTADO COMO VISTA GLOBAL READ-ONLY SOBRE PORTAFOLIO V1 READ SIDE
 - PORTFOLIO FRONTEND V1 MUESTRA UNICAMENTE LISTOPORTAFOLIO Y PUBLICADO, CON FILTROS REALES POR TIPOEVIDENCE Y ESTADOMADUREZ
 - PORTFOLIO FRONTEND V1 USA DETAIL FACTUAL POR AGGREGATE ROOT Y MANTIENE LA GESTION EN EVIDENCE
-- STREAK, DEADLINES PUNITIVOS, TIMER, ANALYTICS Y SEARCH GLOBAL REAL SIGUEN DIFERIDOS
+- SEARCH GLOBAL V1 FRONTEND VALIDADO COMO PALETTE UNICA SOBRE READ-SIDES EXISTENTES
+- SEARCH GLOBAL V1 INDEXA TEMAS, FASES, RESOURCES Y EVIDENCE SIN BACKEND SEARCH GENERICO
+- STREAK, DEADLINES PUNITIVOS, TIMER, ANALYTICS SCREEN Y SEARCH SEMANTICO/IA SIGUEN DIFERIDOS
 
 ## Migraciones Aplicadas
 
@@ -234,8 +236,8 @@ caf832a feat: establish validated initial persistence
   - UsuarioActual: Dylan
   - Fases: 7
   - Temas: 63
-- Navegacion base preparada: Dashboard, Roadmap, Study, Resources, Evidence y Portfolio.
-- Implementacion funcional profunda actual: Dashboard, Roadmap, Tema Workspace, Study y Resources.
+- Navegacion base preparada: Dashboard, Roadmap, Study, Resources, Evidence, Portfolio y Search.
+- Implementacion funcional profunda actual: Dashboard, Roadmap, Tema Workspace, Study, Resources, Evidence, Portfolio y Search Global V1.
 - Dashboard V1 consume GET /api/roadmap/vista y GET /api/usuario-actual para saludo, progreso global, linea conectada de Fases, Fase actual y continuidad factual.
 - Roadmap V1 consume GET /api/roadmap/vista para timeline de Fases, detalle de Fase, metadata pedagogica, objetivos, criterios de avance, Temas, progreso, EstadoTema y repaso.
 - RoadmapService usa cache runtime en memoria con refresh explicito; no usa localStorage, sessionStorage, IndexedDB ni state management externo.
@@ -244,7 +246,7 @@ caf832a feat: establish validated initial persistence
 - Progreso, EstadoTema y repaso en Tema Workspace V1 vienen de TemaWorkspaceV1; Angular no recalcula semantica de dominio.
 - Criterios y percepcion quedan read-only en Workspace V1 aunque existen endpoints de backend; la edicion interactiva queda diferida para no mezclar progreso/percepcion con el bloque de centro de trabajo y memoria.
 - Apuntes permanentes tienen editor de texto plano con dirty state y guardado manual contra `PUT /api/temas/{temaId}/apuntes`, sin autosave y sin enviar usuarioId. Write real contra AprendizajePersonalDb fue validado con prueba controlada y limpieza por API/UI.
-- Resources, Sesiones y Evidence se muestran como resumen contextual con enlaces filtrados por `temaId`; Resources ya tiene pantalla profunda V1 global/contextual y Evidence sigue diferida.
+- Resources, Sesiones y Evidence se muestran como resumen contextual con enlaces filtrados por `temaId`; Resources y Evidence ya tienen pantallas profundas V1 global/contextual.
 - Runtime Personal validado: `GET /api/roadmap/vista`, `GET /api/temas/{temaId}/workspace`, `GET /api/temas/{temaId}/apuntes` y `PUT /api/temas/{temaId}/apuntes` funcionan contra AprendizajePersonalDb alineada.
 - Study Frontend V1 reemplaza el placeholder por una pantalla funcional de registro manual de sesiones: lista historial, crea, edita y elimina sesiones con soft delete via API, soporta `/study` global y `/study?temaId=...` contextual, preselecciona Tema cuando viene desde Workspace, muestra resumen factual de sesiones/minutos y no almacena usuarioId.
 - Study Frontend V1 usa `GET/POST/PUT/DELETE /api/sesiones-estudio` sin usuarioId en Personal y `GET /api/roadmap/vista` para nombres de Tema y selector; no implementa herramientas de sesion porque el DTO de listado no las expone.
@@ -260,9 +262,16 @@ caf832a feat: establish validated initial persistence
 - Portfolio Frontend V1 no crea, edita, elimina, publica, reordena ni persiste estado Portfolio en Angular. La navegacion de gestion permanece como `Ver en Evidence` hacia `/evidence`; los Temas presentes en el read-side enlazan a `/roadmap/tema/{temaId}`.
 - CertificacionObtenida en Portfolio usa titulo factual de Certificacion, no inventa Herramientas ni Tema directo, no modifica Certificacion base y no muestra notas porque el contrato actual no la expone como padre de Nota.
 - Runtime Personal de Portfolio validado en modo empty/read-only mediante frontend y read-side: si AprendizajePersonalDb no tiene Evidence elegible, `/portfolio` muestra el empty state intencional sin crear datos.
+- Search Global V1 reemplaza la palette placeholder por una busqueda real de navegacion, abierta por el boton Search o Ctrl/Cmd+K. Usa un agregador frontend en memoria sobre `GET /api/roadmap/vista`, `GET /api/recursos` y `GET /api/evidence`; no indexa Portfolio por duplicar Evidence ni Study por no ser navegacion primaria V1.
+- Search Global V1 indexa Temas, Fases, Resources y Evidence como modelo UI discriminado, con titulo, contexto factual, terminos buscables y destino de navegacion. Temas navegan a `/roadmap/tema/{temaId}`, Fases a `/roadmap?fase={faseId}`, Resources a `/resources?recursoId={recursoId}` y Evidence a `/evidence?evidenceId={id}&tipoEvidence={tipo}`.
+- Matching Search V1 es local, case-insensitive, con normalizacion de tildes y tokens parciales; ranking V1 prioriza titulo por prefijo, titulo por contenido y metadata/contexto. Los resultados se agrupan por Temas, Fases, Resources y Evidence, con limite visual por categoria y mensaje de mas resultados.
+- Search Global V1 no realiza requests por tecla. Al abrir carga fuentes necesarias una vez por instancia de palette, reutiliza la cache runtime de RoadmapService y vuelve a consultar Resources/Evidence al reabrir para evitar resultados borrados eternos sin crear event bus global ni localStorage.
+- Search Global V1 tolera fallo parcial por fuente: los resultados disponibles siguen utilizables y la palette muestra un mensaje discreto con reintento de fuentes fallidas. La UI usa dialog/combobox/listbox, botones reales, foco inicial en input, navegacion ArrowUp/ArrowDown, Enter y Escape, cierre con retorno razonable de foco y overlay full-screen en mobile.
+- Deep links frontend V1 agregados para Search: Resources abre detail por `recursoId` sin cargar details masivos; Evidence abre detail por `evidenceId` + `tipoEvidence` usando el dispatch existente por Aggregate Root. IDs invalidos o borrados no destruyen la lista ni dejan detail stale. Roadmap responde a cambios de `?fase=` dentro de la misma ruta.
+- Runtime Personal de Search Global V1 validado en modo read-only con 63 Temas, 30 Resources y 0 Evidence, aprox. 38 KB entre fuentes. Busquedas `Bash`, `OSI` y Resource real `ANY.RUN` funcionaron; Tema, Fase y Resource navegaron dentro de la shell, sin hard reload, sin usuarioId en requests y sin N+1 de detail antes de abrir Resource.
 - CORS no se agrego en este bloque; el desarrollo usa proxy Angular especifico. No existe AllowAnyOrigin.
-- Visual Shell V1 validado: dark mode, identidad Ciberseguridad OS, sidebar vertical compacta, topbar por modulo, Search/Ctrl+K preparado, responsive base y estados globales discretos. Light mode, dock inferior y pantallas profundas siguen diferidos.
-- Validacion frontend actual: 142 tests unitarios correctos y `npm run build` correcto.
+- Visual Shell V1 validado: dark mode, identidad Ciberseguridad OS, sidebar vertical compacta, topbar por modulo, Search/Ctrl+K real, responsive base y estados globales discretos. Light mode y dock inferior siguen diferidos.
+- Validacion frontend actual: 187 tests unitarios correctos y `npm run build` correcto.
 
 ## Datos Roadmap V1 Personal
 
@@ -785,7 +794,7 @@ API Personal V1 validada: en modo Personal, la capa HTTP resuelve usuarioId medi
 
 Frontend Foundation V1 validado: Angular standalone vive en frontend/, consume la API Personal via /api y proxy local, obtiene UsuarioActual y muestra las 7 Fases reales y 63 Temas sin que el cliente envie usuarioId. No hay Auth ni CORS global.
 
-Visual Shell V1 frontend validado: la ruta inicial es `/dashboard`; la shell usa identidad `Ciberseguridad OS`, dark mode, sidebar izquierda compacta con Dashboard, Roadmap, Study, Resources, Evidence, Portfolio y Search, topbar con titulo derivado de route data y UsuarioActual cuando esta disponible. Search abre una command palette basica por boton o Ctrl+K sin motor global. No se agregaron UI frameworks, paquetes, Auth, light mode, dock inferior, analytics screen ni frontend profundo de Workspace/Evidence/Portfolio.
+Visual Shell V1 frontend validado: la ruta inicial es `/dashboard`; la shell usa identidad `Ciberseguridad OS`, dark mode, sidebar izquierda compacta con Dashboard, Roadmap, Study, Resources, Evidence, Portfolio y Search, topbar con titulo derivado de route data y UsuarioActual cuando esta disponible. Search abre una palette global real por boton o Ctrl/Cmd+K, indexa read-sides existentes en memoria y navega a entidades factuales. No se agregaron UI frameworks, paquetes, Auth, light mode, dock inferior, analytics screen ni backend search generico.
 
 Roadmap y Dashboard frontend V1 validados: Dashboard y Roadmap consumen `GET /api/roadmap/vista` mediante modelos TypeScript estrictos y cache runtime en memoria. Angular presenta `progresoGlobalPorcentaje`, `progresoPorcentaje`, `faseActualId`, `esFaseActual`, `estado` y `repasoRecomendado` sin recalcular semantica de dominio. Dashboard muestra saludo con UsuarioActual, progreso global, linea conectada de Fases, Fase actual y continuidad factual: ultimo Tema con `ultimaSesion` si existe, o fallback honesto a explorar la Fase actual cuando no hay sesiones porque `RoadmapVistaV1` no expone un orden factual de Tema. Roadmap muestra timeline amplio, detalle de Fase seleccionada, metadata pedagogica, objetivos, criterios de avance y Temas accionables. La seleccion local de Fase puede venir de query param `fase`, pero no cambia la Fase actual real. Personal fue usado en solo lectura para validar Dylan, 7 Fases, 63 Temas y progreso 0% real por ausencia de criterios completados.
 
@@ -809,7 +818,9 @@ RecursoTema Read Contract V1 backend validado: GET `/api/recursos` participa de 
 
 Portfolio Frontend V1 validado: GET `/api/portafolio` es el unico read-side de lista; filtros usados por Angular son solo `tipoEvidence` y `estadoMadurez` con estados elegibles. La UI aplana las colecciones reales solo para presentacion local, conserva la separacion conceptual entre ListoPortafolio y Publicado, defiende visualmente contra estados no elegibles en mocks/tests, reutiliza `EvidenceService.obtenerDetalle()` para detail factual por Proyecto, Laboratorio, Writeup, ArtefactoTecnico y CertificacionObtenida, y carga Notas en modo read-only solo para los tipos que ya las soportan desde Evidence.
 
-Proxima area sugerida: Unlink RecursoTema, filtro rating en LIST, Search global real, IA automation, recomendaciones, light mode, dock inferior, analytics screen y streak siguen diferidos fuera de sus bloques propios.
+Search Global V1 frontend validado: la palette unica consume `RoadmapVistaV1`, Resources LIST y `EvidenceListaV1`, indexa Temas/Fases/Resources/Evidence sin Portfolio duplicado ni Study historico, hace matching local normalizado, limita resultados por categoria, tolera fallo parcial y evita requests por tecla. Deep links frontend quedan en `/resources?recursoId=...` y `/evidence?evidenceId=...&tipoEvidence=...`; invalidos o borrados muestran error de detail sin destruir lista. Runtime Personal read-only confirmo 63 Temas, 30 Resources, 0 Evidence, busquedas Bash/OSI/ANY.RUN, navegacion Tema/Fase/Resource, responsive 1440x900/768x1024/390x844, foco/teclado y ausencia de usuarioId en requests. Semantic/AI search, historial persistente, favoritos y backend full-text quedan diferidos.
+
+Proxima area sugerida: Unlink RecursoTema, filtro rating en LIST, IA automation, recomendaciones, light mode, dock inferior, analytics screen y streak siguen diferidos fuera de sus bloques propios.
 
 ## Pendientes Deliberados
 

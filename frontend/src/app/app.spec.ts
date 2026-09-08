@@ -4,6 +4,9 @@ import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { App } from './app';
 import { UsuarioActualService } from './core/usuario-actual.service';
+import { RoadmapService } from './features/roadmap/roadmap.service';
+import { ResourcesService } from './features/resources/resources.service';
+import { EvidenceService } from './features/evidence/evidence.service';
 
 @Component({ template: '' })
 class EmptyRouteComponent {}
@@ -25,6 +28,9 @@ describe('App', () => {
           { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
         ]),
         { provide: UsuarioActualService, useValue: usuarioActual },
+        { provide: RoadmapService, useValue: { obtenerVista: () => of({ fases: [] }) } },
+        { provide: ResourcesService, useValue: { listar: () => of([]) } },
+        { provide: EvidenceService, useValue: { listar: () => of({ items: [] }) } },
       ],
     }).compileComponents();
   }
@@ -105,13 +111,38 @@ describe('App', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }));
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Busqueda global');
-    expect(fixture.nativeElement.textContent).toContain('Roadmap, Resources y Evidence');
+    expect(fixture.nativeElement.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Escribe para buscar');
 
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).not.toContain('Busqueda global');
+    expect(fixture.nativeElement.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it.each(['button', 'meta'])('abre la misma palette desde %s y devuelve el foco', async (trigger) => {
+    await configure({ obtener: () => of({ id: 'usuario-1', nombre: 'Dylan' }) });
+    fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const button: HTMLButtonElement = fixture.nativeElement.querySelector('.search-trigger');
+    button.focus();
+    if (trigger === 'button') button.click();
+    else window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('[role="dialog"]').length).toBe(1);
+    expect(document.activeElement?.getAttribute('role')).toBe('combobox');
+    expect(fixture.nativeElement.querySelector('.workspace').inert).toBe(true);
+    const input = document.activeElement as HTMLInputElement;
+    input.value = 'bash';
+    input.dispatchEvent(new Event('input'));
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }));
+    fixture.detectChanges();
+    expect(input.value).toBe('bash');
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve));
+    expect(document.activeElement).toBe(button);
+    expect(fixture.nativeElement.querySelector('.workspace').inert).toBe(false);
   });
 
   it('muestra error operativo cuando no puede resolver usuario actual', async () => {

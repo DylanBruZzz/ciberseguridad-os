@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
-import { NEVER, of, throwError } from 'rxjs';
+import { ActivatedRoute, ParamMap, convertToParamMap, provideRouter } from '@angular/router';
+import { BehaviorSubject, NEVER, Subject, of, throwError } from 'rxjs';
 import { RoadmapVistaV1 } from '../../roadmap/roadmap.models';
 import { RoadmapService } from '../../roadmap/roadmap.service';
 import {
@@ -125,6 +125,7 @@ const notas: NotaResumen[] = [
 
 describe('EvidencePage', () => {
   let fixture: ComponentFixture<EvidencePage>;
+  let queryParamMap: BehaviorSubject<ParamMap>;
   let evidence: {
     listar: ReturnType<typeof vi.fn>;
     obtenerDetalle: ReturnType<typeof vi.fn>;
@@ -141,8 +142,11 @@ describe('EvidencePage', () => {
     refrescarVista: ReturnType<typeof vi.fn>;
   };
 
-  async function configure(queryTemaId: string | null = null, lista: EvidenceItemV1[] = items): Promise<void> {
+  type QueryParams = string | null | Record<string, string>;
+
+  async function configure(query: QueryParams = null, lista: EvidenceItemV1[] = items): Promise<void> {
     TestBed.resetTestingModule();
+    queryParamMap = new BehaviorSubject(convertToParamMap(parametros(query)));
 
     evidence = {
       listar: vi.fn(() => of({ total: lista.length, items: lista })),
@@ -170,13 +174,18 @@ describe('EvidencePage', () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            queryParamMap: of(convertToParamMap(queryTemaId ? { temaId: queryTemaId } : {})),
+            queryParamMap: queryParamMap.asObservable(),
           },
         },
         { provide: EvidenceService, useValue: evidence },
         { provide: RoadmapService, useValue: roadmap },
       ],
     }).compileComponents();
+  }
+
+  function parametros(query: QueryParams): Record<string, string> {
+    if (query === null) return {};
+    return typeof query === 'string' ? { temaId: query } : query;
   }
 
   it('muestra loading estructural', async () => {
@@ -312,6 +321,77 @@ describe('EvidencePage', () => {
     expect(evidence.obtenerDetalle).toHaveBeenCalledWith(items.find((item) => item.tipoEvidence === tipo));
     expect(text()).toContain(titulo);
     expect(text()).toContain(textoEsperado);
+  });
+
+  it('abre detail desde evidenceId + tipoEvidence factual sin filtro stale', async () => {
+    await configure({ evidenceId: laboratorioId, tipoEvidence: 'Laboratorio' });
+
+    fixture = TestBed.createComponent(EvidencePage);
+    fixture.detectChanges();
+
+    expect(evidence.listar).toHaveBeenCalledWith({
+      temaId: null,
+      tipoEvidence: '',
+      estadoMadurez: '',
+    });
+    expect(evidence.obtenerDetalle).toHaveBeenCalledWith(items.find((item) => item.id === laboratorioId));
+    expect(text()).toContain('Laboratorio Nmap');
+    expect(text()).toContain('Hallazgos');
+  });
+
+  it('mantiene evidenceId + tipoEvidence al reintentar la lista', async () => {
+    await configure({ evidenceId: laboratorioId, tipoEvidence: 'Laboratorio' });
+    evidence.listar
+      .mockReturnValueOnce(throwError(() => new Error('No pudimos cargar Evidence.')))
+      .mockReturnValueOnce(of({ total: items.length, items }));
+
+    fixture = TestBed.createComponent(EvidencePage);
+    fixture.detectChanges();
+    expect(text()).toContain('No pudimos cargar Evidence.');
+
+    clickPorTexto('Reintentar');
+
+    expect(evidence.listar).toHaveBeenCalledTimes(2);
+    expect(evidence.obtenerDetalle).toHaveBeenCalledWith(items.find((item) => item.id === laboratorioId));
+  });
+
+  it('cancela detail anterior cuando cambia evidenceId en la misma ruta', async () => {
+    await configure();
+    const detallePendiente = new Subject<EvidenceDetail>();
+    evidence.obtenerDetalle.mockImplementation((item: EvidenceItemV1) =>
+      item.tipoEvidence === 'Proyecto' ? detallePendiente.asObservable() : of(detallePara(item)),
+    );
+
+    fixture = TestBed.createComponent(EvidencePage);
+    fixture.detectChanges();
+    abrirItem('Proyecto');
+
+    queryParamMap.next(convertToParamMap({ evidenceId: laboratorioId, tipoEvidence: 'Laboratorio' }));
+    fixture.detectChanges();
+    detallePendiente.next(detallePara(items[0]));
+    detallePendiente.complete();
+    fixture.detectChanges();
+
+    expect(evidence.obtenerDetalle).toHaveBeenLastCalledWith(items.find((item) => item.id === laboratorioId));
+    expect(text()).toContain('Laboratorio Nmap');
+    expect(text()).not.toContain('Proyecto defensivo');
+  });
+
+  it('rechaza deep links invalidos o con tipo incorrecto sin destruir lista', async () => {
+    await configure({ evidenceId: laboratorioId, tipoEvidence: 'Proyecto' });
+
+    fixture = TestBed.createComponent(EvidencePage);
+    fixture.detectChanges();
+
+    expect(evidence.obtenerDetalle).not.toHaveBeenCalled();
+    expect(text()).toContain('La Evidence del enlace ya no esta disponible en esta lista.');
+    expect(listaText()).toContain('Laboratorio Nmap');
+
+    queryParamMap.next(convertToParamMap({ evidenceId: 'id-invalido', tipoEvidence: 'Laboratorio' }));
+    fixture.detectChanges();
+
+    expect(text()).toContain('El enlace de Evidence no es valido.');
+    expect(listaText()).toContain('Laboratorio Nmap');
   });
 
   it('carga y agrega notas append-only para Proyecto', async () => {

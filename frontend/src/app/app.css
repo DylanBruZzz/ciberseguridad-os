@@ -58,8 +58,7 @@
 
 .brand svg,
 .main-nav svg,
-.search-trigger svg,
-.command-palette svg {
+.search-trigger svg {
   width: 1.35rem;
   height: 1.35rem;
   fill: none;

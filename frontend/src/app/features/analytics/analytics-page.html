@@ -1,0 +1,111 @@
+<div class="analytics-page">
+  <header class="page-header">
+    <p class="eyebrow">OBSERVATORIO PERSONAL</p>
+    <h1>Analytics</h1>
+    <p>Una mirada a tu estudio, tu ruta y lo que has registrado.</p>
+  </header>
+
+  <section class="panel" aria-labelledby="study-title" [attr.aria-busy]="fuentes.study().estado === 'cargando'">
+    <div class="section-header">
+      <div><p class="eyebrow">01 · ESTUDIO</p><h2 id="study-title">Tu tiempo de estudio</h2></div>
+      <div class="range" role="group" aria-label="Periodo de estudio">
+        @for (opcion of rangos; track opcion) {
+          <button type="button" [attr.aria-pressed]="rango() === opcion" (click)="rango.set(opcion)">{{ opcion === 'Todo' ? 'Todo' : opcion + ' días' }}</button>
+        }
+      </div>
+    </div>
+    <p class="caption">El periodo afecta sólo al estudio. 30 y 90 días incluyen hoy, según la fecha de cada sesión.</p>
+    @if (fuentes.study().estado === 'cargando') {
+      <div class="skeleton" role="status">Cargando Study…</div>
+    } @else if (fuentes.study().estado === 'error') {
+      <div class="error" role="status"><p>No pudimos cargar Study. Las demás secciones siguen disponibles.</p><button type="button" (click)="fuentes.reintentar('Study')">Reintentar Study</button></div>
+    } @else if (study(); as datos) {
+      @if (datos.totalSesiones === 0) {
+        <div class="empty"><h3>{{ rango() === 'Todo' ? 'Tu estudio empieza con un registro' : 'Sin sesiones en este periodo' }}</h3><p>Aún no hay actividad registrada para mostrar esta sección{{ rango() === 'Todo' ? '.' : ' en el periodo elegido.' }}</p><a routerLink="/study">Ir a Study →</a></div>
+      } @else {
+        <dl class="summary" aria-live="polite">
+          <div><dt>Tiempo registrado</dt><dd>{{ duracion(datos.totalMinutos) }}</dd></div>
+          <div><dt>Sesiones</dt><dd>{{ datos.totalSesiones }}</dd></div>
+          <div><dt>Media por sesión</dt><dd>{{ datos.mediaMinutos | number:'1.0-1' }} <small>min</small></dd></div>
+        </dl>
+        <div class="charts">
+          <div><h3>Actividad por mes</h3><p class="caption">Tiempo registrado en el periodo. Sólo meses con sesiones; los meses omitidos no tienen registros.</p><app-analytics-bars titulo="Tiempo de estudio por mes" [datos]="datos.porMes" unidad="minutos" /></div>
+          <div><h3>Cómo estudias</h3><p class="caption">Cantidad de sesiones por tipo.</p><app-analytics-bars titulo="Sesiones por tipo" [datos]="datos.porTipo" unidad="sesiones" /></div>
+        </div>
+        <details>
+          <summary>Tiempo por Tema y Fase</summary>
+          @if (fuentes.roadmap().estado !== 'listo') {
+            <p class="caption" role="status">Roadmap no está disponible todavía. El tiempo total se conserva; los nombres y las fases no se pueden resolver.</p>
+          }
+          <div class="charts">
+            <div><h3>Hasta 5 Temas con más tiempo registrado</h3><app-analytics-bars titulo="Tiempo por Tema" [datos]="temasDestacados()" unidad="minutos" /></div>
+            <div><h3>Tiempo por Fase</h3><app-analytics-bars titulo="Tiempo por Fase" [datos]="datos.porFase" unidad="minutos" /></div>
+          </div>
+        </details>
+      }
+    }
+  </section>
+
+  <section class="panel" aria-labelledby="roadmap-title" [attr.aria-busy]="fuentes.roadmap().estado === 'cargando'">
+    <div class="section-header"><div><p class="eyebrow">02 · ROADMAP</p><h2 id="roadmap-title">La estructura de tu ruta</h2></div><a routerLink="/roadmap">Ver Roadmap →</a></div>
+    <p class="caption">Estado actual de los Temas asociados a Fases. El progreso refleja sus criterios de dominio.</p>
+    @if (fuentes.roadmap().estado === 'cargando') {
+      <div class="skeleton" role="status">Cargando Roadmap…</div>
+    } @else if (fuentes.roadmap().estado === 'error') {
+      <div class="error" role="status"><p>No pudimos cargar Roadmap.</p><button type="button" (click)="fuentes.reintentar('Roadmap')">Reintentar Roadmap</button></div>
+    } @else if (roadmap(); as datos) {
+      @if (datos.porFase.length === 0) {
+        <div class="empty"><p>Aún no hay Fases registradas para mostrar esta sección.</p></div>
+      } @else {
+        <div class="charts roadmap-charts">
+          <div><h3>Progreso por Fase</h3><app-analytics-bars titulo="Progreso estructural por Fase" [datos]="datos.porFase" unidad="porcentaje" /></div>
+          <div><h3>Temas por estado</h3><p class="caption">{{ datos.totalTemas }} Temas en las Fases del Roadmap.</p>
+            @if (datos.totalTemas > 0) {
+              <app-analytics-bars titulo="Temas por estado" [datos]="datos.porEstado" unidad="temas" />
+              <p class="review-note">{{ datos.repasoRecomendado }} {{ datos.repasoRecomendado === 1 ? 'Tema' : 'Temas' }} con repaso recomendado.</p>
+            } @else { <p class="empty">Aún no hay Temas asociados a estas Fases.</p> }
+          </div>
+        </div>
+      }
+    }
+  </section>
+
+  <div class="collection-grid">
+    <section class="panel" aria-labelledby="evidence-title" [attr.aria-busy]="fuentes.evidence().estado === 'cargando'">
+      <p class="eyebrow">03 · EVIDENCE</p><h2 id="evidence-title">Tu evidencia registrada</h2>
+      <p class="caption">Madurez actual de tus evidencias registradas.</p>
+      @if (fuentes.evidence().estado === 'cargando') {
+        <div class="skeleton" role="status">Cargando Evidence…</div>
+      } @else if (fuentes.evidence().estado === 'error') {
+        <div class="error" role="status"><p>No pudimos cargar Evidence.</p><button type="button" (click)="fuentes.reintentar('Evidence')">Reintentar Evidence</button></div>
+      } @else if (evidence(); as datos) {
+        @if (datos.total === 0) {
+          <div class="empty"><h3>Tu evidencia, cuando la registres</h3><p>Aún no hay Evidence registrada para mostrar esta sección.</p><a routerLink="/evidence">Ir a Evidence →</a></div>
+        } @else {
+          <p class="collection-total">{{ datos.total }} {{ datos.total === 1 ? 'evidencia registrada' : 'evidencias registradas' }}</p>
+          <h3>Por madurez</h3><app-analytics-bars titulo="Evidence por madurez" [datos]="datos.porMadurez" />
+          <p class="caption">Listo para Portfolio y Publicado ya están incluidos aquí. Publicado no implica publicación web.</p>
+          <details><summary>Ver tipos de Evidence</summary><app-analytics-bars titulo="Evidence por tipo" [datos]="datos.porTipo" /></details>
+        }
+      }
+    </section>
+    <section class="panel" aria-labelledby="resources-title" [attr.aria-busy]="fuentes.resources().estado === 'cargando'">
+      <p class="eyebrow">04 · RESOURCES</p><h2 id="resources-title">Tu biblioteca de consulta</h2>
+      <p class="caption">Estado actual de tus recursos, sin una secuencia obligatoria.</p>
+      @if (fuentes.resources().estado === 'cargando') {
+        <div class="skeleton" role="status">Cargando Resources…</div>
+      } @else if (fuentes.resources().estado === 'error') {
+        <div class="error" role="status"><p>No pudimos cargar Resources.</p><button type="button" (click)="fuentes.reintentar('Resources')">Reintentar Resources</button></div>
+      } @else if (resources(); as datos) {
+        @if (datos.total === 0) {
+          <div class="empty"><p>Aún no hay Resources registrados para mostrar esta sección.</p><a routerLink="/resources">Ir a Resources →</a></div>
+        } @else {
+          <p class="collection-total">{{ datos.total }} {{ datos.total === 1 ? 'recurso registrado' : 'recursos registrados' }}</p>
+          <h3>Por estado</h3><app-analytics-bars titulo="Resources por estado" [datos]="datos.porEstado" />
+          <details><summary>Ver tipos de Resources</summary><app-analytics-bars titulo="Resources por tipo" [datos]="datos.porTipo" /></details>
+        }
+      }
+    </section>
+  </div>
+  <p class="footnote">Basado en registros visibles de Study, Roadmap, Evidence y Resources. Los datos se actualizan al volver a entrar.</p>
+</div>

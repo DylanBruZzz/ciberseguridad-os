@@ -190,7 +190,9 @@ caf832a feat: establish validated initial persistence
 - PORTFOLIO FRONTEND V1 USA DETAIL FACTUAL POR AGGREGATE ROOT Y MANTIENE LA GESTION EN EVIDENCE
 - SEARCH GLOBAL V1 FRONTEND VALIDADO COMO PALETTE UNICA SOBRE READ-SIDES EXISTENTES
 - SEARCH GLOBAL V1 INDEXA TEMAS, FASES, RESOURCES Y EVIDENCE SIN BACKEND SEARCH GENERICO
-- STREAK, DEADLINES PUNITIVOS, TIMER, ANALYTICS SCREEN Y SEARCH SEMANTICO/IA SIGUEN DIFERIDOS
+- ANALYTICS FRONTEND V1 IMPLEMENTADO SOBRE LIST/READ-SIDES EXISTENTES SIN BACKEND NUEVO
+- ANALYTICS V1 AGREGA STUDY, ROADMAP, EVIDENCE Y RESOURCES CON METRICAS FACTUALES SIN NPLUS1
+- STREAK, DEADLINES PUNITIVOS, TIMER Y SEARCH SEMANTICO/IA SIGUEN DIFERIDOS
 
 ## Migraciones Aplicadas
 
@@ -236,8 +238,8 @@ caf832a feat: establish validated initial persistence
   - UsuarioActual: Dylan
   - Fases: 7
   - Temas: 63
-- Navegacion base preparada: Dashboard, Roadmap, Study, Resources, Evidence, Portfolio y Search.
-- Implementacion funcional profunda actual: Dashboard, Roadmap, Tema Workspace, Study, Resources, Evidence, Portfolio y Search Global V1.
+- Navegacion base preparada: Dashboard, Roadmap, Study, Resources, Evidence, Portfolio, Analytics y Search.
+- Implementacion funcional profunda actual: Dashboard, Roadmap, Tema Workspace, Study, Resources, Evidence, Portfolio, Search Global y Analytics V1.
 - Dashboard V1 consume GET /api/roadmap/vista y GET /api/usuario-actual para saludo, progreso global, linea conectada de Fases, Fase actual y continuidad factual.
 - Roadmap V1 consume GET /api/roadmap/vista para timeline de Fases, detalle de Fase, metadata pedagogica, objetivos, criterios de avance, Temas, progreso, EstadoTema y repaso.
 - RoadmapService usa cache runtime en memoria con refresh explicito; no usa localStorage, sessionStorage, IndexedDB ni state management externo.
@@ -271,7 +273,7 @@ caf832a feat: establish validated initial persistence
 - Runtime Personal de Search Global V1 validado en modo read-only con 63 Temas, 30 Resources y 0 Evidence, aprox. 38 KB entre fuentes. Busquedas `Bash`, `OSI` y Resource real `ANY.RUN` funcionaron; Tema, Fase y Resource navegaron dentro de la shell, sin hard reload, sin usuarioId en requests y sin N+1 de detail antes de abrir Resource.
 - CORS no se agrego en este bloque; el desarrollo usa proxy Angular especifico. No existe AllowAnyOrigin.
 - Visual Shell V1 validado: dark mode, identidad Ciberseguridad OS, sidebar vertical compacta, topbar por modulo, Search/Ctrl+K real, responsive base y estados globales discretos. Light mode y dock inferior siguen diferidos.
-- Validacion frontend actual: 187 tests unitarios correctos y `npm run build` correcto.
+- Validacion frontend actual: 237 tests unitarios correctos y `npm run build` correcto (baseline previo: 187).
 
 ## Datos Roadmap V1 Personal
 
@@ -820,7 +822,57 @@ Portfolio Frontend V1 validado: GET `/api/portafolio` es el unico read-side de l
 
 Search Global V1 frontend validado: la palette unica consume `RoadmapVistaV1`, Resources LIST y `EvidenceListaV1`, indexa Temas/Fases/Resources/Evidence sin Portfolio duplicado ni Study historico, hace matching local normalizado, limita resultados por categoria, tolera fallo parcial y evita requests por tecla. Deep links frontend quedan en `/resources?recursoId=...` y `/evidence?evidenceId=...&tipoEvidence=...`; invalidos o borrados muestran error de detail sin destruir lista. Runtime Personal read-only confirmo 63 Temas, 30 Resources, 0 Evidence, busquedas Bash/OSI/ANY.RUN, navegacion Tema/Fase/Resource, responsive 1440x900/768x1024/390x844, foco/teclado y ausencia de usuarioId en requests. Semantic/AI search, historial persistente, favoritos y backend full-text quedan diferidos.
 
-Proxima area sugerida: Unlink RecursoTema, filtro rating en LIST, IA automation, recomendaciones, light mode, dock inferior, analytics screen y streak siguen diferidos fuera de sus bloques propios.
+Proxima area sugerida: auditoria de Analytics Frontend V1. Unlink RecursoTema, filtro rating en LIST, IA automation, recomendaciones, light mode, dock inferior y streak siguen diferidos fuera de sus bloques propios.
+
+## Analytics Frontend V1 — Auditoria e Implementacion
+
+- Fecha de validacion: 2026-09-08. HEAD base: `a2412c6 feat: establish global search v1`; working tree inicialmente clean. Implementacion pendiente de auditoria, sin commit ni push.
+- Clasificacion: A. IMPLEMENTADO SIN GAPS. Estrategia A: frontend aggregator en memoria, con modelos UI y funciones puras. No hay entidad Analytics nueva, persistencia, migracion, paquete ni cambio de arquitectura congelada.
+- Los resumenes Analytics directos de backend ya existentes permanecen intactos. Esta pantalla no crea ni requiere un nuevo backend Analytics.
+- Ruta lazy `/analytics`; enlace despues de Portfolio, conservando el orden previo y el titulo/active state de la shell.
+
+### Fuentes y Medicion Personal
+
+Lecturas reales sin `usuarioId`, sin filtros de listado y sin escrituras sobre AprendizajePersonalDb:
+
+| Fuente | Campos auditados y cobertura | Dataset visible | Cuerpo HTTP medido |
+| --- | --- | --- | --- |
+| `GET /api/sesiones-estudio` | `temaId`, `fecha` DateOnly, `duracionMinutos`, `tipo`, `notas`; lista completa visible | 0 sesiones | 2 bytes |
+| `GET /api/roadmap/vista` | Fases, Temas asociados a Fase, progreso factual, estado y boolean de repaso | 7 Fases, 63 Temas | 31.844 bytes |
+| `GET /api/evidence` | `tipoEvidence`, `estadoMadurez`, `fechaActividadUtc`, Temas y Herramientas; lista completa visible | 0 Evidence | 22 bytes |
+| `GET /api/recursos` | `tipo`, `estado`, Temas; lista completa visible, sin rating | 30 Resources | 6.132 bytes |
+| `GET /api/portafolio` | Proyeccion ListoPortafolio/Publicado; auditada, excluida de las requests de Analytics | 0 entradas | 307 bytes |
+
+- Total de las cuatro fuentes usadas por Analytics: 38.000 bytes sin compresion en esta medicion. Agregacion local razonable para el volumen Personal actual; no es una garantia para crecimiento ilimitado.
+- `GET /api/temas` se consulto solo durante la auditoria para contrastar el total: 63. No es una fuente de la pantalla.
+- Los LIST actuales no estan paginados. Si cambian a paginacion, o el volumen/payload deja de ser apropiado, debe reauditarse la estrategia antes de presentar totales parciales como globales.
+- RoadmapVistaV1 contiene Temas asociados a Fases visibles, no todos los Temas posibles sin Fase. La pantalla explicita esa cobertura. Study conserva el tiempo de Temas ausentes del read-side, con etiquetas de Tema no disponible y Fase no resuelta; no infiere asociaciones.
+
+### Seleccion Factual y Limites
+
+- Study: total de sesiones, minutos totales con formato compartido de Study, media por sesion (un decimal en presentacion), cantidad por TipoSesion y minutos por mes cronologico. Cero sesiones produce empty independiente y media interna 0, sin NaN/Infinity.
+- Detalle desplegable de Study: hasta cinco Temas con mas tiempo registrado y distribucion de tiempo por Fase. Lookup `Sesion.temaId -> Tema -> Fase` en memoria; cada sesion se cuenta una vez. La categoria de Fase no resuelta conserva su tiempo.
+- Periodos Todo/30/90 dias solo para Study; 30/90 incluyen hoy y los 29/89 dias previos, excluyendo fechas posteriores a hoy. Todo conserva todas las fechas factuales del listado. Se usa calendario local del navegador y DateOnly, sin conversion de sesiones a UTC. No hay request al cambiar periodo.
+- La vista temporal muestra solo meses con sesiones, con aviso explicito para meses omitidos. El total mensual en 30/90 dias es el de las sesiones dentro del periodo, no el mes completo. Agrupacion diaria cubierta por helper/tests; no se agrega otro grafico diario ni semanal redundante.
+- Roadmap: progreso por Fase tal como lo entrega backend, Temas por EstadoTema (`NoIniciado`, `EnPractica`, `Dominado`, `EnRepaso`) y conteo de `repasoRecomendado === true`. No recalcula criterios, progreso global ni repaso; no duplica las tarjetas de Dashboard.
+- Evidence: conteo visible, distribucion por madurez y desglose por tipo desplegable. Borrador, Documentado, ListoPortafolio y Publicado se mantienen como categorias factuales, sin funnel. Publicado no implica publicacion web.
+- Resources: conteo visible, distribucion por los cinco estados exactos y tipos presentes desplegables. Los estados no son un avance lineal. No hay rating promedio porque rating no esta en LIST.
+- Portfolio: no hace request ni suma un total adicional. ListoPortafolio/Publicado ya estan contabilizados en la madurez de Evidence.
+- Evolucion Evidence descartada: `fechaActividadUtc` es ultima modificacion o creacion por item, no un historial de eventos. Temas/Herramientas de Evidence y Resources no multiplican los conteos por relaciones.
+- No incluye productividad, eficiencia, score, streak, metas, predicciones, IA, recomendaciones ni ranking personal. Predictive analytics, AI insights, goals, Light y Dock siguen diferidos.
+
+### UX, Requests y Validacion
+
+- Cuatro secciones independientes; maximo tres resumenes de Study cuando hay datos. Empty honesto por fuente, skeleton por seccion, error local y reintento solo de la fuente fallida. Un fallo no se representa como cero.
+- Instancia de AnalyticsService por entrada a la ruta. Cuatro GET de LIST/read-side; Roadmap se refresca al entrar. Cache de las respuestas en memoria durante la visita, sin localStorage, polling, requests por interaccion visual ni detail/workspace N+1.
+- Visualizaciones HTML/CSS con tokens existentes de violeta y grises. Cada barra tiene etiqueta y valor textual; la parte visual es `aria-hidden`. Progreso usa escala fija 100%; conteos/tiempo usan escala relativa al maximo de su distribucion. Controles nativos, headings jerarquicos, secciones nombradas, foco visible y `aria-pressed` en periodos.
+- Runtime Personal read-only en `/analytics`: Study y Evidence vacios; Roadmap con 63 NoIniciado, 0 repaso y 0% por Fase; 30 Resources PorClasificar. Tipos reales: Documentacion 2, Libro 6, Curso 8, Video 2, Laboratorio 12. No se crearon datos para llenar graficos.
+- Responsive comprobado en navegador: 1440x900, 768x1024, 390x844 sin overflow horizontal. Filtro 30 dias y desplegable Resources por teclado verificados; consola sin errores/warnings de la aplicacion. Los escenarios poblados, fallo parcial, fallo total y retry se validaron con fixtures HTTP en tests, sin escribir en Personal.
+- CSS de pagina: 3.886 bytes; pagina mas estilos inline de barras por debajo de 5 kB de fuente y del objetivo 8 kB. `angular.json` no cambia.
+- Tests frontend: `npm test`, 237/237 correctos en 20 archivos, +50 respecto del baseline. Incluyen logica factual, tipos/estados, fechas y bisiesto, mapping/desconocidos, inmutabilidad, datasets vacios/parciales, escala cero/fija, loading, success, fallos de cada fuente, retry sin duplicados, no N+1/usuarioId, cambio de periodo local, reentrada, cancelacion de listas, semantica accesible y navegacion de shell.
+- Build frontend: `npm run build` limpio, sin advertencias de presupuesto. Bundle inicial 292,10 kB; chunk lazy Analytics 21,06 kB (transferencia estimada 6,00 kB).
+- Build .NET: el comando principal encontro DLL bloqueadas por la API Personal en ejecucion. `dotnet build Aprendizaje.slnx --artifacts-path bin/analytics-validation` valido la solucion con 0 warnings y 0 errores sin detener Personal. Salida aislada ignorada por Git; backend intacto. Suite backend 535/535 permanece como baseline previo, no reejecutada en este bloque frontend.
+- `docs/decisiones-arquitectura.md`, backend, migraciones, packages y lockfiles permanecen sin cambios. Siguiente estado: auditoria de Analytics Frontend V1.
 
 ## Pendientes Deliberados
 

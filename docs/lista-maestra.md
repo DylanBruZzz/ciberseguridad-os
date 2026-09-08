@@ -632,6 +632,21 @@
 - [x] Evidence Frontend V1 soporta deep link `/evidence?evidenceId=...&tipoEvidence=...` usando dispatch por Aggregate Root.
 - [x] Roadmap Frontend V1 actualiza fase seleccionada al cambiar `?fase=` dentro de la misma ruta.
 - [x] Runtime Personal de Search Global V1 validado read-only con Bash, OSI y Resource real, sin usuarioId en requests ni writes.
+- [x] Analytics Frontend V1 en `/analytics`, con enlace despues de Portfolio y carga lazy.
+- [x] Auditoria Analytics: agregador frontend viable con dataset Personal medido de 0 sesiones, 7 Fases, 63 Temas, 30 Resources, 0 Evidence y 0 Portfolio.
+- [x] Analytics consume cuatro LIST/read-sides existentes: Study, RoadmapVistaV1, EvidenceListaV1 y Resources, sin usuarioId ni N+1.
+- [x] Study Analytics: sesiones, tiempo total, media, tipos, actividad mensual y detalle de tiempo por Tema/Fase mediante lookup local.
+- [x] Periodos Todo/30/90 dias solo para Study, con DateOnly factual y calendario local, sin requests al filtrar.
+- [x] Roadmap Analytics: progreso de Fase desde backend, Temas por estado y boolean factual de repaso, con cobertura limitada a Temas asociados a Fases.
+- [x] Evidence Analytics: total, tipo y madurez factual sin funnel ni doble conteo de Portfolio.
+- [x] Resources Analytics: total, estados y tipos, sin rating de LIST ni detalles masivos.
+- [x] Analytics con funciones puras, datasets parciales, Temas no resueltos seguros, empty y skeleton por fuente, error parcial y retry aislado.
+- [x] Analytics con barras HTML/CSS accesibles, controles nativos, tokens existentes y responsive 1440x900/768x1024/390x844 validado.
+- [x] Runtime Personal Analytics validado read-only; fixtures de tests para success/fallos, sin crear actividad ficticia en Personal.
+- [x] Frontend validado con 237/237 tests y build limpio tras Analytics V1; backend, migraciones, packages y angular.json sin cambios.
+- [x] Limites Analytics documentados: sin backend Analytics nuevo, IA, score, streak, productividad inventada, rating promedio ni historial Evidence inferido de ultima modificacion.
+- [ ] Predictive analytics, AI insights, streak y goals: diferidos, requieren alcance y datos propios antes de implementacion.
+- [ ] Light y Dock: diferidos.
 - [ ] CORS/runtime publish definido para Frontend Foundation fuera de dev proxy.
 
 ## 14. Importacion Roadmap original

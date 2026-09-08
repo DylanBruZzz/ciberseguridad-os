@@ -25,6 +25,7 @@ describe('App', () => {
           { path: 'resources', component: EmptyRouteComponent, data: { title: 'Resources' } },
           { path: 'evidence', component: EmptyRouteComponent, data: { title: 'Evidence' } },
           { path: 'portfolio', component: EmptyRouteComponent, data: { title: 'Portfolio' } },
+          { path: 'analytics', component: EmptyRouteComponent, data: { title: 'Analytics' } },
           { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
         ]),
         { provide: UsuarioActualService, useValue: usuarioActual },
@@ -63,7 +64,21 @@ describe('App', () => {
     expect(text).toContain('Resources');
     expect(text).toContain('Evidence');
     expect(text).toContain('Portfolio');
+    expect(text).toContain('Analytics');
     expect(text).toContain('Search');
+  });
+
+  it('Analytics sigue a Portfolio y actualiza el título y estado activo de la shell', async () => {
+    await configure({ obtener: () => of({ id: 'usuario-1', nombre: 'Dylan' }) });
+    fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    await TestBed.inject(Router).navigateByUrl('/analytics');
+    fixture.detectChanges();
+    const links = fixture.nativeElement.querySelectorAll('nav a');
+    expect(links[5].getAttribute('href')).toBe('/portfolio');
+    expect(links[6].getAttribute('href')).toBe('/analytics');
+    expect(links[6].classList.contains('active')).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('Ciberseguridad OS · Analytics');
   });
 
   it('usa anchors para modulos y boton real para Search', async () => {
@@ -77,7 +92,7 @@ describe('App', () => {
     const links = fixture.nativeElement.querySelectorAll('nav a');
     const search = fixture.nativeElement.querySelector('.search-trigger');
 
-    expect(links.length).toBe(6);
+    expect(links.length).toBe(7);
     expect(Array.from(links).every((link) => link instanceof HTMLAnchorElement)).toBe(true);
     expect(search instanceof HTMLButtonElement).toBe(true);
     expect(search.getAttribute('aria-label')).toBe('Abrir busqueda global');

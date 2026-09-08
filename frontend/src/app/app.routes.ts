@@ -45,6 +45,11 @@ export const routes: Routes = [
       import('./features/portfolio/portfolio-page/portfolio-page').then((m) => m.PortfolioPage),
     data: { title: 'Portfolio' },
   },
+  {
+    path: 'analytics',
+    loadComponent: () => import('./features/analytics/analytics-page').then((m) => m.AnalyticsPage),
+    data: { title: 'Analytics' },
+  },
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   { path: '**', redirectTo: 'dashboard' },
 ];

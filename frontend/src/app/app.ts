@@ -65,6 +65,12 @@ export class App implements OnInit {
       ariaLabel: 'Abrir Portfolio',
       icon: 'M4 7a2 2 0 0 1 2-2h3l1.5 2H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Zm4 5h8',
     },
+    {
+      label: 'Analytics',
+      route: '/analytics',
+      ariaLabel: 'Abrir Analytics',
+      icon: 'M4 20h16M7 16v-5m5 5V4m5 12V8',
+    },
   ];
 
   public constructor(

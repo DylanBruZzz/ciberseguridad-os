@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { formatearDuracion } from '../../../shared/format/duracion';
 import { FaseRoadmapVistaV1, RoadmapVistaV1, TemaRoadmapVistaV1 } from '../../roadmap/roadmap.models';
 import { RoadmapService } from '../../roadmap/roadmap.service';
 import {
@@ -264,16 +265,7 @@ export class StudyPage implements OnInit {
     }).format(new Date(Number(year), Number(month) - 1, Number(day)));
   }
 
-  protected formatearDuracion(minutos: number): string {
-    if (minutos < 60) {
-      return `${minutos} min`;
-    }
-
-    const horas = Math.floor(minutos / 60);
-    const resto = minutos % 60;
-
-    return resto === 0 ? `${horas} h` : `${horas} h ${resto} min`;
-  }
+  protected readonly formatearDuracion = formatearDuracion;
 
   protected trackById(_: number, item: { id: string }): string {
     return item.id;

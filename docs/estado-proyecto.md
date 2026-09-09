@@ -911,6 +911,16 @@ Gate transversal sobre `fb92705 feat: establish analytics frontend v1`, iniciado
 - Siguen diferidos: Light, Dock, Timer/Pomodoro, semantic/AI search, IA insights, predictive analytics, streak, goals, uploads, export/share y unlink RecursoTema. Operacion/publish fuera del proxy local conserva su gate propio.
 - Siguiente estado: decision de Release Candidate V1; no se inicia otra feature ni se crea checkpoint Git automaticamente.
 
+## Release Candidate V1 — 2026-09-08
+
+- Base commit validado: `2952de9 fix: complete release polish gate v1`.
+- Alcance incluido: Dashboard V1, Roadmap V1, Tema Workspace V1, Study V1, Resources V1, Evidence V1, Portfolio V1, Search Global V1, Analytics Frontend V1 y Release / Polish Gate V1.
+- Estado: funcionalidad integrada para Personal V1, polish gate cerrado y release blockers: ninguno.
+- Frontend: `npm test` 255/255 y `npm run build` limpio, sin warnings.
+- Backend: sin cambios desde el baseline 535/535 previamente validado.
+- Packages, lockfiles, `angular.json` y migraciones: sin cambios nuevos para este RC.
+- Siguen diferidos y no bloquean RC V1: Light, Dock, Timer/Pomodoro, Semantic/AI Search, AI Insights, predictive analytics, streak, goals, uploads, export/share y unlink RecursoTema.
+
 ## Pendientes Deliberados
 
 - tests completos de dominio;

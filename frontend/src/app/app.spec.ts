@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { App } from './app';
 import { UsuarioActualService } from './core/usuario-actual.service';
 import { RoadmapService } from './features/roadmap/roadmap.service';
@@ -21,6 +21,7 @@ describe('App', () => {
         provideRouter([
           { path: 'dashboard', component: EmptyRouteComponent, data: { title: 'Dashboard' } },
           { path: 'roadmap', component: EmptyRouteComponent, data: { title: 'Roadmap' } },
+          { path: 'roadmap/tema/:temaId', component: EmptyRouteComponent, data: { title: 'Roadmap' } },
           { path: 'study', component: EmptyRouteComponent, data: { title: 'Study' } },
           { path: 'resources', component: EmptyRouteComponent, data: { title: 'Resources' } },
           { path: 'evidence', component: EmptyRouteComponent, data: { title: 'Evidence' } },
@@ -170,5 +171,36 @@ describe('App', () => {
 
     expect(fixture.nativeElement.textContent).toContain('No se pudo resolver el usuario local');
     expect(fixture.nativeElement.textContent).toContain('Configuracion local invalida');
+  });
+
+  it.each(['/roadmap/tema/tema-1', '/roadmap?fase=fase-1', '/study?temaId=tema-1', '/resources?recursoId=recurso-1', '/evidence?temaId=tema-1'])('mantiene navegación activa y accesible en %s', async (url) => {
+    await configure({ obtener: () => of({ id: 'usuario-1', nombre: 'Dylan' }) });
+    fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    await TestBed.inject(Router).navigateByUrl(url);
+    fixture.detectChanges();
+    const active = fixture.nativeElement.querySelectorAll('nav a.active');
+    expect(active.length).toBe(1);
+    expect(active[0].getAttribute('href')).toBe('/' + url.split(/[/?]/)[1]);
+    expect(active[0].getAttribute('aria-current')).toBe('page');
+    expect(document.title).toBe(`Ciberseguridad OS · ${active[0].textContent.trim()}`);
+  });
+
+  it('recupera usuario local sin recargar la página y evita reintentos simultáneos', async () => {
+    const pending = new Subject<{ id: string; nombre: string }>();
+    const obtener = vi.fn().mockReturnValueOnce(throwError(() => new Error('API no disponible'))).mockReturnValue(pending);
+    await configure({ obtener });
+    fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const retry: HTMLButtonElement = fixture.nativeElement.querySelector('.system-alert button');
+    retry.click();
+    fixture.detectChanges();
+    expect(retry.disabled).toBe(true);
+    retry.click();
+    expect(obtener).toHaveBeenCalledTimes(2);
+    pending.next({ id: 'usuario-1', nombre: 'Dylan' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.system-alert')).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Dylan');
   });
 });

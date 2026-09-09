@@ -88,6 +88,12 @@ export class App implements OnInit {
         if (this.paletteAbierta()) this.cerrarBusqueda();
       });
 
+    this.cargarUsuario();
+  }
+
+  protected cargarUsuario(): void {
+    if (this.cargandoUsuario() && this.errorUsuario()) return;
+    this.cargandoUsuario.set(true);
     this.usuarioActual.obtener().subscribe({
       next: (usuario) => {
         this.usuario.set(usuario);
@@ -139,5 +145,6 @@ export class App implements OnInit {
     }
 
     this.moduloActual.set(route.snapshot.data['title'] ?? 'Dashboard');
+    this.documento.title = `Ciberseguridad OS · ${this.moduloActual()}`;
   }
 }

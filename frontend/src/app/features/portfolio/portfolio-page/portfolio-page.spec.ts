@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NEVER, of, throwError } from 'rxjs';
+import { NEVER, of, Subject, throwError } from 'rxjs';
 import { provideRouter } from '@angular/router';
 import { EvidenceDetail, EvidenceItemV1, NotaResumen } from '../../evidence/evidence.models';
 import { EvidenceService } from '../../evidence/evidence.service';
@@ -185,13 +185,57 @@ describe('PortfolioPage', () => {
     expect(text()).toContain('Cargando Portfolio');
   });
 
+  it('descarta detail y notas anteriores al seleccionar otra pieza', async () => {
+    await configure();
+    const pendiente = new Subject<EvidenceDetail>();
+    evidence.obtenerDetalle.mockReturnValueOnce(pendiente);
+    fixture = TestBed.createComponent(PortfolioPage);
+    fixture.detectChanges();
+    const component = fixture.componentInstance as any;
+    const [primero, segundo] = component.items();
+    component.abrirDetalle(primero);
+    component.abrirDetalle(segundo);
+    const anterior = evidence.obtenerDetalle.mock.calls[0][0];
+    pendiente.next(detallePara(anterior));
+    expect(component.detalle().item.id).toBe(segundo.id);
+    expect(pendiente.observed).toBe(false);
+    const notasPendientes = new Subject<NotaResumen[]>();
+    evidence.listarNotas.mockReturnValueOnce(notasPendientes);
+    component.abrirDetalle(primero);
+    component.abrirDetalle(segundo);
+    notasPendientes.error(new Error('Error anterior'));
+    expect(component.errorNotas()).toBeNull();
+  });
+
+  it('descarta lista antigua al cambiar filtro y cancela detail que deja de pertenecer a la lista', async () => {
+    await configure();
+    const listaPendiente = new Subject<PortafolioDto>();
+    portfolioService.listar.mockReturnValueOnce(listaPendiente);
+    fixture = TestBed.createComponent(PortfolioPage);
+    fixture.detectChanges();
+    const component = fixture.componentInstance as any;
+    component.recargarLista();
+    listaPendiente.next(portafolioVacio());
+    expect(component.items().length).toBeGreaterThan(0);
+    expect(listaPendiente.observed).toBe(false);
+    const detallePendiente = new Subject<EvidenceDetail>();
+    evidence.obtenerDetalle.mockReturnValueOnce(detallePendiente);
+    component.abrirDetalle(component.items()[0]);
+    portfolioService.listar.mockReturnValueOnce(of(portafolioVacio()));
+    component.recargarLista();
+    expect(detallePendiente.observed).toBe(false);
+    expect(component.seleccionado()).toBeNull();
+    expect(component.detalle()).toBeNull();
+    expect(component.cargandoDetalle()).toBe(false);
+  });
+
   it('muestra empty Personal sin crear Portfolio', async () => {
     await configure(portafolioVacio());
 
     fixture = TestBed.createComponent(PortfolioPage);
     fixture.detectChanges();
 
-    expect(text()).toContain('Aun no tienes evidencias listas para Portfolio.');
+    expect(text()).toContain('Aún no tienes evidencias listas para Portfolio.');
     expect(text()).toContain("Cuando una evidencia alcance 'Listo para Portfolio' o 'Publicado'");
     expect(fixture.nativeElement.querySelector('a[href="/evidence"]')).not.toBeNull();
   });
@@ -202,7 +246,7 @@ describe('PortfolioPage', () => {
     fixture = TestBed.createComponent(PortfolioPage);
     fixture.detectChanges();
 
-    expect(text()).toContain('Read-side curado');
+    expect(text()).toContain('Tu selección');
     expect(text()).toContain('Listo para Portfolio');
     expect(text()).toContain('Publicado');
     expect(listaText()).toContain('Proyecto SOC inicial');
@@ -384,7 +428,7 @@ describe('PortfolioPage', () => {
     expect(toolbarText()).toContain('Buscar en Portfolio');
     expect(toolbarText()).toContain('Tipo');
     expect(toolbarText()).toContain('Estado');
-    expect(fixture.nativeElement.querySelector('main[aria-label="Lista de Portfolio"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('section[aria-label="Lista de Portfolio"]')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('aside[aria-label="Detalle de Portfolio"]')).not.toBeNull();
   });
 

@@ -71,7 +71,7 @@
   </section>
 
   <div class="evidence-layout">
-    <main class="list-panel" aria-label="Lista de evidencias">
+    <section class="list-panel" aria-label="Lista de evidencias">
       <div class="section-heading">
         <div>
           <p class="eyebrow">{{ temaIdContextual() ? 'Evidence contextual' : 'Evidence global' }}</p>
@@ -97,8 +97,8 @@
           <h3>
             {{
               temaIdContextual()
-                ? 'Aun no hay evidencias vinculadas a este tema.'
-                : 'Aun no has registrado evidencias.'
+                ? 'Aún no hay evidencias vinculadas a este tema.'
+                : 'Aún no has registrado evidencias.'
             }}
           </h3>
           <p>Cuando exista evidencia factual aparecera en esta vista unificada.</p>
@@ -106,7 +106,7 @@
       } @else if (evidenciasFiltradas().length === 0) {
         <section class="empty-state">
           <h3>No encontramos evidencias con estos filtros.</h3>
-          <p>La busqueda local usa los campos ya cargados por el read-side.</p>
+          <p>Prueba otro título, tema o herramienta, o cambia los filtros.</p>
         </section>
       } @else {
         <ol class="evidence-list">
@@ -147,9 +147,9 @@
           }
         </ol>
       }
-    </main>
+    </section>
 
-    <aside class="detail-panel" aria-label="Detalle de Evidence">
+    <aside tabindex="-1" class="detail-panel" aria-label="Detalle de Evidence">
       @if (modoFormulario(); as modo) {
         <section class="form-panel">
           <div class="section-heading">
@@ -596,7 +596,7 @@
               <div class="section-heading compact">
                 <div>
                   <p class="eyebrow">Notas</p>
-                  <h3>{{ notasDetalle().length }} append-only</h3>
+                  <h3>{{ notasDetalle().length }} notas registradas</h3>
                 </div>
               </div>
 
@@ -666,7 +666,7 @@
         <section class="empty-detail">
           <p class="eyebrow">Detalle</p>
           <h2>Selecciona una evidencia</h2>
-          <p>El panel abre el endpoint real de Proyecto, Laboratorio, Writeup, Artefacto o Certificacion obtenida.</p>
+          <p>Consulta sus detalles y notas, o edita la información registrada.</p>
         </section>
       }
     </aside>

@@ -28,7 +28,7 @@
 
 .eyebrow {
   margin: 0;
-  color: #65d6c8;
+  color: var(--accent-bright);
   font-size: 0.76rem;
   font-weight: 720;
   letter-spacing: 0;
@@ -39,7 +39,7 @@
 .context-note {
   display: inline-block;
   margin-top: 0.8rem;
-  color: #a7e7df;
+  color: var(--accent-bright);
   font-weight: 680;
   text-decoration: none;
 }
@@ -63,8 +63,8 @@
 
 .primary-button,
 .form-actions button {
-  border-color: rgba(101, 214, 200, 0.45);
-  background: linear-gradient(135deg, rgba(33, 150, 136, 0.95), rgba(14, 116, 144, 0.9));
+  border-color: var(--accent-bright);
+  background: var(--accent);
   color: #f8ffff;
 }
 
@@ -88,7 +88,7 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid #65d6c8;
+  outline: 2px solid var(--accent-bright);
   outline-offset: 2px;
 }
 
@@ -118,7 +118,7 @@ textarea:focus-visible {
 
 .inline-write {
   padding: 0.8rem 1rem;
-  color: #a7e7df;
+  color: var(--accent-bright);
 }
 
 .inline-write.error {
@@ -232,8 +232,8 @@ textarea {
 }
 
 .resource-list article.selected {
-  border-color: rgba(101, 214, 200, 0.48);
-  background: rgba(10, 31, 42, 0.76);
+  border-color: var(--accent-bright);
+  background: var(--bg-surface-3);
 }
 
 .resource-open {
@@ -282,7 +282,7 @@ textarea {
 
 .resource-topics a,
 .topic-links a {
-  color: #a7e7df;
+  color: var(--accent-bright);
   text-decoration: none;
 }
 
@@ -291,6 +291,7 @@ textarea {
 }
 
 .detail-panel {
+  scroll-margin-top:var(--topbar-height);
   position: sticky;
   top: 1rem;
   min-width: 0;
@@ -342,7 +343,7 @@ textarea {
 .form-actions p {
   min-height: 1.25rem;
   margin: 0;
-  color: #a7e7df;
+  color: var(--accent-bright);
 }
 
 .detail-actions {
@@ -391,7 +392,7 @@ textarea {
 .external-link {
   max-width: 100%;
   overflow-wrap: anywhere;
-  color: #a7e7df;
+  color: var(--accent-bright);
 }
 
 .topic-links {

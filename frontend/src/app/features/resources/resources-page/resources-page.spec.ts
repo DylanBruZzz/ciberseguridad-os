@@ -206,6 +206,22 @@ describe('ResourcesPage', () => {
     expect(text()).toContain('Cargando Resources');
   });
 
+  it('abrir creación cancela un detail pendiente y conserva el formulario nuevo', async () => {
+    await configure();
+    const pendiente = new Subject<RecursoDetalle>();
+    resourcesService.obtenerDetalle.mockReturnValueOnce(pendiente);
+    fixture = TestBed.createComponent(ResourcesPage);
+    fixture.detectChanges();
+    const component = fixture.componentInstance as any;
+    component.abrirDetalle(recursoId);
+    component.abrirCrear();
+    pendiente.error(new Error('Respuesta anterior'));
+    expect(pendiente.observed).toBe(false);
+    expect(component.modoFormulario()).toBe('crear');
+    expect(component.cargandoDetalle()).toBe(false);
+    expect(component.errorDetalle()).toBeNull();
+  });
+
   it('muestra biblioteca global como lista enriquecida sin filtro rating', async () => {
     await configure();
 
@@ -251,14 +267,14 @@ describe('ResourcesPage', () => {
     fixture = TestBed.createComponent(ResourcesPage);
     fixture.detectChanges();
 
-    expect(text()).toContain('Aun no tienes recursos en tu biblioteca.');
+    expect(text()).toContain('Aún no tienes recursos en tu biblioteca.');
 
     await configure(temaId, []);
 
     fixture = TestBed.createComponent(ResourcesPage);
     fixture.detectChanges();
 
-    expect(text()).toContain('Aun no hay recursos vinculados a este tema.');
+    expect(text()).toContain('Aún no hay recursos vinculados a este tema.');
   });
 
   it('compone search local con filtros de estado y tipo', async () => {

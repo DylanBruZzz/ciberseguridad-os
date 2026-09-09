@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
-import { NEVER, of, throwError } from 'rxjs';
+import { BehaviorSubject, NEVER, of, throwError } from 'rxjs';
 import { RoadmapVistaV1 } from '../../roadmap/roadmap.models';
 import { RoadmapService } from '../../roadmap/roadmap.service';
 import { SesionEstudioResumen } from '../study.models';
@@ -102,6 +102,7 @@ const sesiones: SesionEstudioResumen[] = [
 
 describe('StudyPage', () => {
   let fixture: ComponentFixture<StudyPage>;
+  let parametros: BehaviorSubject<ReturnType<typeof convertToParamMap>>;
   let study: {
     listarSesiones: ReturnType<typeof vi.fn>;
     registrarSesion: ReturnType<typeof vi.fn>;
@@ -115,6 +116,7 @@ describe('StudyPage', () => {
 
   async function configure(queryTemaId: string | null = null): Promise<void> {
     TestBed.resetTestingModule();
+    parametros = new BehaviorSubject(convertToParamMap(queryTemaId ? { temaId: queryTemaId } : {}));
 
     study = {
       listarSesiones: vi.fn(() => of(sesiones)),
@@ -149,7 +151,7 @@ describe('StudyPage', () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            queryParamMap: of(convertToParamMap(queryTemaId ? { temaId: queryTemaId } : {})),
+            queryParamMap: parametros,
           },
         },
         { provide: StudyService, useValue: study },
@@ -167,6 +169,22 @@ describe('StudyPage', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Cargando Study');
+  });
+
+  it('cambiar el contexto no arrastra una sesión en edición ni su confirmación de eliminación', async () => {
+    await configure(temaId);
+    fixture = TestBed.createComponent(StudyPage);
+    fixture.detectChanges();
+    const component = fixture.componentInstance as any;
+    component.editarSesion(sesiones[0]);
+    component.pedirEliminar(sesiones[0]);
+    parametros.next(convertToParamMap({}));
+    expect(component.sesionEditando()).toBeNull();
+    expect(component.sesionAEliminar()).toBeNull();
+    expect(component.formNotas()).toBe('');
+    expect(component.formTemaId()).toBe('');
+    expect(study.listarSesiones).toHaveBeenCalledTimes(1);
+    expect(study.actualizarSesion).not.toHaveBeenCalled();
   });
 
   it('muestra modo global, resumen e historial reciente', async () => {
@@ -361,7 +379,7 @@ describe('StudyPage', () => {
     fixture = TestBed.createComponent(StudyPage);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Aun no has registrado sesiones de estudio.');
+    expect(fixture.nativeElement.textContent).toContain('Aún no has registrado sesiones de estudio.');
 
     TestBed.resetTestingModule();
     await configure(temaId);
@@ -370,7 +388,7 @@ describe('StudyPage', () => {
     fixture = TestBed.createComponent(StudyPage);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Aun no registraste sesiones para este tema.');
+    expect(fixture.nativeElement.textContent).toContain('Aún no registraste sesiones para este tema.');
   });
 
   it('muestra errores de carga con reintento', async () => {

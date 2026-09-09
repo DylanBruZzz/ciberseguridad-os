@@ -47,6 +47,12 @@ export class DashboardPage implements OnInit {
   ) {}
 
   public ngOnInit(): void {
+    this.cargarUsuario();
+    this.cargarRoadmap();
+  }
+
+  private cargarUsuario(): void {
+    this.cargandoUsuario.set(true);
     this.usuarioActual.obtener().subscribe({
       next: (usuario) => {
         this.usuario.set(usuario);
@@ -58,10 +64,10 @@ export class DashboardPage implements OnInit {
       },
     });
 
-    this.cargarRoadmap();
   }
 
   protected recargarRoadmap(): void {
+    if (!this.usuario() && !this.cargandoUsuario()) this.cargarUsuario();
     this.cargarRoadmap(true);
   }
 

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
-import { NEVER, of, throwError } from 'rxjs';
+import { BehaviorSubject, NEVER, of, Subject, throwError } from 'rxjs';
 import { TemaWorkspaceV1 } from './tema-workspace.models';
 import { TemaWorkspaceService } from './tema-workspace.service';
 import { TopicWorkspacePage } from './topic-workspace-page';
@@ -75,11 +75,13 @@ const workspaceBase: TemaWorkspaceV1 = {
 
 describe('TopicWorkspacePage', () => {
   let fixture: ComponentFixture<TopicWorkspacePage>;
+  let parametros: BehaviorSubject<ReturnType<typeof convertToParamMap>>;
 
   async function configure(
     workspace: Partial<TemaWorkspaceService>,
     routeTemaId = temaId,
   ): Promise<void> {
+    parametros = new BehaviorSubject(convertToParamMap({ temaId: routeTemaId }));
     await TestBed.configureTestingModule({
       imports: [TopicWorkspacePage],
       providers: [
@@ -92,6 +94,7 @@ describe('TopicWorkspacePage', () => {
         {
           provide: ActivatedRoute,
           useValue: {
+            paramMap: parametros,
             snapshot: {
               paramMap: convertToParamMap({ temaId: routeTemaId }),
             },
@@ -111,6 +114,56 @@ describe('TopicWorkspacePage', () => {
     expect(fixture.nativeElement.textContent).toContain('Cargando workspace del tema');
   });
 
+  it('Cancelar recupera los apuntes guardados sin enviar writes y limpia dirty/error', async () => {
+    const guardarApuntes = vi.fn();
+    await configure({ obtenerWorkspace: () => of(workspaceBase), guardarApuntes });
+    fixture = TestBed.createComponent(TopicWorkspacePage);
+    fixture.detectChanges();
+    const component = fixture.componentInstance as any;
+    component.borradorApuntes.set('Cambios sin guardar');
+    component.errorGuardado.set('Error anterior');
+    component.cancelarApuntes();
+    expect(component.borradorApuntes()).toBe(workspaceBase.apuntes.contenido);
+    expect(component.hayCambiosApuntes()).toBe(false);
+    expect(component.errorGuardado()).toBeNull();
+    expect(guardarApuntes).not.toHaveBeenCalled();
+  });
+
+  it('cambia de Tema sin recrear la página, cancela la lectura anterior y limpia apuntes', async () => {
+    const anterior = new Subject<TemaWorkspaceV1>();
+    const nuevo = { ...workspaceBase, tema: { ...workspaceBase.tema, id: faseId, nombre: 'Bash' }, apuntes: { ...workspaceBase.apuntes, contenido: 'Apuntes Bash' } };
+    const obtenerWorkspace = vi.fn().mockReturnValueOnce(anterior).mockReturnValue(of(nuevo));
+    await configure({ obtenerWorkspace });
+    fixture = TestBed.createComponent(TopicWorkspacePage);
+    fixture.detectChanges();
+    parametros.next(convertToParamMap({ temaId: faseId }));
+    anterior.next(workspaceBase);
+    fixture.detectChanges();
+    expect(obtenerWorkspace).toHaveBeenLastCalledWith(faseId);
+    expect(fixture.nativeElement.querySelector('h1').textContent).toContain('Bash');
+    expect(fixture.nativeElement.querySelector('textarea').value).toBe('Apuntes Bash');
+    expect(anterior.observed).toBe(false);
+    parametros.next(convertToParamMap({ temaId: 'invalido' }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('textarea')).toBeNull();
+    expect(obtenerWorkspace).toHaveBeenCalledTimes(2);
+  });
+
+  it('un guardado pendiente de otro Tema no sobrescribe apuntes ni estado del Tema actual', async () => {
+    const guardado = new Subject<void>();
+    await configure({ obtenerWorkspace: () => of(workspaceBase), guardarApuntes: () => guardado });
+    fixture = TestBed.createComponent(TopicWorkspacePage);
+    fixture.detectChanges();
+    const component = fixture.componentInstance as any;
+    component.borradorApuntes.set('Borrador anterior');
+    component.guardarApuntes();
+    parametros.next(convertToParamMap({ temaId: faseId }));
+    guardado.next();
+    expect(component.borradorApuntes()).toBe(workspaceBase.apuntes.contenido);
+    expect(component.apuntes().contenido).toBe(workspaceBase.apuntes.contenido);
+    expect(component.estadoGuardado()).toBe('idle');
+  });
+
   it('muestra header, objetivos, criterios, progreso y estado exactos del backend', async () => {
     await configure({ obtenerWorkspace: () => of(workspaceBase) });
 
@@ -121,7 +174,7 @@ describe('TopicWorkspacePage', () => {
     expect(text).toContain('Roadmap');
     expect(text).toContain('Fundamentos');
     expect(text).toContain('Modelo OSI / TCP-IP');
-    expect(text).toContain('EnRepaso');
+    expect(text).toContain('En repaso');
     expect(text).toContain('100%');
     expect(text).toContain('2 / 2');
     expect(text).toContain('Comprender encapsulacion');
@@ -139,7 +192,7 @@ describe('TopicWorkspacePage', () => {
     fixture.detectChanges();
 
     const text = fixture.nativeElement.textContent;
-    expect(text).toContain('EnRepaso');
+    expect(text).toContain('En repaso');
     expect(text).toContain('100%');
     expect(text).toContain('Conviene repasar este tema.');
   });

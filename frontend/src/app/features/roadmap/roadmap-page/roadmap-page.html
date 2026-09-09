@@ -156,7 +156,7 @@
                     >
                       <span class="topic-meta">
                         <span>{{ tema.tipoConocimiento }}</span>
-                        <span>{{ tema.estado }}</span>
+                        <span>{{ etiquetaEstadoTema(tema.estado) }}</span>
                         @if (tema.repasoRecomendado) {
                           <span>Repaso</span>
                         }
@@ -190,7 +190,7 @@
                               hijo.nombre + '. Estado ' + hijo.estado + '. Progreso ' + hijo.progresoPorcentaje + '%'
                             "
                           >
-                            <span>{{ hijo.estado }}</span>
+                            <span>{{ etiquetaEstadoTema(hijo.estado) }}</span>
                             <strong>{{ hijo.nombre }}</strong>
                             <span>{{ hijo.progresoPorcentaje }}%</span>
                           </a>
@@ -212,7 +212,7 @@
                   >
                     <span class="topic-meta">
                       <span>{{ tema.tipoConocimiento }}</span>
-                      <span>{{ tema.estado }}</span>
+                      <span>{{ etiquetaEstadoTema(tema.estado) }}</span>
                       @if (tema.repasoRecomendado) {
                         <span>Repaso</span>
                       }
@@ -238,7 +238,7 @@
                 }
               </div>
             } @else {
-              <p class="muted">Esta fase aun no tiene temas visibles.</p>
+              <p class="muted">Esta fase aún no tiene temas visibles.</p>
             }
           </section>
         </section>

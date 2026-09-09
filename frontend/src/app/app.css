@@ -220,6 +220,21 @@
   padding: var(--space-6) 0 var(--space-8);
 }
 
+.system-alert button {
+  min-height: var(--control-size);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-1);
+  color: var(--text-primary);
+  background: var(--bg-surface-2);
+  cursor: pointer;
+}
+
+.system-alert button:focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 2px;
+}
+
 @media (max-width: 760px) {
   .app-shell {
     grid-template-columns: var(--sidebar-width-mobile) minmax(0, 1fr);

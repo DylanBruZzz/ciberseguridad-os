@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { FaseRoadmapVistaV1, RoadmapVistaV1, TemaRoadmapVistaV1 } from '../roadmap.models';
 import { RoadmapService } from '../roadmap.service';
+import { etiquetaEstadoTema } from '../roadmap.labels';
 
 @Component({
   selector: 'app-roadmap-page',
@@ -11,6 +12,7 @@ import { RoadmapService } from '../roadmap.service';
   styleUrl: './roadmap-page.css',
 })
 export class RoadmapPage implements OnInit {
+  protected readonly etiquetaEstadoTema = etiquetaEstadoTema;
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
 

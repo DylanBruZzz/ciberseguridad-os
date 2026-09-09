@@ -22,6 +22,7 @@ import {
   TipoNota,
 } from '../evidence.models';
 import { EvidenceService } from '../evidence.service';
+import { crearFocoPanel } from '../../../shared/foco-panel';
 
 type EstadoWrite = 'idle' | 'guardando' | 'guardado' | 'error';
 type ModoFormulario = 'crear' | 'editar' | null;
@@ -47,6 +48,7 @@ type CampoFormulario =
   styleUrl: './evidence-page.css',
 })
 export class EvidencePage implements OnInit {
+  private readonly enfocarPanel = crearFocoPanel();
   private readonly destroyRef = inject(DestroyRef);
   private solicitudLista?: Subscription;
   private solicitudDetalle?: Subscription;
@@ -204,9 +206,13 @@ export class EvidencePage implements OnInit {
   protected recargarLista(): void {
     this.cargarLista(true, null, this.evidenceEnlacePendiente());
     this.cargarRoadmap(true);
+    if (this.errorCertificaciones()) this.cargarCertificaciones();
   }
 
   protected abrirCrear(tipo: TipoEvidenceV1 | null = null): void {
+    this.enfocarPanel();
+    this.solicitudDetalle?.unsubscribe();
+    this.cargandoDetalle.set(false);
     this.modoFormulario.set('crear');
     this.detalle.set(null);
     this.seleccionado.set(null);
@@ -220,6 +226,7 @@ export class EvidencePage implements OnInit {
   }
 
   protected abrirDetalle(item: EvidenceItemV1): void {
+    this.enfocarPanel();
     this.solicitudDetalle?.unsubscribe();
     this.seleccionado.set(item);
     this.detalle.set(null);

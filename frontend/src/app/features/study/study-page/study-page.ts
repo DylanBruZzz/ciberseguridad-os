@@ -1,4 +1,5 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { formatearDuracion } from '../../../shared/format/duracion';
 import { FaseRoadmapVistaV1, RoadmapVistaV1, TemaRoadmapVistaV1 } from '../../roadmap/roadmap.models';
@@ -20,6 +21,7 @@ type CampoFormulario = 'temaId' | 'fecha' | 'duracionMinutos' | 'tipo';
   styleUrl: './study-page.css',
 })
 export class StudyPage implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
   private static readonly guidRegex =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -88,7 +90,7 @@ export class StudyPage implements OnInit {
   ) {}
 
   public ngOnInit(): void {
-    this.route.queryParamMap.subscribe((params) => {
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       this.aplicarTemaContextual(params.get('temaId'));
     });
 
@@ -336,8 +338,13 @@ export class StudyPage implements OnInit {
   }
 
   private aplicarTemaContextual(temaId: string | null): void {
+    const anterior = this.temaIdContextual();
     this.temaIdMalformado.set(!!temaId && !StudyPage.guidRegex.test(temaId));
     this.temaIdContextual.set(temaId && StudyPage.guidRegex.test(temaId) ? temaId : null);
+    if (anterior !== this.temaIdContextual()) {
+      this.cancelarEdicion();
+      this.cancelarEliminar();
+    }
 
     if (!this.modoEdicion()) {
       this.formTemaId.set(this.temaIdContextual() ?? '');

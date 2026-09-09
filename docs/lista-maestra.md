@@ -648,6 +648,16 @@
 - [ ] Predictive analytics, AI insights, streak y goals: diferidos, requieren alcance y datos propios antes de implementacion.
 - [ ] Light y Dock: diferidos.
 - [ ] CORS/runtime publish definido para Frontend Foundation fuera de dev proxy.
+- [x] Release / Polish Gate V1 transversal sobre Dashboard, Roadmap, Workspace, Study, Resources, Evidence, Portfolio, Search y Analytics.
+- [x] Navegacion activa contextual, titulo/idioma del documento, Workspace al cambiar Tema y recuperacion de UsuarioActual corregidos.
+- [x] Respuestas tardias de Portfolio/detail, cambio de contexto Study y apertura de formularios sin datos mezclados cubiertos por regresiones.
+- [x] Un main por pagina, etiquetas factuales amigables, foco/desplazamiento de paneles moviles y Cancelar apuntes validados.
+- [x] API Personal detenida/reiniciada, errores/reintentos y fallos parciales Analytics/Search validados; Personal permanece read-only durante el gate.
+- [x] Responsive de todas las rutas en 1440x900, 768x1024 y 390x844, teclado/Search, network y consola auditados.
+- [x] Polish visual acotado: acentos violetas de Resources/Evidence, textos de producto, Portfolio empty sin tres resumenes en cero y placeholder muerto eliminado.
+- [x] Frontend tras Polish: 255/255 tests, 21 archivos, build sin warnings; backend baseline 535/535 sin reejecucion, packages/migrations/angular.json intactos.
+- [ ] Decision de Release Candidate V1 y checkpoint Git del Polish, pendientes de autorizacion propia.
+- [ ] Timer/Pomodoro, semantic/AI search, IA insights, predictive analytics, streak/goals, uploads, export/share y unlink RecursoTema permanecen diferidos junto con Light/Dock.
 
 ## 14. Importacion Roadmap original
 

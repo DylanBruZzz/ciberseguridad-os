@@ -256,4 +256,16 @@ describe('DashboardPage', () => {
 
     expect(fixture.nativeElement.textContent).toContain('Linux y CLI');
   });
+
+  it('retry tras API offline recupera también el saludo factual', async () => {
+    const obtener = vi.fn().mockReturnValueOnce(throwError(() => new Error('Offline')))
+      .mockReturnValue(of({ id: 'usuario-1', nombre: 'Dylan' }));
+    await configure({ obtenerVista: () => throwError(() => new Error('Offline')), refrescarVista: () => of(vista) }, { obtener });
+    fixture = TestBed.createComponent(DashboardPage);
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('button').click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('h1').textContent).toContain('Dylan');
+    expect(obtener).toHaveBeenCalledTimes(2);
+  });
 });

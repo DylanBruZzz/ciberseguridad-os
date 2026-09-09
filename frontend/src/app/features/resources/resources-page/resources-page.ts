@@ -15,6 +15,7 @@ import {
   TipoRecurso,
 } from '../resources.models';
 import { ResourcesService } from '../resources.service';
+import { crearFocoPanel } from '../../../shared/foco-panel';
 
 type EstadoWrite = 'idle' | 'guardando' | 'guardado' | 'error';
 type ModoFormulario = 'crear' | 'editar' | null;
@@ -27,6 +28,7 @@ type CampoFormulario = 'titulo' | 'tipo' | 'estado' | 'rating' | 'url';
   styleUrl: './resources-page.css',
 })
 export class ResourcesPage implements OnInit {
+  private readonly enfocarPanel = crearFocoPanel();
   private readonly destroyRef = inject(DestroyRef);
   private solicitudLista?: Subscription;
   private solicitudDetalle?: Subscription;
@@ -141,6 +143,9 @@ export class ResourcesPage implements OnInit {
   }
 
   protected abrirCrear(): void {
+    this.enfocarPanel();
+    this.solicitudDetalle?.unsubscribe();
+    this.cargandoDetalle.set(false);
     this.modoFormulario.set('crear');
     this.detalle.set(null);
     this.recursoSeleccionadoId.set(null);
@@ -154,6 +159,7 @@ export class ResourcesPage implements OnInit {
   }
 
   protected abrirDetalle(recursoId: string): void {
+    this.enfocarPanel();
     this.solicitudDetalle?.unsubscribe();
     this.recursoSeleccionadoId.set(recursoId);
     this.detalle.set(null);

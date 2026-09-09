@@ -73,7 +73,7 @@
   </section>
 
   <div class="resources-layout">
-    <main class="list-panel" aria-label="Biblioteca de recursos">
+    <section class="list-panel" aria-label="Biblioteca de recursos">
       <div class="section-heading">
         <div>
           <p class="eyebrow">{{ temaIdContextual() ? 'Biblioteca contextual' : 'Biblioteca global' }}</p>
@@ -99,8 +99,8 @@
           <h3>
             {{
               temaIdContextual()
-                ? 'Aun no hay recursos vinculados a este tema.'
-                : 'Aun no tienes recursos en tu biblioteca.'
+                ? 'Aún no hay recursos vinculados a este tema.'
+                : 'Aún no tienes recursos en tu biblioteca.'
             }}
           </h3>
           <p>El formulario queda listo para registrar el primer recurso factual.</p>
@@ -143,9 +143,9 @@
           }
         </ol>
       }
-    </main>
+    </section>
 
-    <aside class="detail-panel" aria-label="Detalle del recurso">
+    <aside tabindex="-1" class="detail-panel" aria-label="Detalle del recurso">
       @if (modoFormulario(); as modo) {
         <section class="form-panel">
           <div class="section-heading">

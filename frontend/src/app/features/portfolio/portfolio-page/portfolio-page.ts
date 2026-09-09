@@ -1,4 +1,6 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subscription } from 'rxjs';
 import { RouterLink } from '@angular/router';
 import {
   ArtefactoTecnicoDetalle,
@@ -29,6 +31,7 @@ import {
   TipoEvidencePortfolio,
 } from '../portfolio.models';
 import { PortfolioService } from '../portfolio.service';
+import { crearFocoPanel } from '../../../shared/foco-panel';
 
 @Component({
   selector: 'app-portfolio-page',
@@ -37,6 +40,11 @@ import { PortfolioService } from '../portfolio.service';
   styleUrl: './portfolio-page.css',
 })
 export class PortfolioPage implements OnInit {
+  private readonly enfocarPanel = crearFocoPanel();
+  private readonly destroyRef = inject(DestroyRef);
+  private solicitudLista?: Subscription;
+  private solicitudDetalle?: Subscription;
+  private solicitudNotas?: Subscription;
   protected readonly tiposPortfolio = TIPOS_PORTFOLIO;
   protected readonly estadosPortfolio = ESTADOS_PORTFOLIO;
 
@@ -113,6 +121,9 @@ export class PortfolioPage implements OnInit {
   }
 
   protected abrirDetalle(item: PortfolioItem): void {
+    this.enfocarPanel();
+    this.solicitudDetalle?.unsubscribe();
+    this.solicitudNotas?.unsubscribe();
     this.seleccionado.set(item);
     this.detalle.set(null);
     this.cargandoDetalle.set(true);
@@ -121,7 +132,8 @@ export class PortfolioPage implements OnInit {
     this.errorNotas.set(null);
     this.cargandoNotas.set(false);
 
-    this.evidence.obtenerDetalle(this.toEvidenceItem(item)).subscribe({
+    this.solicitudDetalle = this.evidence.obtenerDetalle(this.toEvidenceItem(item))
+      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (detalle) => {
         this.detalle.set(detalle);
         this.cargandoDetalle.set(false);
@@ -240,18 +252,19 @@ export class PortfolioPage implements OnInit {
   }
 
   private cargarLista(mostrarLoading = true): void {
+    this.solicitudLista?.unsubscribe();
     if (mostrarLoading) {
       this.cargandoLista.set(true);
     }
 
     this.errorLista.set(null);
 
-    this.portfolio
+    this.solicitudLista = this.portfolio
       .listar({
         tipoEvidence: this.tipoFiltro(),
         estadoMadurez: this.madurezFiltro(),
       })
-      .subscribe({
+      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (portafolio) => {
           const items = this.aplanar(portafolio);
           this.portafolio.set(portafolio);
@@ -274,7 +287,8 @@ export class PortfolioPage implements OnInit {
     this.cargandoNotas.set(true);
     this.errorNotas.set(null);
 
-    this.evidence.listarNotas().subscribe({
+    this.solicitudNotas?.unsubscribe();
+    this.solicitudNotas = this.evidence.listarNotas().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (notas) => {
         this.notas.set(notas);
         this.cargandoNotas.set(false);
@@ -296,6 +310,13 @@ export class PortfolioPage implements OnInit {
     const vigente = items.find((item) => item.id === actual.id && item.tipoEvidence === actual.tipoEvidence);
 
     if (!vigente || !this.esMadurezPortfolio(vigente.estadoMadurez)) {
+      this.solicitudDetalle?.unsubscribe();
+      this.solicitudNotas?.unsubscribe();
+      this.cargandoDetalle.set(false);
+      this.cargandoNotas.set(false);
+      this.errorDetalle.set(null);
+      this.errorNotas.set(null);
+      this.notas.set([]);
       this.seleccionado.set(null);
       this.detalle.set(null);
       return;

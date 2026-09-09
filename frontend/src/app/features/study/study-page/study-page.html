@@ -69,7 +69,7 @@
         }
       </aside>
 
-      <main class="study-form-panel">
+      <div class="study-form-panel">
         <div class="section-heading">
           <div>
             <p class="eyebrow">{{ modoEdicion() ? 'Editar sesion' : 'Nueva sesion' }}</p>
@@ -185,7 +185,7 @@
             </p>
           </div>
         </form>
-      </main>
+      </div>
 
       <section class="history-panel" aria-label="Historial de sesiones">
         <div class="section-heading">
@@ -206,8 +206,8 @@
             <h3>
               {{
                 temaContextual()
-                  ? 'Aun no registraste sesiones para este tema.'
-                  : 'Aun no has registrado sesiones de estudio.'
+                  ? 'Aún no registraste sesiones para este tema.'
+                  : 'Aún no has registrado sesiones de estudio.'
               }}
             </h3>
             <p>El formulario queda listo para registrar la primera actividad factual.</p>

@@ -198,6 +198,35 @@ describe('EvidencePage', () => {
     expect(text()).toContain('Cargando Evidence');
   });
 
+  it('abrir creación cancela un detail pendiente sin mezclar la evidencia anterior', async () => {
+    await configure();
+    const pendiente = new Subject<EvidenceDetail>();
+    evidence.obtenerDetalle.mockReturnValueOnce(pendiente);
+    fixture = TestBed.createComponent(EvidencePage);
+    fixture.detectChanges();
+    const component = fixture.componentInstance as any;
+    component.abrirDetalle(items[0]);
+    component.abrirCrear();
+    pendiente.next(detallePara(items[0]));
+    expect(pendiente.observed).toBe(false);
+    expect(component.modoFormulario()).toBe('crear');
+    expect(component.cargandoDetalle()).toBe(false);
+    expect(component.detalle()).toBeNull();
+  });
+
+  it('retry recupera también el catálogo de certificaciones si falló al entrar', async () => {
+    await configure();
+    evidence.listarCertificaciones.mockReturnValueOnce(throwError(() => new Error('API offline')));
+    fixture = TestBed.createComponent(EvidencePage);
+    fixture.detectChanges();
+    const component = fixture.componentInstance as any;
+    expect(component.errorCertificaciones()).toBe('API offline');
+    component.recargarLista();
+    expect(component.errorCertificaciones()).toBeNull();
+    expect(component.certificaciones()).toEqual(certificaciones);
+    expect(evidence.listarCertificaciones).toHaveBeenCalledTimes(2);
+  });
+
   it('mantiene estado de lista controlado ante error del unified read', async () => {
     await configure();
     evidence.listar.mockReturnValue(throwError(() => new Error('No pudimos cargar Evidence.')));
@@ -290,12 +319,12 @@ describe('EvidencePage', () => {
 
     fixture = TestBed.createComponent(EvidencePage);
     fixture.detectChanges();
-    expect(text()).toContain('Aun no has registrado evidencias.');
+    expect(text()).toContain('Aún no has registrado evidencias.');
 
     await configure(temaId, []);
     fixture = TestBed.createComponent(EvidencePage);
     fixture.detectChanges();
-    expect(text()).toContain('Aun no hay evidencias vinculadas a este tema.');
+    expect(text()).toContain('Aún no hay evidencias vinculadas a este tema.');
 
     await configure();
     fixture = TestBed.createComponent(EvidencePage);

@@ -146,6 +146,7 @@ select:focus-visible {
 
 .list-panel,
 .detail-panel {
+  scroll-margin-top:var(--topbar-height);
   min-width: 0;
 }
 

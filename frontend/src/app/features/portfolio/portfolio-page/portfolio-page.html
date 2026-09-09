@@ -3,10 +3,11 @@
     <div>
       <p class="eyebrow">Portfolio</p>
       <h1>Portfolio</h1>
-      <p>Evidencias listas para mostrar y publicadas desde el read-side curado.</p>
+      <p>Tus evidencias listas para mostrar y publicadas.</p>
     </div>
 
     @if (portafolio(); as datos) {
+      @if (datos.resumen.total > 0) {
       <dl class="summary-strip" aria-label="Resumen de Portfolio">
         <div>
           <dt>Total</dt>
@@ -21,6 +22,7 @@
           <dd>{{ datos.resumen.publicados }}</dd>
         </div>
       </dl>
+      }
     }
   </header>
 
@@ -61,10 +63,10 @@
   </section>
 
   <div class="portfolio-layout">
-    <main class="list-panel" aria-label="Lista de Portfolio">
+    <section class="list-panel" aria-label="Lista de Portfolio">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Read-side curado</p>
+          <p class="eyebrow">Tu selección</p>
           <h2>{{ itemsVisibles().length }} de {{ totalServidor() }} elementos</h2>
         </div>
         <button type="button" class="ghost-button" (click)="recargarLista()">Reintentar</button>
@@ -85,14 +87,14 @@
         </section>
       } @else if (items().length === 0 && !hayFiltros()) {
         <section class="empty-state">
-          <h3>Aun no tienes evidencias listas para Portfolio.</h3>
+          <h3>Aún no tienes evidencias listas para Portfolio.</h3>
           <p>Cuando una evidencia alcance 'Listo para Portfolio' o 'Publicado', aparecera aqui.</p>
           <a [routerLink]="['/evidence']">Ver Evidence</a>
         </section>
       } @else if (itemsVisibles().length === 0) {
         <section class="empty-state">
           <h3>No encontramos elementos con estos filtros.</h3>
-          <p>La busqueda local usa solo campos presentes en el read-side de Portfolio.</p>
+          <p>Prueba otro título, tema o herramienta, o cambia los filtros.</p>
         </section>
       } @else {
         @if (listos().length > 0) {
@@ -185,9 +187,9 @@
           </section>
         }
       }
-    </main>
+    </section>
 
-    <aside class="detail-panel" aria-label="Detalle de Portfolio">
+    <aside tabindex="-1" class="detail-panel" aria-label="Detalle de Portfolio">
       @if (cargandoDetalle()) {
         <section class="detail-state" aria-live="polite">
           <span class="loader-line"></span>
@@ -364,7 +366,7 @@
         <section class="empty-detail">
           <p class="eyebrow">Detalle</p>
           <h2>Selecciona una evidencia</h2>
-          <p>El panel abre el endpoint real del Aggregate Root y lo presenta sin acciones de escritura.</p>
+          <p>Consulta sus detalles, temas y herramientas. Puedes gestionarla desde Evidence.</p>
         </section>
       }
     </aside>

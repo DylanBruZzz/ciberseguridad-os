@@ -1,4 +1,6 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subscription } from 'rxjs';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   TemaWorkspaceCriterio,
@@ -6,6 +8,7 @@ import {
   TemaWorkspaceV1,
 } from './tema-workspace.models';
 import { TemaWorkspaceService } from './tema-workspace.service';
+import { etiquetaEstadoTema } from '../roadmap.labels';
 
 type EstadoGuardado = 'idle' | 'guardando' | 'guardado' | 'error';
 
@@ -16,6 +19,10 @@ type EstadoGuardado = 'idle' | 'guardando' | 'guardado' | 'error';
   styleUrl: './topic-workspace-page.css',
 })
 export class TopicWorkspacePage implements OnInit {
+  protected readonly etiquetaEstadoTema = etiquetaEstadoTema;
+  private readonly destroyRef = inject(DestroyRef);
+  private solicitudWorkspace?: Subscription;
+  private cambioTema = 0;
   private static readonly guidRegex =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -42,16 +49,22 @@ export class TopicWorkspacePage implements OnInit {
   ) {}
 
   public ngOnInit(): void {
-    const temaId = this.route.snapshot.paramMap.get('temaId');
-    this.temaId.set(temaId);
-
-    if (!temaId || !TopicWorkspacePage.guidRegex.test(temaId)) {
-      this.cargando.set(false);
-      this.error.set('Este tema no esta disponible.');
-      return;
-    }
-
-    this.cargarWorkspace();
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      this.cambioTema++;
+      this.solicitudWorkspace?.unsubscribe();
+      const temaId = params.get('temaId');
+      this.temaId.set(temaId);
+      this.workspace.set(null);
+      this.borradorApuntes.set('');
+      this.estadoGuardado.set('idle');
+      this.errorGuardado.set(null);
+      if (!temaId || !TopicWorkspacePage.guidRegex.test(temaId)) {
+        this.cargando.set(false);
+        this.error.set('Este tema no esta disponible.');
+        return;
+      }
+      this.cargarWorkspace();
+    });
   }
 
   protected recargar(): void {
@@ -76,11 +89,13 @@ export class TopicWorkspacePage implements OnInit {
     }
 
     const contenido = this.borradorApuntes();
+    const cambioTema = this.cambioTema;
     this.estadoGuardado.set('guardando');
     this.errorGuardado.set(null);
 
     this.workspaceService.guardarApuntes(temaId, contenido).subscribe({
       next: () => {
+        if (cambioTema !== this.cambioTema) return;
         const actual = this.workspace();
 
         if (actual) {
@@ -96,10 +111,18 @@ export class TopicWorkspacePage implements OnInit {
         this.estadoGuardado.set('guardado');
       },
       error: (error: Error) => {
+        if (cambioTema !== this.cambioTema) return;
         this.errorGuardado.set(error.message);
         this.estadoGuardado.set('error');
       },
     });
+  }
+
+  protected cancelarApuntes(): void {
+    if (this.estadoGuardado() === 'guardando') return;
+    this.borradorApuntes.set(this.apuntes()?.contenido ?? '');
+    this.estadoGuardado.set('idle');
+    this.errorGuardado.set(null);
   }
 
   protected textoVolverRoadmap(): string {
@@ -157,7 +180,7 @@ export class TopicWorkspacePage implements OnInit {
   private cargarWorkspace(): void {
     const temaId = this.temaId();
 
-    if (!temaId) {
+    if (!temaId || !TopicWorkspacePage.guidRegex.test(temaId)) {
       return;
     }
 
@@ -166,7 +189,9 @@ export class TopicWorkspacePage implements OnInit {
     this.estadoGuardado.set('idle');
     this.errorGuardado.set(null);
 
-    this.workspaceService.obtenerWorkspace(temaId).subscribe({
+    this.solicitudWorkspace?.unsubscribe();
+    this.solicitudWorkspace = this.workspaceService.obtenerWorkspace(temaId)
+      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (workspace) => {
         this.workspace.set(workspace);
         this.borradorApuntes.set(workspace.apuntes.contenido);

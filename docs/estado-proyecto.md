@@ -874,6 +874,43 @@ Lecturas reales sin `usuarioId`, sin filtros de listado y sin escrituras sobre A
 - Build .NET: el comando principal encontro DLL bloqueadas por la API Personal en ejecucion. `dotnet build Aprendizaje.slnx --artifacts-path bin/analytics-validation` valido la solucion con 0 warnings y 0 errores sin detener Personal. Salida aislada ignorada por Git; backend intacto. Suite backend 535/535 permanece como baseline previo, no reejecutada en este bloque frontend.
 - `docs/decisiones-arquitectura.md`, backend, migraciones, packages y lockfiles permanecen sin cambios. Siguiente estado: auditoria de Analytics Frontend V1.
 
+## Release / Polish Gate V1 — 2026-09-08
+
+Gate transversal sobre `fb92705 feat: establish analytics frontend v1`, iniciado con working tree limpio. Alcance: producto local Personal existente; sin nuevas features, backend, migraciones, paquetes ni cambios de dominio. Sin commit en este gate.
+
+### Defectos corregidos
+
+- Sidebar conserva el modulo activo en Workspace y rutas con query params, con `aria-current`. Topbar y titulo de documento siguen el modulo; documento en español y nombre Ciberseguridad OS.
+- Workspace observa cambios de `temaId` en la misma instancia. Cancela lecturas anteriores, limpia contexto/borrador y evita que un guardado anterior sobrescriba el Tema nuevo. Cancelar apuntes recupera el texto guardado sin write.
+- Study limpia edicion y confirmacion de eliminacion al cambiar contexto; no mezcla una sesion anterior con el Tema de destino ni consulta de nuevo por ese cambio local.
+- Resources y Evidence cancelan un detail pendiente al abrir creacion. Portfolio cancela respuestas anteriores de lista/detail/notas y descarta el detalle que deja de pertenecer al filtro actual.
+- Shell permite reintentar UsuarioActual tras fallo de API; Dashboard recupera tambien el saludo al reintentar. Evidence reintenta el catalogo de Certificaciones si fallo durante la entrada.
+- Eliminados `main` anidados. Detalles de Resources/Evidence/Portfolio reciben foco al abrirse y desplazamiento cuando el layout los apila bajo la lista. Defecto reproducido en Resources movil: detalle a unos 4.884 px debajo del viewport antes de corregirlo.
+- Roadmap y Workspace presentan No iniciado/En practica/En repaso mediante etiquetas, conservando intacto el estado recibido. Se corrigieron Aun/Aún y textos que exponian endpoint, Aggregate Root, read-side o append-only en el flujo de producto.
+- Resources/Evidence reutilizan violeta de tokens para acentos y acciones, retirando turquesa/gradientes de esas acciones. Portfolio vacio omite la tira de tres resumenes en cero. Se preservan las composiciones propias de cada modulo.
+- Eliminado PlaceholderPage sin referencias; no hay placeholders de modulos terminados en el router.
+
+### Validacion del producto integrado
+
+- Rutas auditadas: Dashboard, Roadmap, Workspace, Study, Resources, Evidence, Portfolio y Analytics; fallback de ruta desconocida hacia Dashboard. Orden de sidebar preservado, Analytics despues de Portfolio y Search como unica palette.
+- Cadena Personal por UI: Dashboard -> Roadmap -> Workspace -> Study/Resources/Evidence -> Workspace; shell -> Portfolio/Analytics. Navegacion SPA comprobada sin hard reload. Search Bash/Modelo OSI/ANY.RUN/Fase, cambio de Tema, atras/adelante y Resource deep link verificados.
+- Entrada directa/reload en rutas contextuales y deep links; query params malformados y entidades ausentes producen estados seguros. Evidence/Portfolio Personal vacios: el deep link a Evidence ausente se valido en runtime; detalles existentes, writes y carreras de respuestas se cubren con fixtures de tests, sin crear datos personales.
+- API Personal detenida realmente y reiniciada en loopback. Ocho pantallas mantienen shell/navegacion/errores/retry; cero requests automaticos durante la espera observada. Recuperacion por reintento, sin pantalla blanca ni excepciones no capturadas. El runtime queda levantado en modo Personal.
+- Fallo parcial controlado de Study en Analytics y Resources en Search: otras fuentes visibles, reintento y recuperacion comprobados en navegador. Errores HTTP esperados en estas pruebas se separan de la consola normal, que no presenta errores/warnings de la aplicacion.
+- 1440x900, 768x1024 y 390x844: todas las rutas sin overflow horizontal de pagina. Labels de controles, un h1 y un main por pagina, navegacion activa, foco visible, Search dialog/teclado/Escape/retorno de foco y controles nativos auditados. Formularios Evidence de los cinco tipos y Resource con titulo/URL largos revisados en movil; Cancelar sin writes. Cmd+K cubierto por tests; Ctrl+K/boton/teclado en runtime.
+- Network: requests personales sin usuarioId, sin polling ni N+1 de detalles. Analytics hace cuatro GET al entrar y cero al alternar Todo/30/90. Search no consulta por tecla. Evidence/Portfolio conservan filtros server-side. Dashboard hace dos lecturas de UsuarioActual en entrada directa (shell y saludo); duplicado pequeno y acotado, sin refactor preventivo.
+- Dataset Personal reconfirmado via GET: Dylan; 7 Fases, 63 Temas, 30 Resources, 0 sesiones, 0 Evidence y 0 Portfolio. Fuentes Analytics: 38.000 bytes JSON en total. Sin SQL, seed, importador ni writes personales durante el gate.
+
+### Cierre tecnico y limites
+
+- `npm test`: 255/255, 21 archivos, +18 tests frente a 237. Regresiones puntuales de navegacion, retry, cambio de contexto, respuestas tardias, Cancelar y foco de detalle.
+- `npm run build`: limpio, sin warnings/budgets. Inicial 295,53 kB (82,06 kB estimados de transferencia), modulos lazy preservados; Analytics 21,06 kB.
+- CSS fuente: Dashboard 5.259; Roadmap 7.763; Workspace 7.117; Study 6.361; Resources 7.315; Evidence 8.135; Portfolio 6.429; Search 3.350; Analytics pagina 3.886 (aprox. 4.562 con barras); shell 5.084 bytes. `angular.json` intacto; Evidence queda bajo 8.192 bytes.
+- Backend y migrations sin diff; suite 535/535 conservada como baseline previo, no reejecutada. Packages/lockfile intactos; sin dependencias nuevas ni publicacion.
+- Readiness del alcance local V1: funcionalidad A, estabilidad A, responsive A, accesibilidad A, performance V1 A, semantica A y mantenibilidad frontend A, tras corregir los defectos documentados. Ningun release blocker encontrado dentro de este alcance. No equivale a haber definido distribucion/publish fuera del dev proxy local.
+- Siguen diferidos: Light, Dock, Timer/Pomodoro, semantic/AI search, IA insights, predictive analytics, streak, goals, uploads, export/share y unlink RecursoTema. Operacion/publish fuera del proxy local conserva su gate propio.
+- Siguiente estado: decision de Release Candidate V1; no se inicia otra feature ni se crea checkpoint Git automaticamente.
+
 ## Pendientes Deliberados
 
 - tests completos de dominio;
@@ -895,7 +932,6 @@ Lecturas reales sin `usuarioId`, sin filtros de listado y sin escrituras sobre A
 - auth;
 - SnapshotProgreso operativo;
 - integrations;
-- formularios frontend Evidence;
 - filtros Study;
 - edicion EntradaBitacora;
 - GitHub remote.

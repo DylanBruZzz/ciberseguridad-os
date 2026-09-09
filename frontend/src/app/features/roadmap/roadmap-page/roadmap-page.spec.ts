@@ -172,9 +172,9 @@ describe('RoadmapPage', () => {
 
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('Shell scripting');
-    expect(text).toContain('NoIniciado');
+    expect(text).toContain('No iniciado');
     expect(text).toContain('Permisos Linux');
-    expect(text).toContain('EnRepaso');
+    expect(text).toContain('En repaso');
     expect(text).toContain('Repaso');
     expect(text).toContain('0%');
   });

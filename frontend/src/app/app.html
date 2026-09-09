@@ -15,7 +15,8 @@
         <a
           [routerLink]="item.route"
           routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: true }"
+          [routerLinkActiveOptions]="{ paths: 'subset', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored' }"
+          ariaCurrentWhenActive="page"
           [attr.aria-label]="item.ariaLabel"
           [attr.title]="item.label"
         >
@@ -70,6 +71,7 @@
       <section class="system-alert" role="alert">
         <strong>No se pudo resolver el usuario local.</strong>
         <span>{{ errorUsuario() }}</span>
+        <button type="button" (click)="cargarUsuario()" [disabled]="cargandoUsuario()">{{ cargandoUsuario() ? 'Conectando...' : 'Reintentar usuario local' }}</button>
       </section>
     }
 

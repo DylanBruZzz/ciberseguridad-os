@@ -658,6 +658,7 @@
 - [x] Frontend tras Polish: 255/255 tests, 21 archivos, build sin warnings; backend baseline 535/535 sin reejecucion, packages/migrations/angular.json intactos.
 - [x] Checkpoint Git del Polish creado: `2952de9 fix: complete release polish gate v1`.
 - [x] Release Candidate V1 declarado sobre `2952de9`: Personal V1 integrado, 255/255 frontend tests, build limpio, backend baseline 535/535, packages y migrations intactos, release blockers ninguno.
+- [x] Release V1.0.0 declarado desde `v1.0.0-rc.1`: RC validado, Personal V1 integrado, 255/255 frontend tests, build limpio, backend baseline 535/535, sin nuevas features, packages ni migrations, release blockers ninguno.
 - [ ] Timer/Pomodoro, semantic/AI search, IA insights, predictive analytics, streak/goals, uploads, export/share y unlink RecursoTema permanecen diferidos junto con Light/Dock.
 
 ## 14. Importacion Roadmap original

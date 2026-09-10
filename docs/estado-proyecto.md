@@ -921,6 +921,17 @@ Gate transversal sobre `fb92705 feat: establish analytics frontend v1`, iniciado
 - Packages, lockfiles, `angular.json` y migraciones: sin cambios nuevos para este RC.
 - Siguen diferidos y no bloquean RC V1: Light, Dock, Timer/Pomodoro, Semantic/AI Search, AI Insights, predictive analytics, streak, goals, uploads, export/share y unlink RecursoTema.
 
+## Release V1.0.0 — 2026-09-10
+
+- Promovido desde `v1.0.0-rc.1`, validado sobre `44d49f3 docs: declare release candidate v1`.
+- Alcance declarado: Release V1.0.0 del alcance Personal V1 integrado.
+- Estado: RC validado, Release / Polish Gate V1 cerrado y release blockers: ninguno.
+- Frontend: baseline `npm test` 255/255 y `npm run build` limpio, sin warnings.
+- Backend: sin cambios desde el baseline 535/535 previamente validado.
+- Packages, lockfiles, `angular.json` y migraciones: sin cambios nuevos desde el RC.
+- No se incorporan nuevas features desde el RC.
+- Siguen diferidos y no bloquean V1.0.0: Light, Dock, Timer/Pomodoro, Semantic/AI Search, AI Insights, predictive analytics, streak, goals, uploads, export/share y unlink RecursoTema.
+
 ## Pendientes Deliberados
 
 - tests completos de dominio;

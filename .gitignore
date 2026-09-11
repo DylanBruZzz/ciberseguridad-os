@@ -33,12 +33,15 @@ yarn-error.log*
 # Temporary files
 *.tmp
 *.temp
+tmp/
+temp/
 *.swp
 *.bak
 ~$*
 
 # Test and coverage outputs
 TestResults/
+*.trx
 coverage/
 *.coverage
 *.coveragexml
@@ -51,6 +54,17 @@ packages/
 # Local databases
 *.mdf
 *.ldf
+*.bacpac
+
+# Local secrets and credentials
+.env
+.env.*
+secrets.json
+credentials*
+*.pem
+*.key
+*.pfx
+*.p12
 
 # OS files
 Thumbs.db

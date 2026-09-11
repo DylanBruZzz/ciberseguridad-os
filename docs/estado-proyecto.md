@@ -235,7 +235,7 @@ caf832a feat: establish validated initial persistence
 - Roadmap inicial legacy: GET /api/fases y GET /api/temas se consumian sin usuarioId desde frontend.
 - Roadmap/Dashboard funcional V1: GET /api/roadmap/vista se consume sin usuarioId desde frontend.
 - Runtime Personal validado en modo read-only:
-  - UsuarioActual: Dylan
+  - UsuarioActual: usuario local
   - Fases: 7
   - Temas: 63
 - Navegacion base preparada: Dashboard, Roadmap, Study, Resources, Evidence, Portfolio, Analytics y Search.
@@ -278,11 +278,8 @@ caf832a feat: establish validated initial persistence
 ## Datos Roadmap V1 Personal
 
 - Base: AprendizajePersonalDb
-- Usuario personal:
-  - Id: 01A046D5-9BF3-7CEC-AA05-10C93459FA16
-  - Nombre: Dylan
-  - Email: dylan@aprendizaje.local
-  - Email de uso local interno; no representa cuenta operativa ni habilita envio de correo.
+- Usuario personal: 1 usuario visible en runtime Personal.
+- Datos publicados en documentacion: sin email interno, sin GUIDs fisicos y sin rutas locales de backup.
 - Migrations aplicadas:
   - 20260818153945_Inicial
   - 20260818174900_HacerObjetivosTemaNullable
@@ -306,208 +303,13 @@ caf832a feat: establish validated initial persistence
 - ApunteTema: 1 registro vacio tras prueba controlada de Workspace V1.
 - Idempotencia real confirmada: segunda ejecucion del importador no creo nuevas Fases, Temas, Recursos, Herramientas ni Certificaciones.
 - Dataset: 31 entradas documentales de Recurso -> 30 recursos fisicos unicos por deduplicacion de clave natural UsuarioId + Titulo + Tipo + Url.
-- Backup inicial verificado: C:\Program Files\Microsoft SQL Server\MSSQL17.MSSQLSERVER01\MSSQL\Backup\AprendizajePersonalDb_20260828_002927.bak
-- Backup pre-ApunteTema verificado: C:\Program Files\Microsoft SQL Server\MSSQL17.MSSQLSERVER01\MSSQL\Backup\AprendizajePersonalDb_PreApunteTema_20260904_100212.bak
+- Backups personales verificados fuera del repositorio. No hay archivos `.bak`, `.mdf`, `.ldf` ni `.bacpac` tracked.
 
 ## Datos E2E Actuales
 
-- Usuario: 1
-- Tema: 2
-- Fase: 2
-- Recurso: 1
-- SesionEstudio: 1
-- EntradaBitacora: 1
-- Herramienta: 1
-- SesionHerramienta: 1
-- Laboratorio: 1
-- LaboratorioTema: 1
-- LaboratorioHerramienta: 1
-- Proyecto: 1
-- ProyectoTema: 1
-- ProyectoHerramienta: 1
-- ArtefactoTecnico: 1
-- ArtefactoTema: 1
-- ArtefactoHerramienta: 1
-- Writeup: 1
-- WriteupTema: 1
-- Certificacion: 1
-- CertificacionTema: 1
-- CertificacionObtenida: 1
-- Nota: 1
-- Competencia: 1
-- CompetenciaTema: 1
-
-Usuario E2E:
-
-- Id: 01A015CC-1AC8-7EB0-A2C8-5D2A33894DCC
-- Nombre: Dylan
-- Email: dylan.e2e@local.test
-
-Tema E2E:
-
-- Id: 01A01604-8436-742A-A59B-B756B8FF07B3
-- Nombre: Fundamentos de redes
-- TipoConocimiento: Conceptual
-- FaseId: 01A016CB-92F1-75B0-B5F6-803F92691273
-- TemaPadreId: null
-- Objetivos:
-  - Comprender el modelo OSI
-  - Diferenciar TCP y UDP
-
-Subtema E2E:
-
-- Id: 01A016F7-1517-7C35-BAF3-A1BEB648776C
-- Nombre: Modelo OSI
-- TipoConocimiento: Conceptual
-- TemaPadreId: 01A01604-8436-742A-A59B-B756B8FF07B3
-- FechaInicio: 2026-08-25
-- FechaFin: 2026-10-15
-- DificultadPercibida: 4
-- Confianza: 5
-- IntervaloRepasoDias: 21
-- RowVersion: 0x0000000000014053
-- Criterios:
-  - Teoria: cumplido
-  - Practica: cumplido
-
-Competencia E2E:
-
-- Id: 01A03AE8-7EEF-7981-B925-D1A8A66B0A53
-- Usuario: 01A015CC-1AC8-7EB0-A2C8-5D2A33894DCC
-- Nombre: Comprensión de fundamentos de redes E2E Roadmap
-- Descripcion: null
-- Tema vinculado: 01A016F7-1517-7C35-BAF3-A1BEB648776C
-
-Recurso E2E:
-
-- Id: 01A01DEB-1C4A-7C05-9C43-1F08CADBA7C2
-- Titulo: Documentación modelo OSI
-- Tipo: Documentacion
-- Estado: PorClasificar
-- Tema vinculado: 01A016F7-1517-7C35-BAF3-A1BEB648776C
-
-Fase E2E:
-
-- Id: 01A016CB-92F1-75B0-B5F6-803F92691273
-- Nombre: Fundamentos
-- Orden: 1
-
-Fase Metadata Pedagogica E2E:
-
-- Id: 01A0422E-2CBA-7D1B-949C-B75FE9CDDA00
-- Nombre: Metadata pedagógica Fase E2E
-- Orden: 2
-- Objetivos:
-  - Validar metadata pedagógica de fase actualizada
-- CriteriosAvance:
-  - Confirmar actualización idempotente para importación
-- MesInicioRecomendado: 49
-- MesFinRecomendado: 52
-- CargaSemanalRecomendada: Tiempo controlado E2E
-
-SesionEstudio E2E:
-
-- Id: 01A01FD6-072F-7DB6-8513-F75C0C993AF9
-- Tema: 01A016F7-1517-7C35-BAF3-A1BEB648776C
-- Tipo: Teoria
-- Fecha: 2026-08-20
-- DuracionMinutos: 45
-- Notas: Estudio inicial del modelo OSI
-- RowVersion: verificada fisicamente y actualizada tras corregir duracion.
-
-EntradaBitacora E2E:
-
-- Id: 01A0364E-1D06-7644-9F33-84D1597A3942
-- Usuario: 01A015CC-1AC8-7EB0-A2C8-5D2A33894DCC
-- Tema: 01A016F7-1517-7C35-BAF3-A1BEB648776C
-- Texto: Repaso inicial del modelo OSI
-
-Herramienta E2E:
-
-- Id: 01A0364E-1F1D-7418-92F8-BE5DBC14C7FD
-- Nombre: Wireshark E2E Study
-- Categoria: Redes
-- Vinculada a SesionEstudio: 01A01FD6-072F-7DB6-8513-F75C0C993AF9
-- Vinculada a Laboratorio: 01A0366B-9775-7BFD-8F16-408B94E557CA
-
-Laboratorio E2E:
-
-- Id: 01A0366B-9775-7BFD-8F16-408B94E557CA
-- Usuario: 01A015CC-1AC8-7EB0-A2C8-5D2A33894DCC
-- Nombre: Análisis de tráfico OSI con Wireshark
-- Objetivo: Identificar capas del modelo OSI en tráfico capturado
-- EntornoVms: Wireshark
-- Hallazgos: Tráfico de prueba clasificado por capas
-- TiempoInvertidoMinutos: 45
-- Fecha: 2026-08-24
-- EstadoMadurez: Borrador
-- Tema vinculado: 01A016F7-1517-7C35-BAF3-A1BEB648776C
-- Herramienta vinculada: 01A0364E-1F1D-7418-92F8-BE5DBC14C7FD
-
-Proyecto E2E:
-
-- Id: 01A036BB-D0BC-71EA-A339-1178A34A7F0A
-- Usuario: 01A015CC-1AC8-7EB0-A2C8-5D2A33894DCC
-- Nombre: Analizador de tráfico OSI
-- Estado: Idea
-- EstadoMadurez: Borrador
-- RowVersion: 0x00000000000101d1
-- Tema vinculado: 01A016F7-1517-7C35-BAF3-A1BEB648776C
-- Herramienta vinculada: 01A0364E-1F1D-7418-92F8-BE5DBC14C7FD
-
-ArtefactoTecnico E2E:
-
-- Id: 01A03704-78C5-73A5-B683-0AB4E0C213FA
-- Usuario: 01A015CC-1AC8-7EB0-A2C8-5D2A33894DCC
-- TipoArtefacto: Cheatsheet
-- Nombre: Filtros Wireshark para análisis OSI
-- EstadoMadurez: Borrador
-- Tema vinculado: 01A016F7-1517-7C35-BAF3-A1BEB648776C
-- Herramienta vinculada: 01A0364E-1F1D-7418-92F8-BE5DBC14C7FD
-
-Writeup E2E:
-
-- Id: 01A03716-FBAF-706E-830A-13D1B5985137
-- Usuario: 01A015CC-1AC8-7EB0-A2C8-5D2A33894DCC
-- Titulo: Análisis del modelo OSI con Wireshark
-- PlataformaOrigen: null
-- Url: null
-- EstadoMadurez: Borrador
-- Tema vinculado: 01A016F7-1517-7C35-BAF3-A1BEB648776C
-
-Certificacion E2E:
-
-- Id: 01A0396F-2D99-7805-AEF4-D5A85D587BED
-- Nombre: CompTIA Network+ E2E Evidence
-- Proveedor: null
-- TipoCosto: Pago
-- Url: null
-- Catalogo global: si
-- Tema vinculado: 01A016F7-1517-7C35-BAF3-A1BEB648776C
-- CertificacionTema.Peso: null
-
-CertificacionObtenida E2E:
-
-- Id: 01A0396F-3B45-7C8C-84AE-D870B729E04D
-- Usuario: 01A015CC-1AC8-7EB0-A2C8-5D2A33894DCC
-- Certificacion: 01A0396F-2D99-7805-AEF4-D5A85D587BED
-- FechaObtencion: 2026-08-25
-- EvidenciaUrl: null
-- EstadoMadurez: Documentado
-
-Nota E2E:
-
-- Id: 01A0398C-3C84-7B1B-87D6-5A5D773A26C4
-- Usuario: 01A015CC-1AC8-7EB0-A2C8-5D2A33894DCC
-- Proyecto: 01A036BB-D0BC-71EA-A339-1178A34A7F0A
-- Tema: null
-- Laboratorio: null
-- Writeup: null
-- ArtefactoTecnico: null
-- Texto: Observación de cierre del proyecto OSI
-- Tipo: Nota
-- Padres informados: 1
-- CertificacionObtenida no es padre de Nota.
+- Los datos E2E actuales se mantienen como fixtures operativos en la base de desarrollo/pruebas, no como archivos de datos dentro del repositorio.
+- Conteos E2E validados: Usuario, Tema, Fase, Recurso, SesionEstudio, EntradaBitacora, Herramienta, Laboratorio, Proyecto, ArtefactoTecnico, Writeup, Certificacion, CertificacionObtenida, Nota, Competencia y relaciones principales.
+- La documentacion publica no conserva GUIDs fisicos, emails locales ni rutas de maquina de esos datos E2E.
 
 ## Flujos Funcionales Actuales
 
@@ -798,7 +600,7 @@ Frontend Foundation V1 validado: Angular standalone vive en frontend/, consume l
 
 Visual Shell V1 frontend validado: la ruta inicial es `/dashboard`; la shell usa identidad `Ciberseguridad OS`, dark mode, sidebar izquierda compacta con Dashboard, Roadmap, Study, Resources, Evidence, Portfolio y Search, topbar con titulo derivado de route data y UsuarioActual cuando esta disponible. Search abre una palette global real por boton o Ctrl/Cmd+K, indexa read-sides existentes en memoria y navega a entidades factuales. No se agregaron UI frameworks, paquetes, Auth, light mode, dock inferior, analytics screen ni backend search generico.
 
-Roadmap y Dashboard frontend V1 validados: Dashboard y Roadmap consumen `GET /api/roadmap/vista` mediante modelos TypeScript estrictos y cache runtime en memoria. Angular presenta `progresoGlobalPorcentaje`, `progresoPorcentaje`, `faseActualId`, `esFaseActual`, `estado` y `repasoRecomendado` sin recalcular semantica de dominio. Dashboard muestra saludo con UsuarioActual, progreso global, linea conectada de Fases, Fase actual y continuidad factual: ultimo Tema con `ultimaSesion` si existe, o fallback honesto a explorar la Fase actual cuando no hay sesiones porque `RoadmapVistaV1` no expone un orden factual de Tema. Roadmap muestra timeline amplio, detalle de Fase seleccionada, metadata pedagogica, objetivos, criterios de avance y Temas accionables. La seleccion local de Fase puede venir de query param `fase`, pero no cambia la Fase actual real. Personal fue usado en solo lectura para validar Dylan, 7 Fases, 63 Temas y progreso 0% real por ausencia de criterios completados.
+Roadmap y Dashboard frontend V1 validados: Dashboard y Roadmap consumen `GET /api/roadmap/vista` mediante modelos TypeScript estrictos y cache runtime en memoria. Angular presenta `progresoGlobalPorcentaje`, `progresoPorcentaje`, `faseActualId`, `esFaseActual`, `estado` y `repasoRecomendado` sin recalcular semantica de dominio. Dashboard muestra saludo con UsuarioActual, progreso global, linea conectada de Fases, Fase actual y continuidad factual: ultimo Tema con `ultimaSesion` si existe, o fallback honesto a explorar la Fase actual cuando no hay sesiones porque `RoadmapVistaV1` no expone un orden factual de Tema. Roadmap muestra timeline amplio, detalle de Fase seleccionada, metadata pedagogica, objetivos, criterios de avance y Temas accionables. La seleccion local de Fase puede venir de query param `fase`, pero no cambia la Fase actual real. Personal fue usado en solo lectura para validar usuario local, 7 Fases, 63 Temas y progreso 0% real por ausencia de criterios completados.
 
 Tema Workspace frontend V1 validado: `/roadmap/tema/:temaId` consume `GET /api/temas/{temaId}/workspace` mediante `TemaWorkspaceService` y modelos TypeScript estrictos, sin usuarioId. La pantalla funciona como centro de trabajo y memoria del Tema: header con breadcrumb Roadmap/Fase, EstadoTema, progreso, criterios, percepcion y ultima sesion; cuerpo con objetivos, criterios read-only y editor de apuntes permanentes; panel contextual con progreso, percepcion, ultima sesion, proximo repaso, repaso recomendado y CTA hacia `/study?temaId=...`; resumen inferior enlaza Resources, Sesiones y Evidence con `temaId`. Progreso, EstadoTema y repaso son fieles a TemaWorkspaceV1 y no se recalculan en Angular. Criterios y percepcion quedan read-only en este bloque. Apuntes permite guardado manual contra endpoint existente y fue validado contra AprendizajePersonalDb luego de aplicar controladamente `20260901003645_AgregarApuntesPermanentesTema`. Tests frontend cubren loading, success, 404, error/retry, tema/fase, objetivos, criterios, EnRepaso + 100%, percepcion, ultima sesion, repaso, resumenes, enlaces, CTA, apuntes, guardado sin usuarioId e id malformado.
 
@@ -899,7 +701,7 @@ Gate transversal sobre `fb92705 feat: establish analytics frontend v1`, iniciado
 - Fallo parcial controlado de Study en Analytics y Resources en Search: otras fuentes visibles, reintento y recuperacion comprobados en navegador. Errores HTTP esperados en estas pruebas se separan de la consola normal, que no presenta errores/warnings de la aplicacion.
 - 1440x900, 768x1024 y 390x844: todas las rutas sin overflow horizontal de pagina. Labels de controles, un h1 y un main por pagina, navegacion activa, foco visible, Search dialog/teclado/Escape/retorno de foco y controles nativos auditados. Formularios Evidence de los cinco tipos y Resource con titulo/URL largos revisados en movil; Cancelar sin writes. Cmd+K cubierto por tests; Ctrl+K/boton/teclado en runtime.
 - Network: requests personales sin usuarioId, sin polling ni N+1 de detalles. Analytics hace cuatro GET al entrar y cero al alternar Todo/30/90. Search no consulta por tecla. Evidence/Portfolio conservan filtros server-side. Dashboard hace dos lecturas de UsuarioActual en entrada directa (shell y saludo); duplicado pequeno y acotado, sin refactor preventivo.
-- Dataset Personal reconfirmado via GET: Dylan; 7 Fases, 63 Temas, 30 Resources, 0 sesiones, 0 Evidence y 0 Portfolio. Fuentes Analytics: 38.000 bytes JSON en total. Sin SQL, seed, importador ni writes personales durante el gate.
+- Dataset Personal reconfirmado via GET: usuario local; 7 Fases, 63 Temas, 30 Resources, 0 sesiones, 0 Evidence y 0 Portfolio. Fuentes Analytics: 38.000 bytes JSON en total. Sin SQL, seed, importador ni writes personales durante el gate.
 
 ### Cierre tecnico y limites
 
@@ -931,6 +733,16 @@ Gate transversal sobre `fb92705 feat: establish analytics frontend v1`, iniciado
 - Packages, lockfiles, `angular.json` y migraciones: sin cambios nuevos desde el RC.
 - No se incorporan nuevas features desde el RC.
 - Siguen diferidos y no bloquean V1.0.0: Light, Dock, Timer/Pomodoro, Semantic/AI Search, AI Insights, predictive analytics, streak, goals, uploads, export/share y unlink RecursoTema.
+
+## GitHub Safety / Repository Gate V1 — 2026-09-11
+
+- Base auditada: `914205a fix: align final visual design v1`, posterior a `v1.0.0`.
+- `v1.0.0` permanece apuntando a `90792a43cabb0bfab9f43850cee1a0518147621a`.
+- Working tree inicial limpio. Sin push, sin remote creado, sin reescritura de historial y sin tags modificados.
+- Auditoria de repositorio enfocada en publicacion futura: tracked/untracked/ignored, `.gitignore`, secretos, datos personales, archivos de base/backups, appsettings, historial Git, assets, archivos generados y README publico.
+- `.gitignore` reforzado solo con reglas acotadas para resultados `.trx`, `tmp/`, `temp/`, `.bacpac`, env files y credenciales locales.
+- README raiz creado como descripcion publica del proyecto sin Email personal, GUIDs ni rutas de usuario.
+- Sin cambios de codigo, arquitectura, frontend visual, backend, migraciones ni paquetes.
 
 ## Pendientes Deliberados
 

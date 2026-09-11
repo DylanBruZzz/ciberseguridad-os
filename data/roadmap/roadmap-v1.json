@@ -1,11 +1,11 @@
 {
   "version": "1",
   "fuente": {
-    "archivo": "docs/roadmap-original/cybersecurity_roadmap_dylan.html",
+    "archivo": "docs/roadmap-original/cybersecurity_roadmap_original.html",
     "tipo": "html-original-inmutable",
     "idioma": "es",
     "titulo": "Ruta Completa de Ciberseguridad",
-    "personaOriginal": "Dylan Flores · UNJFSC 6.º Ciclo",
+    "personaOriginal": "Autor local · Roadmap personal V1",
     "resumenOriginal": {
       "anios": 4,
       "fases": 7,

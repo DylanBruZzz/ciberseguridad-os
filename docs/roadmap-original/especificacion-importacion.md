@@ -5,7 +5,7 @@
 La fuente original e inmutable es:
 
 ```text
-docs/roadmap-original/cybersecurity_roadmap_dylan.html
+docs/roadmap-original/cybersecurity_roadmap_original.html
 ```
 
 El runtime y la capa Application no deben parsear este HTML. El flujo aprobado es:

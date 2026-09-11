@@ -1,6 +1,6 @@
 # Matriz de importabilidad Roadmap V1
 
-Fuente original: `docs/roadmap-original/cybersecurity_roadmap_dylan.html`
+Fuente original: `docs/roadmap-original/cybersecurity_roadmap_original.html`
 
 Esta matriz define la trazabilidad HTML -> JSON -> destino futuro. El HTML permanece como fuente original inmutable. El JSON normalizado es el artefacto consumible por el futuro importador.
 

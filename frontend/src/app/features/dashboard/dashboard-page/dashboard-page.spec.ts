@@ -207,7 +207,11 @@ describe('DashboardPage', () => {
     expect(text).toContain('Explorar fase actual');
     expect(text).toContain('Linux y CLI');
     expect(text).toContain('Ver fase');
-    expect(text).not.toContain('Shell scripting');
+    const continuidad = fixture.nativeElement.querySelector('.continue-panel');
+    expect(continuidad.textContent).not.toContain('Shell scripting');
+    expect(continuidad.querySelector('a').getAttribute('href')).toBe('/roadmap?fase=fase-2');
+    expect(fixture.nativeElement.querySelector('.topic-preview').textContent).toContain('Shell scripting');
+    expect(fixture.nativeElement.querySelector('a[href="/roadmap/tema/tema-2"]')).not.toBeNull();
   });
 
   it('muestra conteo de repasos y no muestra streak inventado', async () => {

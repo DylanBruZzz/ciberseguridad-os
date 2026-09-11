@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { UsuarioActual, UsuarioActualService } from '../../../core/usuario-actual.service';
 import { FaseRoadmapVistaV1, RoadmapVistaV1, TemaRoadmapVistaV1 } from '../../roadmap/roadmap.models';
 import { RoadmapService } from '../../roadmap/roadmap.service';
+import { etiquetaEstadoTema } from '../../roadmap/roadmap.labels';
 
 interface ContinuarAprendiendo {
   readonly titulo: string;
@@ -40,6 +41,10 @@ export class DashboardPage implements OnInit {
     this.fases().flatMap((fase) => fase.temas).filter((tema) => tema.repasoRecomendado).length,
   );
   protected readonly continuar = computed(() => this.obtenerContinuidad());
+  protected readonly estadoTemaLabel = etiquetaEstadoTema;
+  protected readonly temasFaseActual = computed(() =>
+    [...(this.faseActual()?.temas ?? [])].sort((a, b) => a.nombre.localeCompare(b.nombre)).slice(0, 4),
+  );
 
   public constructor(
     private readonly usuarioActual: UsuarioActualService,

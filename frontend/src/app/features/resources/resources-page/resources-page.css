@@ -13,9 +13,9 @@
 .resources-header h1 {
   margin: 0.2rem 0 0.35rem;
   color: #f7fbff;
-  font-size: clamp(2rem, 3vw, 3.1rem);
-  font-weight: 760;
-  line-height: 1.02;
+  font-size: clamp(1.5rem, 2.3vw, 2rem);
+  font-weight: 650;
+  line-height: 1.2;
 }
 
 .resources-header p,
@@ -55,7 +55,7 @@
   border-radius: 8px;
   padding: 0.55rem 0.85rem;
   color: #e7f0f7;
-  background: rgba(15, 23, 42, 0.72);
+  background: var(--bg-surface-2);
   font: inherit;
   font-weight: 700;
   cursor: pointer;
@@ -102,7 +102,7 @@ textarea:focus-visible {
 .resource-detail {
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 8px;
-  background: rgba(10, 18, 32, 0.68);
+  background: var(--bg-surface-1);
 }
 
 .inline-warning {
@@ -152,7 +152,7 @@ textarea {
   border-radius: 8px;
   padding: 0.7rem 0.8rem;
   color: #ecf5ff;
-  background: rgba(3, 10, 20, 0.72);
+  background: var(--bg-app);
   font: inherit;
 }
 
@@ -228,7 +228,7 @@ textarea {
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 8px;
   padding: 0.7rem;
-  background: rgba(9, 17, 30, 0.72);
+  background: var(--bg-surface-1);
 }
 
 .resource-list article.selected {
@@ -364,7 +364,7 @@ textarea {
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 8px;
   padding: 0.7rem;
-  background: rgba(15, 23, 42, 0.55);
+  background: var(--bg-surface-2);
 }
 
 .detail-facts dt {

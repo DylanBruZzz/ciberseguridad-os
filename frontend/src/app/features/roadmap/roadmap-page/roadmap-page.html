@@ -1,11 +1,12 @@
 <section class="roadmap-page">
   <header class="page-header">
     <div>
-      <p class="eyebrow">Roadmap</p>
-      <h1>Tu ruta de aprendizaje</h1>
+      <h1>Roadmap</h1>
+      <p class="module-subtitle">Tu ruta de aprendizaje</p>
     </div>
 
     <div class="summary" aria-label="Resumen del roadmap">
+      <span><strong>{{ vista()?.progresoGlobalPorcentaje ?? 0 }}%</strong> avance</span>
       <span><strong>{{ fases().length }}</strong> fases</span>
       <span><strong>{{ totalTemas() }}</strong> temas</span>
       <span><strong>{{ temasDominados() }}</strong> dominados</span>
@@ -38,7 +39,7 @@
             [class.selected]="fase.id === faseSeleccionada().id"
             [class.current]="estadoFase(fase) === 'actual'"
             [class.completed]="estadoFase(fase) === 'completada'"
-            [attr.aria-selected]="fase.id === faseSeleccionada().id"
+            [attr.aria-pressed]="fase.id === faseSeleccionada().id"
             [attr.aria-current]="estadoFase(fase) === 'actual' ? 'step' : null"
             [attr.aria-label]="
               'Fase ' +
@@ -53,7 +54,7 @@
             "
             (click)="seleccionarFase(fase.id)"
           >
-            <span class="phase-order">{{ fase.orden }}</span>
+            <span class="phase-order" aria-hidden="true">@if (fase.estaCompletada) { ✓ } @else { {{ fase.orden }} }</span>
             <span class="phase-copy">
               <strong>{{ fase.nombre }}</strong>
               <span>{{ textoEstadoFase(fase) }}</span>
@@ -99,7 +100,7 @@
                 <dd>{{ fase.temasDominados }} / {{ fase.totalTemas }}</dd>
               </div>
               <div>
-                <dt>Meses</dt>
+                <dt>Meses orientativos</dt>
                 <dd>
                   @if (fase.mesInicioRecomendado && fase.mesFinRecomendado) {
                     {{ fase.mesInicioRecomendado }} - {{ fase.mesFinRecomendado }}
@@ -109,7 +110,7 @@
                 </dd>
               </div>
               <div>
-                <dt>Carga</dt>
+                <dt>Carga orientativa</dt>
                 <dd>{{ fase.cargaSemanalRecomendada ?? 'No definida' }}</dd>
               </div>
             </dl>
@@ -118,28 +119,34 @@
           @if (fase.descripcion) {
             <p class="phase-description">{{ fase.descripcion }}</p>
           }
+          <div class="progress-track detail-progress" role="progressbar" aria-label="Progreso de la fase seleccionada"
+            aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="fase.progresoPorcentaje">
+            <span [style.width.%]="fase.progresoPorcentaje"></span>
+          </div>
 
+          <div class="phase-guidance">
           @if (fase.objetivos.length > 0) {
-            <section class="detail-block">
-              <h3>Objetivos</h3>
+            <details class="detail-block">
+              <summary>Objetivos <span>{{ fase.objetivos.length }}</span></summary>
               <ul>
                 @for (objetivo of fase.objetivos; track objetivo) {
                   <li>{{ objetivo }}</li>
                 }
               </ul>
-            </section>
+            </details>
           }
 
           @if (fase.criteriosAvance.length > 0) {
-            <section class="detail-block">
-              <h3>Criterios de avance</h3>
+            <details class="detail-block">
+              <summary>Criterios de avance <span>{{ fase.criteriosAvance.length }}</span></summary>
               <ul>
                 @for (criterio of fase.criteriosAvance; track criterio) {
                   <li>{{ criterio }}</li>
                 }
               </ul>
-            </section>
+            </details>
           }
+          </div>
 
           <section class="detail-block">
             <h3>Temas</h3>

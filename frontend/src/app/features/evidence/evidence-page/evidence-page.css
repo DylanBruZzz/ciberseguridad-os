@@ -34,8 +34,9 @@ p {
 h1 {
   max-width: 52rem;
   color: var(--text-primary);
-  font-size: clamp(2rem, 4vw, 3.6rem);
-  line-height: 1.02;
+  font-size: clamp(1.5rem, 2.3vw, 2rem);
+  line-height: 1.2;
+  font-weight: 650;
 }
 
 .evidence-header p,

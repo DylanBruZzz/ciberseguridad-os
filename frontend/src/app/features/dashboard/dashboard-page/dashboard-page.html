@@ -1,7 +1,6 @@
 <section class="dashboard-page">
   <header class="dashboard-hero">
     <div>
-      <p class="eyebrow">Dashboard</p>
       <h1>
         @if (usuario(); as actual) {
           Hola, {{ actual.nombre }}
@@ -14,10 +13,13 @@
       <p>Estado de tu ruta de aprendizaje</p>
     </div>
 
-    @if (vista(); as roadmap) {
+  </header>
+
+  @if (vista(); as roadmap) {
+    <section class="roadmap-overview" aria-label="Estado de tu roadmap">
       <div class="global-progress">
-        <span>{{ roadmap.progresoGlobalPorcentaje }}%</span>
         <p>Progreso global</p>
+        <span>{{ roadmap.progresoGlobalPorcentaje }}%</span>
         <div
           class="progress-track"
           role="progressbar"
@@ -28,9 +30,22 @@
         >
           <span [style.width.%]="roadmap.progresoGlobalPorcentaje"></span>
         </div>
+        <p class="overview-meta">{{ roadmap.temasDominados }} / {{ roadmap.totalTemas }} temas dominados · {{ fases().length }} fases</p>
       </div>
-    }
-  </header>
+      <nav class="phase-line" aria-label="Progreso conectado por fases">
+        @for (fase of fases(); track fase.id) {
+          <a routerLink="/roadmap" [queryParams]="{ fase: fase.id }" class="phase-node"
+            [class.completed]="estadoFase(fase) === 'completada'"
+            [class.current]="estadoFase(fase) === 'actual'"
+            [attr.aria-current]="estadoFase(fase) === 'actual' ? 'step' : null">
+            <span class="node-dot">{{ fase.orden }}</span>
+            <strong>{{ fase.nombre }}</strong>
+            <span>{{ textoEstadoFase(fase) }}</span>
+          </a>
+        }
+      </nav>
+    </section>
+  }
 
   @if (cargandoRoadmap()) {
     <section class="state-panel skeleton" aria-live="polite">
@@ -50,24 +65,6 @@
       <a routerLink="/roadmap">Abrir Roadmap</a>
     </section>
   } @else {
-    <section class="phase-line" aria-label="Progreso conectado por fases">
-      @for (fase of fases(); track fase.id) {
-        <a
-          [routerLink]="['/roadmap']"
-          [queryParams]="{ fase: fase.id }"
-          class="phase-node"
-          [class.completed]="estadoFase(fase) === 'completada'"
-          [class.current]="estadoFase(fase) === 'actual'"
-          [attr.aria-current]="estadoFase(fase) === 'actual' ? 'step' : null"
-          [attr.title]="fase.nombre"
-        >
-          <span class="node-dot">{{ fase.orden }}</span>
-          <strong>F{{ fase.orden }}</strong>
-          <span>{{ textoEstadoFase(fase) }}</span>
-        </a>
-      }
-    </section>
-
     <div class="dashboard-grid">
       @if (continuar(); as item) {
         <section class="continue-panel">
@@ -97,18 +94,32 @@
             </div>
           } @else {
             <strong>{{ item.fase?.nombre }}</strong>
-            <p>Abre la fase actual para elegir el siguiente paso con datos reales.</p>
+            <p>Elige un tema de esta fase y abre tu espacio de trabajo.</p>
           }
 
           <a [routerLink]="item.ruta" [queryParams]="item.queryParams">{{ item.accion }}</a>
         </section>
+        <section class="activity-panel" aria-label="Actividad de estudio">
+          <p class="eyebrow">Actividad de estudio</p>
+          @if (item.tema; as tema) {
+            <h2>Última sesión en el roadmap</h2>
+            <strong>{{ tema.ultimaSesion }}</strong>
+            <p>{{ tema.nombre }}</p>
+          } @else {
+            <h2>Tu primera sesión</h2>
+            <p>Aún no hay sesiones registradas en los temas de tu roadmap.</p>
+            <p class="muted">Explora un tema y registra lo que estudiaste cuando termines.</p>
+          }
+          <a routerLink="/study">Ver Study →</a>
+        </section>
       }
-
+    </div>
       @if (faseActual(); as fase) {
         <section class="current-phase-panel">
-          <p class="eyebrow">Fase actual</p>
-          <h2>Fase {{ fase.orden }}</h2>
-          <strong>{{ fase.nombre }}</strong>
+          <header class="phase-heading">
+            <div><p class="eyebrow">Fase actual · Fase {{ fase.orden }}</p><h2>{{ fase.nombre }}</h2></div>
+            <a routerLink="/roadmap" [queryParams]="{ fase: fase.id }">Ver fase →</a>
+          </header>
           <div class="inline-progress">
             <span
               class="progress-track"
@@ -125,15 +136,30 @@
           @if (fase.cargaSemanalRecomendada) {
             <p>{{ fase.cargaSemanalRecomendada }}</p>
           }
-          <a routerLink="/roadmap" [queryParams]="{ fase: fase.id }">Ver fase</a>
+          <div class="topic-preview" aria-label="Temas de la fase actual">
+            @for (tema of temasFaseActual(); track tema.id) {
+              <a class="topic-link" [routerLink]="['/roadmap/tema', tema.id]"
+                [class.mastered]="tema.estado === 'Dominado'" [class.in-progress]="tema.estado === 'EnPractica'">
+                <strong>{{ tema.nombre }}</strong>
+                <span class="topic-state">{{ estadoTemaLabel(tema.estado) }}</span>
+                <span class="muted">{{ tema.criteriosCumplidos }} / {{ tema.criteriosTotal }} criterios</span>
+                <span class="progress-track" role="progressbar" [attr.aria-label]="'Progreso de ' + tema.nombre"
+                  aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="tema.progresoPorcentaje">
+                  <span [style.width.%]="tema.progresoPorcentaje"></span>
+                </span>
+                <span class="topic-open" aria-hidden="true">↗</span>
+              </a>
+            } @empty {
+              <p class="muted">Esta fase todavía no tiene temas.</p>
+            }
+          </div>
         </section>
       }
-    </div>
 
     @if (repasosRecomendados() > 0) {
       <section class="review-strip">
         <strong>Repasos recomendados: {{ repasosRecomendados() }}</strong>
-        <span>Señal factual del roadmap; sin agenda ni vencimientos calculados en Angular.</span>
+        <span>Puedes volver a estos temas cuando te venga bien.</span>
       </section>
     }
   }

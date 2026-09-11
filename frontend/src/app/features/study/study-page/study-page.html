@@ -1,10 +1,10 @@
 <section class="study-page">
   <header class="study-header">
     <div>
-      <p class="eyebrow">Study</p>
-      <h1>Registra y revisa tus sesiones de aprendizaje</h1>
+      <p class="eyebrow">Registro de aprendizaje</p>
+      <h1>Study</h1>
       <p>
-        Guarda lo que estudiaste fuera o dentro de la aplicacion, con tiempo, tema y notas de esa sesion.
+        Registra y revisa tus sesiones de aprendizaje.
       </p>
     </div>
 
@@ -29,7 +29,7 @@
     </section>
   } @else {
     <div class="study-grid">
-      <aside class="context-panel" aria-label="Contexto de Study">
+      <aside class="context-panel" [class.contextual]="temaContextual()" aria-label="Contexto de Study">
         @if (temaContextual(); as tema) {
           <section>
             <p class="eyebrow">Contexto del tema</p>
@@ -37,6 +37,14 @@
             @if (faseDeTema(tema.id); as fase) {
               <p>{{ fase.nombre }}</p>
             }
+            <p class="topic-status">{{ etiquetaEstadoTema(tema.estado) }} · {{ tema.criteriosCumplidos }} / {{ tema.criteriosTotal }} criterios</p>
+            <div class="context-progress">
+              <span class="progress-track" role="progressbar" aria-label="Progreso del tema"
+                aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="tema.progresoPorcentaje">
+                <span [style.width.%]="tema.progresoPorcentaje"></span>
+              </span>
+              <span>{{ tema.progresoPorcentaje }}%</span>
+            </div>
             <a [routerLink]="['/roadmap/tema', tema.id]">Volver al tema</a>
           </section>
         } @else if (contextoInvalido()) {
@@ -108,7 +116,8 @@
             <p id="study-tema-error" class="field-error">{{ erroresFormulario().temaId }}</p>
           }
 
-          <div class="form-row">
+          <fieldset class="form-row">
+            <legend>Detalles de la sesión</legend>
             <label>
               <span>Fecha</span>
               <input
@@ -121,7 +130,7 @@
             </label>
 
             <label>
-              <span>Duracion</span>
+              <span>Duracion (minutos)</span>
               <input
                 type="number"
                 min="1"
@@ -133,7 +142,6 @@
                 aria-describedby="study-duracion-error"
               />
             </label>
-          </div>
           @if (erroresFormulario().fecha) {
             <p id="study-fecha-error" class="field-error">{{ erroresFormulario().fecha }}</p>
           }
@@ -141,7 +149,7 @@
             <p id="study-duracion-error" class="field-error">{{ erroresFormulario().duracionMinutos }}</p>
           }
 
-          <label>
+          <label class="session-type">
             <span>Tipo de sesion</span>
             <select
               [value]="formTipo()"
@@ -159,11 +167,12 @@
           @if (erroresFormulario().tipo) {
             <p id="study-tipo-error" class="field-error">{{ erroresFormulario().tipo }}</p>
           }
+          </fieldset>
 
           <label>
             <span>Notas de sesion</span>
             <textarea
-              rows="8"
+              rows="5"
               [value]="formNotas()"
               (input)="onNotasInput($event)"
               placeholder="Anota que estudiaste, que practicabas o que quedo pendiente."
@@ -210,7 +219,7 @@
                   : 'Aún no has registrado sesiones de estudio.'
               }}
             </h3>
-            <p>El formulario queda listo para registrar la primera actividad factual.</p>
+            <p>Registra lo que estudiaste y encontrarás aquí tu historial.</p>
           </section>
         } @else {
           <ol class="session-list">

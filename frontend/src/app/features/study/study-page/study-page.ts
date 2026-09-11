@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { formatearDuracion } from '../../../shared/format/duracion';
 import { FaseRoadmapVistaV1, RoadmapVistaV1, TemaRoadmapVistaV1 } from '../../roadmap/roadmap.models';
 import { RoadmapService } from '../../roadmap/roadmap.service';
+import { etiquetaEstadoTema } from '../../roadmap/roadmap.labels';
 import {
   SesionEstudioResumen,
   TIPOS_SESION,
@@ -26,6 +27,7 @@ export class StudyPage implements OnInit {
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
   protected readonly tiposSesion = TIPOS_SESION;
+  protected readonly etiquetaEstadoTema = etiquetaEstadoTema;
   protected readonly sesiones = signal<SesionEstudioResumen[]>([]);
   protected readonly cargandoSesiones = signal(true);
   protected readonly errorSesiones = signal<string | null>(null);

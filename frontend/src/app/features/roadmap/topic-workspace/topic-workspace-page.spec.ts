@@ -51,6 +51,12 @@ const workspaceBase: TemaWorkspaceV1 = {
     contenido: 'Capas, encapsulacion y troubleshooting.',
     fechaModificacionUtc: '2026-09-02T00:00:00Z',
   },
+  herramientas: [
+    {
+      id: '01a046d5-9bf3-7cec-aa05-10c93459fa21',
+      nombre: 'Wireshark',
+    },
+  ],
   ultimaSesion: {
     id: '01a046d5-9bf3-7cec-aa05-10c93459fa20',
     fecha: '2026-08-30',
@@ -116,7 +122,7 @@ describe('TopicWorkspacePage', () => {
 
   it('Cancelar recupera los apuntes guardados sin enviar writes y limpia dirty/error', async () => {
     const guardarApuntes = vi.fn();
-    await configure({ obtenerWorkspace: () => of(workspaceBase), guardarApuntes });
+    await configure({ obtenerWorkspace: () => of(workspaceBase), guardarApuntes, listarHerramientas: () => of([]) });
     fixture = TestBed.createComponent(TopicWorkspacePage);
     fixture.detectChanges();
     const component = fixture.componentInstance as any;
@@ -133,7 +139,7 @@ describe('TopicWorkspacePage', () => {
     const anterior = new Subject<TemaWorkspaceV1>();
     const nuevo = { ...workspaceBase, tema: { ...workspaceBase.tema, id: faseId, nombre: 'Bash' }, apuntes: { ...workspaceBase.apuntes, contenido: 'Apuntes Bash' } };
     const obtenerWorkspace = vi.fn().mockReturnValueOnce(anterior).mockReturnValue(of(nuevo));
-    await configure({ obtenerWorkspace });
+    await configure({ obtenerWorkspace, listarHerramientas: () => of([]) });
     fixture = TestBed.createComponent(TopicWorkspacePage);
     fixture.detectChanges();
     parametros.next(convertToParamMap({ temaId: faseId }));
@@ -151,7 +157,7 @@ describe('TopicWorkspacePage', () => {
 
   it('un guardado pendiente de otro Tema no sobrescribe apuntes ni estado del Tema actual', async () => {
     const guardado = new Subject<void>();
-    await configure({ obtenerWorkspace: () => of(workspaceBase), guardarApuntes: () => guardado });
+    await configure({ obtenerWorkspace: () => of(workspaceBase), guardarApuntes: () => guardado, listarHerramientas: () => of([]) });
     fixture = TestBed.createComponent(TopicWorkspacePage);
     fixture.detectChanges();
     const component = fixture.componentInstance as any;
@@ -165,7 +171,7 @@ describe('TopicWorkspacePage', () => {
   });
 
   it('muestra header, objetivos, criterios, progreso y estado exactos del backend', async () => {
-    await configure({ obtenerWorkspace: () => of(workspaceBase) });
+    await configure({ obtenerWorkspace: () => of(workspaceBase), listarHerramientas: () => of([]) });
 
     fixture = TestBed.createComponent(TopicWorkspacePage);
     fixture.detectChanges();
@@ -186,7 +192,7 @@ describe('TopicWorkspacePage', () => {
   });
 
   it('muestra EnRepaso con progreso 100 sin tratarlo como reinicio', async () => {
-    await configure({ obtenerWorkspace: () => of(workspaceBase) });
+    await configure({ obtenerWorkspace: () => of(workspaceBase), listarHerramientas: () => of([]) });
 
     fixture = TestBed.createComponent(TopicWorkspacePage);
     fixture.detectChanges();
@@ -198,7 +204,7 @@ describe('TopicWorkspacePage', () => {
   });
 
   it('muestra percepcion, ultima sesion, proximo repaso y CTA de continuidad', async () => {
-    await configure({ obtenerWorkspace: () => of(workspaceBase) });
+    await configure({ obtenerWorkspace: () => of(workspaceBase), listarHerramientas: () => of([]) });
 
     fixture = TestBed.createComponent(TopicWorkspacePage);
     fixture.detectChanges();
@@ -220,6 +226,7 @@ describe('TopicWorkspacePage', () => {
           repaso: { proximaFechaRepaso: null, repasoRecomendado: false },
           sesionesResumen: { total: 0, totalMinutos: 0 },
         }),
+      listarHerramientas: () => of([]),
     });
 
     fixture = TestBed.createComponent(TopicWorkspacePage);
@@ -247,6 +254,7 @@ describe('TopicWorkspacePage', () => {
             confianza: null,
           },
           apuntes: { contenido: '', fechaModificacionUtc: null },
+          herramientas: [],
           resourcesResumen: { total: 0 },
           evidenceResumen: {
             total: 0,
@@ -257,6 +265,7 @@ describe('TopicWorkspacePage', () => {
             certificacionesObtenidas: 0,
           },
         }),
+      listarHerramientas: () => of([]),
     });
 
     fixture = TestBed.createComponent(TopicWorkspacePage);
@@ -272,7 +281,7 @@ describe('TopicWorkspacePage', () => {
   });
 
   it('muestra apuntes existentes y estado dirty al editar', async () => {
-    await configure({ obtenerWorkspace: () => of(workspaceBase) });
+    await configure({ obtenerWorkspace: () => of(workspaceBase), listarHerramientas: () => of([]) });
 
     fixture = TestBed.createComponent(TopicWorkspacePage);
     fixture.detectChanges();
@@ -292,6 +301,7 @@ describe('TopicWorkspacePage', () => {
     await configure({
       obtenerWorkspace: () => of(workspaceBase),
       guardarApuntes,
+      listarHerramientas: () => of([]),
     });
 
     fixture = TestBed.createComponent(TopicWorkspacePage);
@@ -313,6 +323,7 @@ describe('TopicWorkspacePage', () => {
     await configure({
       obtenerWorkspace: () => of(workspaceBase),
       guardarApuntes: () => throwError(() => new Error('No pudimos guardar los apuntes.')),
+      listarHerramientas: () => of([]),
     });
 
     fixture = TestBed.createComponent(TopicWorkspacePage);
@@ -330,7 +341,7 @@ describe('TopicWorkspacePage', () => {
   });
 
   it('muestra enlaces contextuales con temaId', async () => {
-    await configure({ obtenerWorkspace: () => of(workspaceBase) });
+    await configure({ obtenerWorkspace: () => of(workspaceBase), listarHerramientas: () => of([]) });
 
     fixture = TestBed.createComponent(TopicWorkspacePage);
     fixture.detectChanges();
@@ -356,7 +367,7 @@ describe('TopicWorkspacePage', () => {
       .fn()
       .mockReturnValueOnce(throwError(() => new Error('No pudimos cargar este tema.')))
       .mockReturnValueOnce(of(workspaceBase));
-    await configure({ obtenerWorkspace: refrescar });
+    await configure({ obtenerWorkspace: refrescar, listarHerramientas: () => of([]) });
 
     fixture = TestBed.createComponent(TopicWorkspacePage);
     fixture.detectChanges();
@@ -372,7 +383,7 @@ describe('TopicWorkspacePage', () => {
 
   it('trata temaId malformado como no disponible sin llamar la API', async () => {
     const obtenerWorkspace = vi.fn(() => of(workspaceBase));
-    await configure({ obtenerWorkspace }, 'tema-malformado');
+    await configure({ obtenerWorkspace, listarHerramientas: () => of([]) }, 'tema-malformado');
 
     fixture = TestBed.createComponent(TopicWorkspacePage);
     fixture.detectChanges();
@@ -382,7 +393,7 @@ describe('TopicWorkspacePage', () => {
   });
 
   it('muestra los resumenes de Resources, Sesiones y Evidence', async () => {
-    await configure({ obtenerWorkspace: () => of(workspaceBase) });
+    await configure({ obtenerWorkspace: () => of(workspaceBase), listarHerramientas: () => of([]) });
 
     fixture = TestBed.createComponent(TopicWorkspacePage);
     fixture.detectChanges();
@@ -397,5 +408,82 @@ describe('TopicWorkspacePage', () => {
     expect(text).toContain('1 writeup');
     expect(text).toContain('1 artefacto');
     expect(text).toContain('1 certificacion');
+  });
+
+  it('muestra herramientas vinculadas', async () => {
+    await configure({ obtenerWorkspace: () => of(workspaceBase), listarHerramientas: () => of([]) });
+
+    fixture = TestBed.createComponent(TopicWorkspacePage);
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('Herramientas');
+    expect(text).toContain('Wireshark');
+  });
+
+  it('agrega herramienta y actualiza la lista al confirmar API', async () => {
+    const vincularHerramienta = vi.fn(() => of(undefined));
+    await configure({
+      obtenerWorkspace: () => of({ ...workspaceBase, herramientas: [] }),
+      listarHerramientas: () => of([
+        { id: 'herramienta-1', nombre: 'PowerShell', categoria: 'Sistema' },
+      ]),
+      vincularHerramienta,
+    });
+
+    fixture = TestBed.createComponent(TopicWorkspacePage);
+    fixture.detectChanges();
+
+    const select = fixture.nativeElement.querySelector('.tool-picker select') as HTMLSelectElement;
+    select.value = 'herramienta-1';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('.tool-picker button').click();
+    fixture.detectChanges();
+
+    expect(vincularHerramienta).toHaveBeenCalledWith(temaId, 'herramienta-1');
+    expect(fixture.nativeElement.textContent).toContain('PowerShell');
+  });
+
+  it('quita herramienta y elimina solo el vinculo visual', async () => {
+    const desvincularHerramienta = vi.fn(() => of(undefined));
+    await configure({
+      obtenerWorkspace: () => of(workspaceBase),
+      listarHerramientas: () => of([]),
+      desvincularHerramienta,
+    });
+
+    fixture = TestBed.createComponent(TopicWorkspacePage);
+    fixture.detectChanges();
+
+    fixture.nativeElement.querySelector('.tool-list button').click();
+    fixture.detectChanges();
+
+    expect(desvincularHerramienta).toHaveBeenCalledWith(temaId, workspaceBase.herramientas[0].id);
+    expect(fixture.nativeElement.textContent).not.toContain('Wireshark');
+  });
+
+  it('error al agregar herramienta no deja estado falso', async () => {
+    await configure({
+      obtenerWorkspace: () => of({ ...workspaceBase, herramientas: [] }),
+      listarHerramientas: () => of([
+        { id: 'herramienta-1', nombre: 'PowerShell', categoria: 'Sistema' },
+      ]),
+      vincularHerramienta: () => throwError(() => new Error('No pudimos vincular la herramienta.')),
+    });
+
+    fixture = TestBed.createComponent(TopicWorkspacePage);
+    fixture.detectChanges();
+
+    const select = fixture.nativeElement.querySelector('.tool-picker select') as HTMLSelectElement;
+    select.value = 'herramienta-1';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('.tool-picker button').click();
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('No pudimos vincular la herramienta.');
+    expect(fixture.nativeElement.querySelector('.tool-list')).toBeNull();
   });
 });

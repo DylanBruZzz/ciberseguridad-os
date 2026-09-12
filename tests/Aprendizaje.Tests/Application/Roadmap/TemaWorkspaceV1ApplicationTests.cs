@@ -90,6 +90,7 @@ public sealed class TemaWorkspaceV1ApplicationTests
                 []),
             null,
             new TemaWorkspaceApuntesDto(string.Empty, null),
+            [],
             null,
             new TemaWorkspaceRepasoDto(null, false),
             new TemaWorkspaceResourcesResumenDto(0),

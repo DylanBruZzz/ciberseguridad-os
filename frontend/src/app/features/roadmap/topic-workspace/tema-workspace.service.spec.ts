@@ -31,6 +31,12 @@ const workspace: TemaWorkspaceV1 = {
     contenido: 'Capas y encapsulacion',
     fechaModificacionUtc: '2026-09-01T00:00:00Z',
   },
+  herramientas: [
+    {
+      id: '01a046d5-9bf3-7cec-aa05-10c93459fa21',
+      nombre: 'Wireshark',
+    },
+  ],
   ultimaSesion: {
     id: '01a046d5-9bf3-7cec-aa05-10c93459fa18',
     fecha: '2026-08-30',
@@ -95,6 +101,39 @@ describe('TemaWorkspaceService', () => {
     expect(req.request.method).toBe('PUT');
     expect(req.request.params.has('usuarioId')).toBeFalsy();
     expect(req.request.body).toEqual({ contenido: 'Nuevo contenido' });
+    req.flush(null, { status: 204, statusText: 'No Content' });
+  });
+
+  it('lista herramientas del catalogo existente', () => {
+    service.listarHerramientas().subscribe((resultado) => {
+      expect(resultado[0].nombre).toBe('Wireshark');
+    });
+
+    const req = http.expectOne('/api/herramientas');
+    expect(req.request.method).toBe('GET');
+    req.flush([{ id: 'herramienta-1', nombre: 'Wireshark', categoria: 'Redes' }]);
+  });
+
+  it('vincula herramienta a Tema sin usuarioId ni body redundante', () => {
+    service.vincularHerramienta(workspace.tema.id, 'herramienta-1').subscribe((resultado) => {
+      expect(resultado).toBeUndefined();
+    });
+
+    const req = http.expectOne(`/api/temas/${workspace.tema.id}/herramientas/herramienta-1`);
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.params.has('usuarioId')).toBeFalsy();
+    expect(req.request.body).toBeNull();
+    req.flush(null, { status: 204, statusText: 'No Content' });
+  });
+
+  it('desvincula herramienta de Tema sin usuarioId', () => {
+    service.desvincularHerramienta(workspace.tema.id, 'herramienta-1').subscribe((resultado) => {
+      expect(resultado).toBeUndefined();
+    });
+
+    const req = http.expectOne(`/api/temas/${workspace.tema.id}/herramientas/herramienta-1`);
+    expect(req.request.method).toBe('DELETE');
+    expect(req.request.params.has('usuarioId')).toBeFalsy();
     req.flush(null, { status: 204, statusText: 'No Content' });
   });
 

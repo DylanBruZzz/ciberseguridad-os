@@ -33,6 +33,7 @@ public sealed class TemaWorkspaceV1SqlServerTests
         tema.ActualizarConfianza(NivelPercepcion.Crear(3));
         tema.ConfigurarIntervaloRepaso(IntervaloRepaso.Crear(10));
         var apunte = ApunteTema.Crear(usuario.Id, tema.Id, "Capas, encapsulacion y troubleshooting");
+        var herramienta = Herramienta.Crear("Wireshark");
         var recurso = Recurso.Guardar(usuario.Id, TipoRecurso.Documentacion, "RFC TCP");
         var recursoAjeno = Recurso.Guardar(otroUsuario.Id, TipoRecurso.Video, "No contar");
         var proyecto = Proyecto.Crear(usuario.Id, "Proyecto redes");
@@ -51,6 +52,7 @@ public sealed class TemaWorkspaceV1SqlServerTests
             contexto.Fases.Add(fase);
             contexto.Temas.Add(tema);
             contexto.ApuntesTema.Add(apunte);
+            contexto.Herramientas.Add(herramienta);
             contexto.Recursos.AddRange(recurso, recursoAjeno);
             contexto.Proyectos.Add(proyecto);
             contexto.Laboratorios.Add(laboratorio);
@@ -63,6 +65,7 @@ public sealed class TemaWorkspaceV1SqlServerTests
                 SesionEstudio.Registrar(usuario.Id, tema.Id, new DateOnly(2026, 8, 10), 45, TipoSesion.Repaso),
                 SesionEstudio.Registrar(otroUsuario.Id, tema.Id, new DateOnly(2026, 8, 30), 999, TipoSesion.Practica));
             await contexto.GuardarCambiosAsync(CancellationToken);
+            await VincularTemaHerramientaAsync(contexto, tema.Id, herramienta.Id);
             await VincularRecursoTemaAsync(contexto, recurso.Id, tema.Id);
             await VincularRecursoTemaAsync(contexto, recursoAjeno.Id, tema.Id);
             await VincularProyectoTemaAsync(contexto, proyecto.Id, tema.Id);
@@ -99,6 +102,9 @@ public sealed class TemaWorkspaceV1SqlServerTests
             Assert.Equal("Fundamentos", workspace.Fase.Nombre);
             Assert.Equal("Capas, encapsulacion y troubleshooting", workspace.Apuntes.Contenido);
             Assert.NotNull(workspace.Apuntes.FechaModificacionUtc);
+            var herramientaWorkspace = Assert.Single(workspace.Herramientas);
+            Assert.Equal(herramienta.Id, herramientaWorkspace.Id);
+            Assert.Equal("Wireshark", herramientaWorkspace.Nombre);
             Assert.NotNull(workspace.UltimaSesion);
             Assert.Equal(new DateOnly(2026, 8, 10), workspace.UltimaSesion.Fecha);
             Assert.Equal(45, workspace.UltimaSesion.DuracionMinutos);
@@ -253,7 +259,7 @@ public sealed class TemaWorkspaceV1SqlServerTests
             _ = await consulta.ObtenerAsync(usuario.Id, tema.Id, AhoraUtc, CancellationToken);
         }
 
-        Assert.True(contador.ComandosLectura <= 8, $"Se esperaban como maximo 8 comandos; se ejecutaron {contador.ComandosLectura}.");
+        Assert.True(contador.ComandosLectura <= 9, $"Se esperaban como maximo 9 comandos; se ejecutaron {contador.ComandosLectura}.");
     }
 
     private static Tema CrearTemaDominado(Guid usuarioId, Guid faseId, string nombre)
@@ -270,6 +276,11 @@ public sealed class TemaWorkspaceV1SqlServerTests
     private static async Task VincularRecursoTemaAsync(AprendizajeDbContext contexto, Guid recursoId, Guid temaId) =>
         await contexto.Database.ExecuteSqlInterpolatedAsync(
             $"INSERT INTO [resource].[RecursoTema] ([RecursoId], [TemaId]) VALUES ({recursoId}, {temaId})",
+            CancellationToken);
+
+    private static async Task VincularTemaHerramientaAsync(AprendizajeDbContext contexto, Guid temaId, Guid herramientaId) =>
+        await contexto.Database.ExecuteSqlInterpolatedAsync(
+            $"INSERT INTO [roadmap].[TemaHerramienta] ([TemaId], [HerramientaId]) VALUES ({temaId}, {herramientaId})",
             CancellationToken);
 
     private static async Task VincularProyectoTemaAsync(AprendizajeDbContext contexto, Guid proyectoId, Guid temaId) =>

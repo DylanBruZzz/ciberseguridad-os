@@ -12,5 +12,17 @@ public interface ITemaRepository
         Guid usuarioId,
         CancellationToken cancellationToken = default);
 
+    Task<bool> ExisteVinculoHerramientaAsync(
+        Guid temaId,
+        Guid herramientaId,
+        CancellationToken cancellationToken = default);
+
     void Agregar(Tema tema);
+
+    void VincularHerramienta(Guid temaId, Guid herramientaId);
+
+    Task<bool> DesvincularHerramientaAsync(
+        Guid temaId,
+        Guid herramientaId,
+        CancellationToken cancellationToken = default);
 }

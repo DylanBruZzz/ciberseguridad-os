@@ -156,6 +156,65 @@
       </div>
 
       <aside class="context-panel" aria-label="Panel contextual del tema">
+        <section class="tools-section">
+          <div class="context-head">
+            <h2>Herramientas</h2>
+            <strong>{{ actual.herramientas.length }}</strong>
+          </div>
+
+          @if (actual.herramientas.length > 0) {
+            <ul class="tool-list" aria-label="Herramientas vinculadas">
+              @for (herramienta of actual.herramientas; track herramienta.id) {
+                <li>
+                  <span>{{ herramienta.nombre }}</span>
+                  <button
+                    type="button"
+                    [disabled]="estadoHerramientas() === 'guardando'"
+                    (click)="desvincularHerramienta(herramienta.id)"
+                  >
+                    Quitar
+                  </button>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p>Sin herramientas vinculadas directamente.</p>
+          }
+
+          <div class="tool-picker">
+            <label>
+              <span>Buscar en catalogo</span>
+              <input
+                type="search"
+                [value]="filtroHerramienta()"
+                (input)="onFiltroHerramientaInput($event)"
+                placeholder="Wireshark, PowerShell..."
+              />
+            </label>
+
+            <label>
+              <span>Herramienta</span>
+              <select [value]="herramientaSeleccionadaId()" (change)="onHerramientaSeleccionadaChange($event)">
+                <option value="">Selecciona una herramienta</option>
+                @for (herramienta of herramientasParaAgregar(); track herramienta.id) {
+                  <option [value]="herramienta.id">{{ herramienta.nombre }}</option>
+                }
+              </select>
+            </label>
+
+            <button
+              type="button"
+              [disabled]="!herramientaSeleccionadaId() || estadoHerramientas() === 'guardando'"
+              (click)="vincularHerramienta()"
+            >
+              {{ estadoHerramientas() === 'guardando' ? 'Actualizando...' : 'Agregar' }}
+            </button>
+            @if (errorHerramientas()) {
+              <p class="error-text" role="alert">{{ errorHerramientas() }}</p>
+            }
+          </div>
+        </section>
+
         <section>
           <div class="context-head">
             <h2>Progreso</h2>

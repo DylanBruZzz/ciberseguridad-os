@@ -63,6 +63,15 @@ public sealed class ConsultaTemaWorkspaceV1 : IConsultaTemaWorkspaceV1
             .SingleOrDefaultAsync(cancellationToken)
             ?? new TemaWorkspaceApuntesDto(string.Empty, null);
 
+        var herramientas = await (
+            from vinculacion in _context.Set<TemaHerramienta>().AsNoTracking()
+            join herramienta in _context.Herramientas.AsNoTracking()
+                on vinculacion.HerramientaId equals herramienta.Id
+            where vinculacion.TemaId == temaId
+            orderby herramienta.Nombre, herramienta.Id
+            select new TemaWorkspaceHerramientaDto(herramienta.Id, herramienta.Nombre))
+            .ToArrayAsync(cancellationToken);
+
         var ultimaSesion = await _context.SesionesEstudio
             .AsNoTracking()
             .Where(s => s.TemaId == temaId && s.UsuarioId == usuarioId)
@@ -124,6 +133,7 @@ public sealed class ConsultaTemaWorkspaceV1 : IConsultaTemaWorkspaceV1
             temaDto,
             fase,
             apunte,
+            herramientas,
             ultimaSesion,
             new TemaWorkspaceRepasoDto(semantica.ProximaFechaRepaso, semantica.RepasoRecomendado),
             new TemaWorkspaceResourcesResumenDto(resourcesTotal),

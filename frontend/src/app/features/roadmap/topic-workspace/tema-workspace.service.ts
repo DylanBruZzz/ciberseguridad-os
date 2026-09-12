@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { catchError, map, Observable, throwError } from 'rxjs';
 import { API_BASE_URL } from '../../../core/api.config';
 import { toApiError } from '../../../core/api-error';
-import { TemaWorkspaceV1 } from './tema-workspace.models';
+import { HerramientaCatalogo, TemaWorkspaceV1 } from './tema-workspace.models';
 
 @Injectable({ providedIn: 'root' })
 export class TemaWorkspaceService {
@@ -29,6 +29,36 @@ export class TemaWorkspaceService {
         map(() => undefined),
         catchError((error: unknown) =>
           throwError(() => toApiError(error, 'No pudimos guardar los apuntes.')),
+        ),
+      );
+  }
+
+  public listarHerramientas(): Observable<HerramientaCatalogo[]> {
+    return this.http.get<HerramientaCatalogo[]>(`${this.apiBaseUrl}/herramientas`).pipe(
+      catchError((error: unknown) =>
+        throwError(() => toApiError(error, 'No pudimos cargar las herramientas.')),
+      ),
+    );
+  }
+
+  public vincularHerramienta(temaId: string, herramientaId: string): Observable<void> {
+    return this.http
+      .put<void>(`${this.apiBaseUrl}/temas/${temaId}/herramientas/${herramientaId}`, null)
+      .pipe(
+        map(() => undefined),
+        catchError((error: unknown) =>
+          throwError(() => toApiError(error, 'No pudimos vincular la herramienta.')),
+        ),
+      );
+  }
+
+  public desvincularHerramienta(temaId: string, herramientaId: string): Observable<void> {
+    return this.http
+      .delete<void>(`${this.apiBaseUrl}/temas/${temaId}/herramientas/${herramientaId}`)
+      .pipe(
+        map(() => undefined),
+        catchError((error: unknown) =>
+          throwError(() => toApiError(error, 'No pudimos quitar la herramienta.')),
         ),
       );
   }

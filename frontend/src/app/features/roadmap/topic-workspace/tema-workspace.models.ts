@@ -2,6 +2,7 @@ export interface TemaWorkspaceV1 {
   tema: TemaWorkspaceTema;
   fase: TemaWorkspaceFase | null;
   apuntes: TemaWorkspaceApuntes;
+  herramientas: TemaWorkspaceHerramienta[];
   ultimaSesion: TemaWorkspaceSesion | null;
   repaso: TemaWorkspaceRepaso;
   resourcesResumen: TemaWorkspaceResourcesResumen;
@@ -42,6 +43,17 @@ export interface TemaWorkspaceFase {
 export interface TemaWorkspaceApuntes {
   contenido: string;
   fechaModificacionUtc: string | null;
+}
+
+export interface TemaWorkspaceHerramienta {
+  id: string;
+  nombre: string;
+}
+
+export interface HerramientaCatalogo {
+  id: string;
+  nombre: string;
+  categoria: string | null;
 }
 
 export interface TemaWorkspaceSesion {

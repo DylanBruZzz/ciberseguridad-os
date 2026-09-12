@@ -39,6 +39,8 @@ public sealed class TemaWorkspaceEndpointsTests
             cancellationToken: CancellationToken);
         Assert.Equal(temaId, json.RootElement.GetProperty("tema").GetProperty("id").GetGuid());
         Assert.Equal(string.Empty, json.RootElement.GetProperty("apuntes").GetProperty("contenido").GetString());
+        var herramienta = Assert.Single(json.RootElement.GetProperty("herramientas").EnumerateArray());
+        Assert.Equal("Wireshark", herramienta.GetProperty("nombre").GetString());
     }
 
     [Fact]
@@ -183,6 +185,7 @@ public sealed class TemaWorkspaceEndpointsTests
                 []),
             null,
             new TemaWorkspaceApuntesDto(string.Empty, null),
+            [new TemaWorkspaceHerramientaDto(Guid.CreateVersion7(), "Wireshark")],
             null,
             new TemaWorkspaceRepasoDto(null, false),
             new TemaWorkspaceResourcesResumenDto(0),

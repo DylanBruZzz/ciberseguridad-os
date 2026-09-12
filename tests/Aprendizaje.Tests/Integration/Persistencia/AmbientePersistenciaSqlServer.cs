@@ -100,7 +100,8 @@ internal sealed class AmbientePersistenciaSqlServer : IAsyncDisposable
                 "20260818153945_Inicial",
                 "20260818174900_HacerObjetivosTemaNullable",
                 "20260827073704_AgregarMetadataPedagogicaFase",
-                "20260901003645_AgregarApuntesPermanentesTema"
+                "20260901003645_AgregarApuntesPermanentesTema",
+                "20260912045046_AgregarRelacionTemaHerramienta"
             },
             migraciones);
     }

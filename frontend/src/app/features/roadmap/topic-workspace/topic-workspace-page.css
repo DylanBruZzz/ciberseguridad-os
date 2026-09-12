@@ -317,6 +317,84 @@ button,
   color: var(--text-secondary);
 }
 
+.tool-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tool-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: 2.25rem;
+  padding: .35rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.tool-list span {
+  color: var(--text-primary);
+  font-size: .9rem;
+  line-height: 1.4;
+}
+
+.tool-list button {
+  min-height: 2rem;
+  padding: 0 .65rem;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  background: transparent;
+}
+
+.tool-picker {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.tool-picker label {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.tool-picker label span {
+  color: var(--text-muted);
+  font-size: .76rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.tool-picker input,
+.tool-picker select {
+  width: 100%;
+  min-height: 2.35rem;
+  padding: 0 .7rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  color: var(--text-primary);
+  background: var(--bg-app);
+}
+
+.tool-picker button {
+  border: 1px solid rgba(139, 92, 246, 0.5);
+  color: var(--text-primary);
+  background: rgba(124, 58, 237, 0.22);
+}
+
+.tool-picker button:disabled,
+.tool-list button:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+.error-text {
+  color: var(--danger, #fca5a5);
+}
+
 .compact-list {
   display: grid;
   gap: var(--space-2);
@@ -407,7 +485,9 @@ button,
 
 button:focus-visible,
 a:focus-visible,
-textarea:focus-visible {
+textarea:focus-visible,
+input:focus-visible,
+select:focus-visible {
   outline: 2px solid var(--accent-bright);
   outline-offset: 3px;
 }

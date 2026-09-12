@@ -3,16 +3,21 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
+  CertificacionCatalogo,
   HerramientaCatalogo,
   TemaWorkspaceCriterio,
   TemaWorkspaceEvidenceResumen,
   TemaWorkspaceV1,
+  TipoCriterioTema,
+  tiposCriterioTema,
 } from './tema-workspace.models';
 import { TemaWorkspaceService } from './tema-workspace.service';
 import { etiquetaEstadoTema } from '../roadmap.labels';
 
 type EstadoGuardado = 'idle' | 'guardando' | 'guardado' | 'error';
 type EstadoHerramientas = 'idle' | 'guardando' | 'error';
+type EstadoCriterios = 'idle' | 'guardando' | 'error';
+type EstadoCertificaciones = 'idle' | 'guardando' | 'error';
 
 @Component({
   selector: 'app-topic-workspace-page',
@@ -22,6 +27,7 @@ type EstadoHerramientas = 'idle' | 'guardando' | 'error';
 })
 export class TopicWorkspacePage implements OnInit {
   protected readonly etiquetaEstadoTema = etiquetaEstadoTema;
+  protected readonly tiposCriterio = tiposCriterioTema;
   private readonly destroyRef = inject(DestroyRef);
   private solicitudWorkspace?: Subscription;
   private cambioTema = 0;
@@ -40,11 +46,20 @@ export class TopicWorkspacePage implements OnInit {
   protected readonly herramientaSeleccionadaId = signal('');
   protected readonly estadoHerramientas = signal<EstadoHerramientas>('idle');
   protected readonly errorHerramientas = signal<string | null>(null);
+  protected readonly criteriosSeleccionados = signal<TipoCriterioTema[]>([]);
+  protected readonly estadoCriterios = signal<EstadoCriterios>('idle');
+  protected readonly errorCriterios = signal<string | null>(null);
+  protected readonly certificacionesDisponibles = signal<CertificacionCatalogo[]>([]);
+  protected readonly filtroCertificacion = signal('');
+  protected readonly certificacionSeleccionadaId = signal('');
+  protected readonly estadoCertificaciones = signal<EstadoCertificaciones>('idle');
+  protected readonly errorCertificaciones = signal<string | null>(null);
 
   protected readonly tema = computed(() => this.workspace()?.tema ?? null);
   protected readonly fase = computed(() => this.workspace()?.fase ?? null);
   protected readonly apuntes = computed(() => this.workspace()?.apuntes ?? null);
   protected readonly herramientasVinculadas = computed(() => this.workspace()?.herramientas ?? []);
+  protected readonly certificacionesVinculadas = computed(() => this.workspace()?.certificaciones ?? []);
   protected readonly ultimaSesion = computed(() => this.workspace()?.ultimaSesion ?? null);
   protected readonly repaso = computed(() => this.workspace()?.repaso ?? null);
   protected readonly hayCambiosApuntes = computed(
@@ -57,6 +72,15 @@ export class TopicWorkspacePage implements OnInit {
     return this.herramientasDisponibles()
       .filter((herramienta) => !vinculadas.has(herramienta.id))
       .filter((herramienta) => !filtro || herramienta.nombre.toLocaleLowerCase('es-PE').includes(filtro))
+      .slice(0, 12);
+  });
+  protected readonly certificacionesParaAgregar = computed(() => {
+    const vinculadas = new Set(this.certificacionesVinculadas().map((certificacion) => certificacion.id));
+    const filtro = this.filtroCertificacion().trim().toLocaleLowerCase('es-PE');
+
+    return this.certificacionesDisponibles()
+      .filter((certificacion) => !vinculadas.has(certificacion.id))
+      .filter((certificacion) => !filtro || certificacion.nombre.toLocaleLowerCase('es-PE').includes(filtro))
       .slice(0, 12);
   });
 
@@ -79,6 +103,13 @@ export class TopicWorkspacePage implements OnInit {
       this.herramientaSeleccionadaId.set('');
       this.estadoHerramientas.set('idle');
       this.errorHerramientas.set(null);
+      this.criteriosSeleccionados.set([]);
+      this.estadoCriterios.set('idle');
+      this.errorCriterios.set(null);
+      this.filtroCertificacion.set('');
+      this.certificacionSeleccionadaId.set('');
+      this.estadoCertificaciones.set('idle');
+      this.errorCertificaciones.set(null);
       if (!temaId || !TopicWorkspacePage.guidRegex.test(temaId)) {
         this.cargando.set(false);
         this.error.set('Este tema no esta disponible.');
@@ -167,6 +198,74 @@ export class TopicWorkspacePage implements OnInit {
     }
   }
 
+  protected onCriterioSeleccionChange(tipo: TipoCriterioTema, event: Event): void {
+    const target = event.target;
+
+    if (!(target instanceof HTMLInputElement)) {
+      return;
+    }
+
+    const actuales = new Set(this.criteriosSeleccionados());
+    if (target.checked) {
+      actuales.add(tipo);
+    } else {
+      actuales.delete(tipo);
+    }
+
+    this.criteriosSeleccionados.set(this.tiposCriterio.filter((criterio) => actuales.has(criterio)));
+    this.estadoCriterios.set('idle');
+    this.errorCriterios.set(null);
+  }
+
+  protected criterioEstaSeleccionado(tipo: TipoCriterioTema): boolean {
+    return this.criteriosSeleccionados().includes(tipo);
+  }
+
+  protected definirCriterios(): void {
+    const temaId = this.temaId();
+
+    if (!temaId || this.estadoCriterios() === 'guardando') {
+      return;
+    }
+
+    const cambioTema = this.cambioTema;
+    this.estadoCriterios.set('guardando');
+    this.errorCriterios.set(null);
+
+    this.workspaceService.definirCriterios(temaId, this.criteriosSeleccionados()).subscribe({
+      next: () => this.recargarWorkspaceTrasAccion(cambioTema, () => this.estadoCriterios.set('idle')),
+      error: (error: Error) => {
+        if (cambioTema !== this.cambioTema) return;
+        this.errorCriterios.set(error.message);
+        this.estadoCriterios.set('error');
+      },
+    });
+  }
+
+  protected cambiarCumplimientoCriterio(criterio: TemaWorkspaceCriterio): void {
+    const temaId = this.temaId();
+
+    if (!temaId || this.estadoCriterios() === 'guardando') {
+      return;
+    }
+
+    const cambioTema = this.cambioTema;
+    this.estadoCriterios.set('guardando');
+    this.errorCriterios.set(null);
+    const solicitud = criterio.cumplido
+      ? this.workspaceService.desmarcarCriterio(temaId, criterio.tipo)
+      : this.workspaceService.marcarCriterio(temaId, criterio.tipo);
+
+    solicitud.subscribe({
+      next: () => this.recargarWorkspaceTrasAccion(cambioTema, () => this.estadoCriterios.set('idle')),
+      error: (error: Error) => {
+        if (cambioTema !== this.cambioTema) return;
+        this.errorCriterios.set(error.message);
+        this.estadoCriterios.set('error');
+      },
+    });
+  }
+
   protected vincularHerramienta(): void {
     const temaId = this.temaId();
     const herramientaId = this.herramientaSeleccionadaId();
@@ -234,6 +333,72 @@ export class TopicWorkspacePage implements OnInit {
         if (cambioTema !== this.cambioTema) return;
         this.errorHerramientas.set(error.message);
         this.estadoHerramientas.set('error');
+      },
+    });
+  }
+
+  protected onFiltroCertificacionInput(event: Event): void {
+    const target = event.target;
+
+    if (target instanceof HTMLInputElement) {
+      this.filtroCertificacion.set(target.value);
+      this.certificacionSeleccionadaId.set('');
+      this.estadoCertificaciones.set('idle');
+      this.errorCertificaciones.set(null);
+    }
+  }
+
+  protected onCertificacionSeleccionadaChange(event: Event): void {
+    const target = event.target;
+
+    if (target instanceof HTMLSelectElement) {
+      this.certificacionSeleccionadaId.set(target.value);
+      this.estadoCertificaciones.set('idle');
+      this.errorCertificaciones.set(null);
+    }
+  }
+
+  protected vincularCertificacion(): void {
+    const temaId = this.temaId();
+    const certificacionId = this.certificacionSeleccionadaId();
+    const certificacion = this.certificacionesDisponibles().find((item) => item.id === certificacionId);
+
+    if (!temaId || !certificacionId || !certificacion || this.estadoCertificaciones() === 'guardando') {
+      return;
+    }
+
+    const cambioTema = this.cambioTema;
+    this.estadoCertificaciones.set('guardando');
+    this.errorCertificaciones.set(null);
+
+    this.workspaceService.vincularCertificacion(temaId, certificacionId).subscribe({
+      next: () => {
+        if (cambioTema !== this.cambioTema) return;
+        const actual = this.workspace();
+
+        if (actual && !actual.certificaciones.some((item) => item.id === certificacion.id)) {
+          this.workspace.set({
+            ...actual,
+            certificaciones: [
+              ...actual.certificaciones,
+              {
+                id: certificacion.id,
+                nombre: certificacion.nombre,
+                proveedor: certificacion.proveedor,
+                tipoCosto: certificacion.tipoCosto,
+              },
+            ].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es-PE')),
+          });
+        }
+
+        this.certificacionSeleccionadaId.set('');
+        this.filtroCertificacion.set('');
+        this.estadoCertificaciones.set('idle');
+      },
+      error: (error: Error) => {
+        if (cambioTema !== this.cambioTema) return;
+        this.errorCertificaciones.set(error.message);
+        this.estadoCertificaciones.set('error');
       },
     });
   }
@@ -306,10 +471,10 @@ export class TopicWorkspacePage implements OnInit {
     this.solicitudWorkspace = this.workspaceService.obtenerWorkspace(temaId)
       .pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (workspace) => {
-        this.workspace.set(workspace);
-        this.borradorApuntes.set(workspace.apuntes.contenido);
+        this.aplicarWorkspace(workspace, true);
         this.cargando.set(false);
         this.cargarHerramientasDisponibles();
+        this.cargarCertificacionesDisponibles();
       },
       error: (error: Error) => {
         this.workspace.set(null);
@@ -317,6 +482,42 @@ export class TopicWorkspacePage implements OnInit {
         this.cargando.set(false);
       },
     });
+  }
+
+  private recargarWorkspaceTrasAccion(cambioTema: number, alTerminar: () => void): void {
+    const temaId = this.temaId();
+
+    if (!temaId) {
+      return;
+    }
+
+    this.workspaceService.obtenerWorkspace(temaId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (workspace) => {
+          if (cambioTema !== this.cambioTema) return;
+          this.aplicarWorkspace(workspace, false);
+          alTerminar();
+        },
+        error: (error: Error) => {
+          if (cambioTema !== this.cambioTema) return;
+          this.errorCriterios.set(error.message);
+          this.estadoCriterios.set('error');
+        },
+      });
+  }
+
+  private aplicarWorkspace(workspace: TemaWorkspaceV1, sincronizarApuntes: boolean): void {
+    this.workspace.set(workspace);
+    this.criteriosSeleccionados.set(
+      workspace.tema.criterios
+        .map((criterio) => criterio.tipo)
+        .filter((tipo): tipo is TipoCriterioTema => this.esTipoCriterioTema(tipo)),
+    );
+
+    if (sincronizarApuntes) {
+      this.borradorApuntes.set(workspace.apuntes.contenido);
+    }
   }
 
   private cargarHerramientasDisponibles(): void {
@@ -338,6 +539,31 @@ export class TopicWorkspacePage implements OnInit {
           this.estadoHerramientas.set('error');
         },
       });
+  }
+
+  private cargarCertificacionesDisponibles(): void {
+    if (this.certificacionesDisponibles().length > 0) {
+      return;
+    }
+
+    const cambioTema = this.cambioTema;
+    this.workspaceService.listarCertificaciones()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (certificaciones) => {
+          if (cambioTema !== this.cambioTema) return;
+          this.certificacionesDisponibles.set(certificaciones);
+        },
+        error: (error: Error) => {
+          if (cambioTema !== this.cambioTema) return;
+          this.errorCertificaciones.set(error.message);
+          this.estadoCertificaciones.set('error');
+        },
+      });
+  }
+
+  private esTipoCriterioTema(tipo: string): tipo is TipoCriterioTema {
+    return (this.tiposCriterio as readonly string[]).includes(tipo);
   }
 
   private textoConteo(total: number, singular: string, plural: string): string | null {

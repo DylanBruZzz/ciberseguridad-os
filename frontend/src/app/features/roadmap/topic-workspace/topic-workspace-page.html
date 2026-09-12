@@ -93,7 +93,10 @@
 
         <section class="content-block">
           <div class="section-heading">
-            <h2>Criterios de dominio</h2>
+            <div>
+              <h2>Criterios de dominio</h2>
+              <p>Gestion</p>
+            </div>
             <span>{{ actual.tema.criteriosCumplidos }} de {{ actual.tema.criteriosTotal }}</span>
           </div>
 
@@ -104,12 +107,43 @@
                   <span class="criterion-status">{{ criterio.cumplido ? 'Cumplido' : 'Pendiente' }}</span>
                   <span class="criterion-type">{{ criterio.tipo }}</span>
                   <span class="criterion-date">{{ criterio.cumplido ? fechaHora(criterio.fechaCumplidoUtc) : 'Sin fecha de cumplimiento' }}</span>
+                  <button
+                    type="button"
+                    [disabled]="estadoCriterios() === 'guardando'"
+                    (click)="cambiarCumplimientoCriterio(criterio)"
+                  >
+                    {{ criterio.cumplido ? 'Desmarcar' : 'Marcar' }}
+                  </button>
                 </li>
               }
             </ul>
           } @else {
-            <p class="muted">Este tema todavia no tiene criterios definidos.</p>
+            <p class="muted">Aún no hay criterios definidos para este tema.</p>
           }
+
+          <div class="criteria-editor" aria-label="Definir criterios del tema">
+            @for (tipo of tiposCriterio; track tipo) {
+              <label>
+                <input
+                  type="checkbox"
+                  [checked]="criterioEstaSeleccionado(tipo)"
+                  [disabled]="estadoCriterios() === 'guardando'"
+                  (change)="onCriterioSeleccionChange(tipo, $event)"
+                />
+                <span>{{ tipo }}</span>
+              </label>
+            }
+            <button
+              type="button"
+              [disabled]="criteriosSeleccionados().length < 2 || estadoCriterios() === 'guardando'"
+              (click)="definirCriterios()"
+            >
+              {{ estadoCriterios() === 'guardando' ? 'Actualizando...' : 'Definir criterios' }}
+            </button>
+            @if (errorCriterios()) {
+              <p class="error-text" role="alert">{{ errorCriterios() }}</p>
+            }
+          </div>
         </section>
 
         <section class="content-block notes-block">
@@ -211,6 +245,59 @@
             </button>
             @if (errorHerramientas()) {
               <p class="error-text" role="alert">{{ errorHerramientas() }}</p>
+            }
+          </div>
+        </section>
+
+        <section>
+          <div class="context-head">
+            <h2>Certificaciones relacionadas</h2>
+            <strong>{{ actual.certificaciones.length }}</strong>
+          </div>
+
+          @if (actual.certificaciones.length > 0) {
+            <ul class="tool-list" aria-label="Certificaciones relacionadas">
+              @for (certificacion of actual.certificaciones; track certificacion.id) {
+                <li>
+                  <span>{{ certificacion.nombre }}</span>
+                  <small>{{ certificacion.proveedor ?? certificacion.tipoCosto }}</small>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p>Sin certificaciones relacionadas.</p>
+          }
+
+          <div class="tool-picker">
+            <label>
+              <span>Buscar en catalogo</span>
+              <input
+                type="search"
+                [value]="filtroCertificacion()"
+                (input)="onFiltroCertificacionInput($event)"
+                placeholder="Security+, PNPT..."
+              />
+            </label>
+
+            <label>
+              <span>Certificacion</span>
+              <select [value]="certificacionSeleccionadaId()" (change)="onCertificacionSeleccionadaChange($event)">
+                <option value="">Selecciona una certificacion</option>
+                @for (certificacion of certificacionesParaAgregar(); track certificacion.id) {
+                  <option [value]="certificacion.id">{{ certificacion.nombre }}</option>
+                }
+              </select>
+            </label>
+
+            <button
+              type="button"
+              [disabled]="!certificacionSeleccionadaId() || estadoCertificaciones() === 'guardando'"
+              (click)="vincularCertificacion()"
+            >
+              {{ estadoCertificaciones() === 'guardando' ? 'Actualizando...' : 'Relacionar' }}
+            </button>
+            @if (errorCertificaciones()) {
+              <p class="error-text" role="alert">{{ errorCertificaciones() }}</p>
             }
           </div>
         </section>

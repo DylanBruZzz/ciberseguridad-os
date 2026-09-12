@@ -3,6 +3,7 @@ export interface TemaWorkspaceV1 {
   fase: TemaWorkspaceFase | null;
   apuntes: TemaWorkspaceApuntes;
   herramientas: TemaWorkspaceHerramienta[];
+  certificaciones: TemaWorkspaceCertificacion[];
   ultimaSesion: TemaWorkspaceSesion | null;
   repaso: TemaWorkspaceRepaso;
   resourcesResumen: TemaWorkspaceResourcesResumen;
@@ -55,6 +56,31 @@ export interface HerramientaCatalogo {
   nombre: string;
   categoria: string | null;
 }
+
+export interface TemaWorkspaceCertificacion {
+  id: string;
+  nombre: string;
+  proveedor: string | null;
+  tipoCosto: string;
+}
+
+export interface CertificacionCatalogo {
+  id: string;
+  nombre: string;
+  proveedor: string | null;
+  tipoCosto: string;
+  url: string | null;
+}
+
+export const tiposCriterioTema = [
+  'Teoria',
+  'Practica',
+  'Explicacion',
+  'Ejercicios',
+  'Laboratorio',
+] as const;
+
+export type TipoCriterioTema = (typeof tiposCriterioTema)[number];
 
 export interface TemaWorkspaceSesion {
   id: string;

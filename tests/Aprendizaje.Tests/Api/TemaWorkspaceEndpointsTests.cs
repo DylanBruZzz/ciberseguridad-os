@@ -41,6 +41,8 @@ public sealed class TemaWorkspaceEndpointsTests
         Assert.Equal(string.Empty, json.RootElement.GetProperty("apuntes").GetProperty("contenido").GetString());
         var herramienta = Assert.Single(json.RootElement.GetProperty("herramientas").EnumerateArray());
         Assert.Equal("Wireshark", herramienta.GetProperty("nombre").GetString());
+        var certificacion = Assert.Single(json.RootElement.GetProperty("certificaciones").EnumerateArray());
+        Assert.Equal("Security+", certificacion.GetProperty("nombre").GetString());
     }
 
     [Fact]
@@ -186,6 +188,7 @@ public sealed class TemaWorkspaceEndpointsTests
             null,
             new TemaWorkspaceApuntesDto(string.Empty, null),
             [new TemaWorkspaceHerramientaDto(Guid.CreateVersion7(), "Wireshark")],
+            [new TemaWorkspaceCertificacionDto(Guid.CreateVersion7(), "Security+", "CompTIA", TipoCosto.Pago)],
             null,
             new TemaWorkspaceRepasoDto(null, false),
             new TemaWorkspaceResourcesResumenDto(0),

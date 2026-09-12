@@ -216,6 +216,17 @@ dd {
   text-align: left;
 }
 
+.criteria-editor {
+  display: grid;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+}
+
+.criteria-editor label {
+  color: var(--text-secondary);
+  font-size: .86rem;
+}
+
 .notes-block {
   grid-column: 1 / -1;
   padding: var(--space-4);
@@ -260,6 +271,7 @@ button,
 }
 
 .notes-actions button,
+.criteria-editor button,
 .state-actions button {
   padding: 0 var(--space-4);
   border: 1px solid rgba(139, 92, 246, 0.5);
@@ -267,7 +279,8 @@ button,
   background: rgba(124, 58, 237, 0.22);
 }
 
-.notes-actions button:disabled {
+.notes-actions button:disabled,
+.criteria-editor button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
 }
@@ -341,7 +354,10 @@ button,
   line-height: 1.4;
 }
 
+.criteria-list button,
 .tool-list button {
+  grid-column: 1 / -1;
+  justify-self: start;
   min-height: 2rem;
   padding: 0 .65rem;
   border: 1px solid var(--border-subtle);
@@ -386,6 +402,7 @@ button,
 }
 
 .tool-picker button:disabled,
+.criteria-list button:disabled,
 .tool-list button:disabled {
   cursor: not-allowed;
   opacity: .55;
@@ -448,39 +465,11 @@ button,
   background: var(--bg-surface-1);
 }
 
-.skeleton-header,
-.skeleton-grid {
-  display: grid;
-  gap: var(--space-3);
-}
-
-.skeleton-grid {
-  grid-template-columns: 1fr 0.55fr;
-}
-
 .workspace-skeleton span {
   display: block;
   height: 0.9rem;
   border-radius: 999px;
   background: linear-gradient(90deg, var(--bg-surface-2), var(--bg-surface-3), var(--bg-surface-2));
-}
-
-.skeleton-header span:nth-child(1) {
-  width: 28%;
-}
-
-.skeleton-header span:nth-child(2) {
-  width: 72%;
-  height: 2.7rem;
-}
-
-.skeleton-header span:nth-child(3) {
-  width: 50%;
-}
-
-.skeleton-grid span {
-  height: 18rem;
-  border-radius: 8px;
 }
 
 button:focus-visible,
@@ -525,7 +514,7 @@ select:focus-visible {
     gap: var(--space-1);
   }
 
-  .criterion-date {
-    text-align: left;
+  .criteria-list button {
+    justify-self: start;
   }
 }

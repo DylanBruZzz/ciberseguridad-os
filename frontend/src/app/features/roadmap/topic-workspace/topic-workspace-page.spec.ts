@@ -57,6 +57,14 @@ const workspaceBase: TemaWorkspaceV1 = {
       nombre: 'Wireshark',
     },
   ],
+  certificaciones: [
+    {
+      id: '01a046d5-9bf3-7cec-aa05-10c93459fa22',
+      nombre: 'Security+',
+      proveedor: 'CompTIA',
+      tipoCosto: 'Pago',
+    },
+  ],
   ultimaSesion: {
     id: '01a046d5-9bf3-7cec-aa05-10c93459fa20',
     fecha: '2026-08-30',
@@ -106,7 +114,21 @@ describe('TopicWorkspacePage', () => {
             },
           },
         },
-        { provide: TemaWorkspaceService, useValue: workspace },
+        {
+          provide: TemaWorkspaceService,
+          useValue: {
+            guardarApuntes: () => of(undefined),
+            listarHerramientas: () => of([]),
+            vincularHerramienta: () => of(undefined),
+            desvincularHerramienta: () => of(undefined),
+            definirCriterios: () => of(undefined),
+            marcarCriterio: () => of(undefined),
+            desmarcarCriterio: () => of(undefined),
+            listarCertificaciones: () => of([]),
+            vincularCertificacion: () => of(undefined),
+            ...workspace,
+          },
+        },
       ],
     }).compileComponents();
   }
@@ -255,6 +277,7 @@ describe('TopicWorkspacePage', () => {
           },
           apuntes: { contenido: '', fechaModificacionUtc: null },
           herramientas: [],
+          certificaciones: [],
           resourcesResumen: { total: 0 },
           evidenceResumen: {
             total: 0,
@@ -273,11 +296,12 @@ describe('TopicWorkspacePage', () => {
 
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('Este tema todavia no tiene objetivos definidos.');
-    expect(text).toContain('Este tema todavia no tiene criterios definidos.');
+    expect(text).toContain('Aún no hay criterios definidos para este tema.');
     expect(text).toContain('Dificultad no definida');
     expect(text).toContain('Confianza no definida');
     expect(text).toContain('0 recursos vinculados');
     expect(text).toContain('Sin evidence vinculada');
+    expect(text).toContain('Sin certificaciones relacionadas.');
   });
 
   it('muestra apuntes existentes y estado dirty al editar', async () => {
@@ -421,6 +445,113 @@ describe('TopicWorkspacePage', () => {
     expect(text).toContain('Wireshark');
   });
 
+  it('define criterios y refresca el progreso desde el backend', async () => {
+    const actualizado = {
+      ...workspaceBase,
+      tema: {
+        ...workspaceBase.tema,
+        criteriosTotal: 2,
+        criteriosCumplidos: 0,
+        progresoPorcentaje: 0,
+        criterios: [
+          { id: 'criterio-1', tipo: 'Teoria', cumplido: false, fechaCumplidoUtc: null },
+          { id: 'criterio-2', tipo: 'Practica', cumplido: false, fechaCumplidoUtc: null },
+        ],
+      },
+    };
+    const obtenerWorkspace = vi.fn().mockReturnValueOnce(of({
+      ...workspaceBase,
+      tema: { ...workspaceBase.tema, criterios: [], criteriosTotal: 0, criteriosCumplidos: 0, progresoPorcentaje: 0 },
+    })).mockReturnValueOnce(of(actualizado));
+    const definirCriterios = vi.fn(() => of(undefined));
+    await configure({ obtenerWorkspace, definirCriterios });
+
+    fixture = TestBed.createComponent(TopicWorkspacePage);
+    fixture.detectChanges();
+    const checks = fixture.nativeElement.querySelectorAll('.criteria-editor input') as NodeListOf<HTMLInputElement>;
+    checks[0].click();
+    checks[1].click();
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('.criteria-editor button').click();
+    fixture.detectChanges();
+
+    expect(definirCriterios).toHaveBeenCalledWith(temaId, ['Teoria', 'Practica']);
+    expect(obtenerWorkspace).toHaveBeenCalledTimes(2);
+    expect(fixture.nativeElement.textContent).toContain('Teoria');
+    expect(fixture.nativeElement.textContent).toContain('0%');
+  });
+
+  it('marca y desmarca criterios usando el backend y no recalcula progreso localmente', async () => {
+    const marcado = {
+      ...workspaceBase,
+      tema: {
+        ...workspaceBase.tema,
+        criteriosCumplidos: 2,
+        progresoPorcentaje: 100,
+        criterios: workspaceBase.tema.criterios.map((criterio) =>
+          criterio.tipo === 'Practica'
+            ? { ...criterio, cumplido: true, fechaCumplidoUtc: '2026-09-03T00:00:00Z' }
+            : criterio,
+        ),
+      },
+    };
+    const desmarcado = {
+      ...workspaceBase,
+      tema: {
+        ...workspaceBase.tema,
+        criteriosCumplidos: 1,
+        progresoPorcentaje: 50,
+        criterios: workspaceBase.tema.criterios.map((criterio) =>
+          criterio.tipo === 'Teoria'
+            ? { ...criterio, cumplido: false, fechaCumplidoUtc: null }
+            : criterio,
+        ),
+      },
+    };
+    const obtenerWorkspace = vi.fn()
+      .mockReturnValueOnce(of(workspaceBase))
+      .mockReturnValueOnce(of(marcado))
+      .mockReturnValueOnce(of(desmarcado));
+    const marcarCriterio = vi.fn(() => of(undefined));
+    const desmarcarCriterio = vi.fn(() => of(undefined));
+    await configure({ obtenerWorkspace, marcarCriterio, desmarcarCriterio });
+
+    fixture = TestBed.createComponent(TopicWorkspacePage);
+    fixture.detectChanges();
+    const botones = fixture.nativeElement.querySelectorAll('.criteria-list button') as NodeListOf<HTMLButtonElement>;
+    botones[1].click();
+    fixture.detectChanges();
+
+    expect(marcarCriterio).toHaveBeenCalledWith(temaId, 'Practica');
+    expect(fixture.nativeElement.textContent).toContain('2 / 2');
+
+    const botonDesmarcar = fixture.nativeElement.querySelector('.criteria-list button') as HTMLButtonElement;
+    botonDesmarcar.click();
+    fixture.detectChanges();
+
+    expect(desmarcarCriterio).toHaveBeenCalledWith(temaId, 'Teoria');
+    expect(fixture.nativeElement.textContent).toContain('50%');
+  });
+
+  it('error al definir criterios conserva el estado factual recibido', async () => {
+    await configure({
+      obtenerWorkspace: () => of({ ...workspaceBase, tema: { ...workspaceBase.tema, criterios: [], criteriosTotal: 0, criteriosCumplidos: 0, progresoPorcentaje: 0 } }),
+      definirCriterios: () => throwError(() => new Error('No pudimos definir los criterios.')),
+    });
+
+    fixture = TestBed.createComponent(TopicWorkspacePage);
+    fixture.detectChanges();
+    const checks = fixture.nativeElement.querySelectorAll('.criteria-editor input') as NodeListOf<HTMLInputElement>;
+    checks[0].click();
+    checks[1].click();
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('.criteria-editor button').click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('No pudimos definir los criterios.');
+    expect(fixture.nativeElement.textContent).toContain('Aún no hay criterios definidos para este tema.');
+  });
+
   it('agrega herramienta y actualiza la lista al confirmar API', async () => {
     const vincularHerramienta = vi.fn(() => of(undefined));
     await configure({
@@ -484,6 +615,58 @@ describe('TopicWorkspacePage', () => {
 
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('No pudimos vincular la herramienta.');
-    expect(fixture.nativeElement.querySelector('.tool-list')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.tools-section .tool-list')).toBeNull();
+  });
+
+  it('muestra certificaciones relacionadas y permite vincular una certificacion existente', async () => {
+    const vincularCertificacion = vi.fn(() => of(undefined));
+    await configure({
+      obtenerWorkspace: () => of({ ...workspaceBase, certificaciones: [] }),
+      listarCertificaciones: () => of([
+        { id: 'certificacion-2', nombre: 'PNPT', proveedor: 'TCM', tipoCosto: 'Pago', url: null },
+      ]),
+      vincularCertificacion,
+    });
+
+    fixture = TestBed.createComponent(TopicWorkspacePage);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Sin certificaciones relacionadas.');
+
+    const selects = fixture.nativeElement.querySelectorAll('.tool-picker select') as NodeListOf<HTMLSelectElement>;
+    const selectCertificacion = selects[1];
+    selectCertificacion.value = 'certificacion-2';
+    selectCertificacion.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    const botones = fixture.nativeElement.querySelectorAll('.tool-picker button') as NodeListOf<HTMLButtonElement>;
+    botones[1].click();
+    fixture.detectChanges();
+
+    expect(vincularCertificacion).toHaveBeenCalledWith(temaId, 'certificacion-2');
+    expect(fixture.nativeElement.textContent).toContain('PNPT');
+    expect(fixture.nativeElement.textContent).toContain('TCM');
+  });
+
+  it('error al vincular certificacion no deja relacion falsa', async () => {
+    await configure({
+      obtenerWorkspace: () => of({ ...workspaceBase, certificaciones: [] }),
+      listarCertificaciones: () => of([
+        { id: 'certificacion-2', nombre: 'PNPT', proveedor: 'TCM', tipoCosto: 'Pago', url: null },
+      ]),
+      vincularCertificacion: () => throwError(() => new Error('No pudimos vincular la certificacion.')),
+    });
+
+    fixture = TestBed.createComponent(TopicWorkspacePage);
+    fixture.detectChanges();
+    const selects = fixture.nativeElement.querySelectorAll('.tool-picker select') as NodeListOf<HTMLSelectElement>;
+    selects[1].value = 'certificacion-2';
+    selects[1].dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    const botones = fixture.nativeElement.querySelectorAll('.tool-picker button') as NodeListOf<HTMLButtonElement>;
+    botones[1].click();
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('No pudimos vincular la certificacion.');
+    expect(text).toContain('Sin certificaciones relacionadas.');
   });
 });

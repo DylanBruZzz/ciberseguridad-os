@@ -3,7 +3,12 @@ import { inject, Injectable } from '@angular/core';
 import { catchError, map, Observable, throwError } from 'rxjs';
 import { API_BASE_URL } from '../../../core/api.config';
 import { toApiError } from '../../../core/api-error';
-import { HerramientaCatalogo, TemaWorkspaceV1 } from './tema-workspace.models';
+import {
+  CertificacionCatalogo,
+  HerramientaCatalogo,
+  TemaWorkspaceV1,
+  TipoCriterioTema,
+} from './tema-workspace.models';
 
 @Injectable({ providedIn: 'root' })
 export class TemaWorkspaceService {
@@ -41,6 +46,39 @@ export class TemaWorkspaceService {
     );
   }
 
+  public definirCriterios(temaId: string, criterios: TipoCriterioTema[]): Observable<void> {
+    return this.http
+      .put<void>(`${this.apiBaseUrl}/temas/${temaId}/criterios`, { criterios })
+      .pipe(
+        map(() => undefined),
+        catchError((error: unknown) =>
+          throwError(() => toApiError(error, 'No pudimos definir los criterios.')),
+        ),
+      );
+  }
+
+  public marcarCriterio(temaId: string, tipo: string): Observable<void> {
+    return this.http
+      .put<void>(`${this.apiBaseUrl}/temas/${temaId}/criterios/${tipo}/cumplido`, null)
+      .pipe(
+        map(() => undefined),
+        catchError((error: unknown) =>
+          throwError(() => toApiError(error, 'No pudimos marcar el criterio.')),
+        ),
+      );
+  }
+
+  public desmarcarCriterio(temaId: string, tipo: string): Observable<void> {
+    return this.http
+      .delete<void>(`${this.apiBaseUrl}/temas/${temaId}/criterios/${tipo}/cumplido`)
+      .pipe(
+        map(() => undefined),
+        catchError((error: unknown) =>
+          throwError(() => toApiError(error, 'No pudimos desmarcar el criterio.')),
+        ),
+      );
+  }
+
   public vincularHerramienta(temaId: string, herramientaId: string): Observable<void> {
     return this.http
       .put<void>(`${this.apiBaseUrl}/temas/${temaId}/herramientas/${herramientaId}`, null)
@@ -59,6 +97,25 @@ export class TemaWorkspaceService {
         map(() => undefined),
         catchError((error: unknown) =>
           throwError(() => toApiError(error, 'No pudimos quitar la herramienta.')),
+        ),
+      );
+  }
+
+  public listarCertificaciones(): Observable<CertificacionCatalogo[]> {
+    return this.http.get<CertificacionCatalogo[]>(`${this.apiBaseUrl}/certificaciones`).pipe(
+      catchError((error: unknown) =>
+        throwError(() => toApiError(error, 'No pudimos cargar las certificaciones.')),
+      ),
+    );
+  }
+
+  public vincularCertificacion(temaId: string, certificacionId: string): Observable<void> {
+    return this.http
+      .put<void>(`${this.apiBaseUrl}/certificaciones/${certificacionId}/temas/${temaId}`, null)
+      .pipe(
+        map(() => undefined),
+        catchError((error: unknown) =>
+          throwError(() => toApiError(error, 'No pudimos vincular la certificacion.')),
         ),
       );
   }

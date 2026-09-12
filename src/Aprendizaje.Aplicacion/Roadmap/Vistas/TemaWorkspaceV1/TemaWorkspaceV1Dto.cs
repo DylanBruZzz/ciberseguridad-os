@@ -8,6 +8,7 @@ public sealed record TemaWorkspaceV1Dto(
     TemaWorkspaceFaseDto? Fase,
     TemaWorkspaceApuntesDto Apuntes,
     IReadOnlyCollection<TemaWorkspaceHerramientaDto> Herramientas,
+    IReadOnlyCollection<TemaWorkspaceCertificacionDto> Certificaciones,
     TemaWorkspaceSesionDto? UltimaSesion,
     TemaWorkspaceRepasoDto Repaso,
     TemaWorkspaceResourcesResumenDto ResourcesResumen,
@@ -41,6 +42,8 @@ public sealed record TemaWorkspaceFaseDto(Guid Id, int Orden, string Nombre);
 public sealed record TemaWorkspaceApuntesDto(string Contenido, DateTime? FechaModificacionUtc);
 
 public sealed record TemaWorkspaceHerramientaDto(Guid Id, string Nombre);
+
+public sealed record TemaWorkspaceCertificacionDto(Guid Id, string Nombre, string? Proveedor, TipoCosto TipoCosto);
 
 public sealed record TemaWorkspaceSesionDto(Guid Id, DateOnly Fecha, int DuracionMinutos, TipoSesion Tipo);
 

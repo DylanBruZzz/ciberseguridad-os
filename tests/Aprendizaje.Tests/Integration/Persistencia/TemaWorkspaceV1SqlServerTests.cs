@@ -105,6 +105,10 @@ public sealed class TemaWorkspaceV1SqlServerTests
             var herramientaWorkspace = Assert.Single(workspace.Herramientas);
             Assert.Equal(herramienta.Id, herramientaWorkspace.Id);
             Assert.Equal("Wireshark", herramientaWorkspace.Nombre);
+            var certificacionWorkspace = Assert.Single(workspace.Certificaciones);
+            Assert.Equal(certificacion.Id, certificacionWorkspace.Id);
+            Assert.Equal("Network+", certificacionWorkspace.Nombre);
+            Assert.Equal(TipoCosto.Pago, certificacionWorkspace.TipoCosto);
             Assert.NotNull(workspace.UltimaSesion);
             Assert.Equal(new DateOnly(2026, 8, 10), workspace.UltimaSesion.Fecha);
             Assert.Equal(45, workspace.UltimaSesion.DuracionMinutos);
@@ -259,7 +263,7 @@ public sealed class TemaWorkspaceV1SqlServerTests
             _ = await consulta.ObtenerAsync(usuario.Id, tema.Id, AhoraUtc, CancellationToken);
         }
 
-        Assert.True(contador.ComandosLectura <= 9, $"Se esperaban como maximo 9 comandos; se ejecutaron {contador.ComandosLectura}.");
+        Assert.True(contador.ComandosLectura <= 10, $"Se esperaban como maximo 10 comandos; se ejecutaron {contador.ComandosLectura}.");
     }
 
     private static Tema CrearTemaDominado(Guid usuarioId, Guid faseId, string nombre)

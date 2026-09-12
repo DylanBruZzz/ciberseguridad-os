@@ -72,6 +72,19 @@ public sealed class ConsultaTemaWorkspaceV1 : IConsultaTemaWorkspaceV1
             select new TemaWorkspaceHerramientaDto(herramienta.Id, herramienta.Nombre))
             .ToArrayAsync(cancellationToken);
 
+        var certificacionesRelacionadas = await (
+            from vinculacion in _context.Set<CertificacionTema>().AsNoTracking()
+            join certificacion in _context.Certificaciones.AsNoTracking()
+                on vinculacion.CertificacionId equals certificacion.Id
+            where vinculacion.TemaId == temaId
+            orderby certificacion.Nombre, certificacion.Id
+            select new TemaWorkspaceCertificacionDto(
+                certificacion.Id,
+                certificacion.Nombre,
+                certificacion.Proveedor,
+                certificacion.TipoCosto))
+            .ToArrayAsync(cancellationToken);
+
         var ultimaSesion = await _context.SesionesEstudio
             .AsNoTracking()
             .Where(s => s.TemaId == temaId && s.UsuarioId == usuarioId)
@@ -134,6 +147,7 @@ public sealed class ConsultaTemaWorkspaceV1 : IConsultaTemaWorkspaceV1
             fase,
             apunte,
             herramientas,
+            certificacionesRelacionadas,
             ultimaSesion,
             new TemaWorkspaceRepasoDto(semantica.ProximaFechaRepaso, semantica.RepasoRecomendado),
             new TemaWorkspaceResourcesResumenDto(resourcesTotal),

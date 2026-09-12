@@ -37,6 +37,14 @@ const workspace: TemaWorkspaceV1 = {
       nombre: 'Wireshark',
     },
   ],
+  certificaciones: [
+    {
+      id: '01a046d5-9bf3-7cec-aa05-10c93459fa22',
+      nombre: 'Security+',
+      proveedor: 'CompTIA',
+      tipoCosto: 'Pago',
+    },
+  ],
   ultimaSesion: {
     id: '01a046d5-9bf3-7cec-aa05-10c93459fa18',
     fecha: '2026-08-30',
@@ -126,6 +134,38 @@ describe('TemaWorkspaceService', () => {
     req.flush(null, { status: 204, statusText: 'No Content' });
   });
 
+  it('define criterios con el contrato de conjunto existente', () => {
+    service.definirCriterios(workspace.tema.id, ['Teoria', 'Practica']).subscribe((resultado) => {
+      expect(resultado).toBeUndefined();
+    });
+
+    const req = http.expectOne(`/api/temas/${workspace.tema.id}/criterios`);
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.params.has('usuarioId')).toBeFalsy();
+    expect(req.request.body).toEqual({ criterios: ['Teoria', 'Practica'] });
+    req.flush(null, { status: 204, statusText: 'No Content' });
+  });
+
+  it('marca y desmarca criterios sin enviar usuarioId', () => {
+    service.marcarCriterio(workspace.tema.id, 'Teoria').subscribe((resultado) => {
+      expect(resultado).toBeUndefined();
+    });
+
+    const marcar = http.expectOne(`/api/temas/${workspace.tema.id}/criterios/Teoria/cumplido`);
+    expect(marcar.request.method).toBe('PUT');
+    expect(marcar.request.body).toBeNull();
+    marcar.flush(null, { status: 204, statusText: 'No Content' });
+
+    service.desmarcarCriterio(workspace.tema.id, 'Teoria').subscribe((resultado) => {
+      expect(resultado).toBeUndefined();
+    });
+
+    const desmarcar = http.expectOne(`/api/temas/${workspace.tema.id}/criterios/Teoria/cumplido`);
+    expect(desmarcar.request.method).toBe('DELETE');
+    expect(desmarcar.request.params.has('usuarioId')).toBeFalsy();
+    desmarcar.flush(null, { status: 204, statusText: 'No Content' });
+  });
+
   it('desvincula herramienta de Tema sin usuarioId', () => {
     service.desvincularHerramienta(workspace.tema.id, 'herramienta-1').subscribe((resultado) => {
       expect(resultado).toBeUndefined();
@@ -135,6 +175,34 @@ describe('TemaWorkspaceService', () => {
     expect(req.request.method).toBe('DELETE');
     expect(req.request.params.has('usuarioId')).toBeFalsy();
     req.flush(null, { status: 204, statusText: 'No Content' });
+  });
+
+  it('lista y vincula certificaciones existentes sin usuarioId', () => {
+    service.listarCertificaciones().subscribe((resultado) => {
+      expect(resultado[0].nombre).toBe('Security+');
+    });
+
+    const listar = http.expectOne('/api/certificaciones');
+    expect(listar.request.method).toBe('GET');
+    listar.flush([
+      {
+        id: 'certificacion-1',
+        nombre: 'Security+',
+        proveedor: 'CompTIA',
+        tipoCosto: 'Pago',
+        url: null,
+      },
+    ]);
+
+    service.vincularCertificacion(workspace.tema.id, 'certificacion-1').subscribe((resultado) => {
+      expect(resultado).toBeUndefined();
+    });
+
+    const vincular = http.expectOne(`/api/certificaciones/certificacion-1/temas/${workspace.tema.id}`);
+    expect(vincular.request.method).toBe('PUT');
+    expect(vincular.request.params.has('usuarioId')).toBeFalsy();
+    expect(vincular.request.body).toBeNull();
+    vincular.flush(null, { status: 204, statusText: 'No Content' });
   });
 
   it('traduce 404 a tema no disponible', () => {

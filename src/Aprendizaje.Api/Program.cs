@@ -4,6 +4,7 @@ using Aprendizaje.Api.Endpoints.Resource;
 using Aprendizaje.Api.Endpoints.Roadmap;
 using Aprendizaje.Api.Endpoints.Study;
 using Aprendizaje.Api.Endpoints;
+using Aprendizaje.Api.Configuracion;
 using Aprendizaje.Aplicacion.Analytics.Certificaciones;
 using Aprendizaje.Aplicacion.Analytics.Competencias;
 using Aprendizaje.Aplicacion.Analytics.Estudio;
@@ -99,6 +100,15 @@ using Aprendizaje.Aplicacion.Study.SesionesEstudio.RegistrarSesionEstudio;
 using Aprendizaje.Aplicacion.Study.SesionesEstudio.VincularHerramientaASesionEstudio;
 using Aprendizaje.Infraestructura.Configuracion;
 using System.Text.Json.Serialization;
+
+RuntimeLocalWindows.ConfigurarEntornoPersonalSiEsEmpaquetado();
+
+using var instanciaUnica = RuntimeLocalWindows.IntentarTomarInstanciaUnica();
+if (RuntimeLocalWindows.DebeCerrarPorInstanciaExistente(instanciaUnica))
+{
+    RuntimeLocalWindows.AbrirDashboard();
+    return;
+}
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -203,6 +213,8 @@ builder.Services.AddInfraestructura(builder.Configuration);
 
 var app = builder.Build();
 
+app.UseFrontendEstatico();
+
 app.MapAnalyticsEstudioEndpoints();
 app.MapAnalyticsTemaEndpoints();
 app.MapAnalyticsCompetenciaEndpoints();
@@ -227,5 +239,11 @@ app.MapTemaWorkspaceEndpoints();
 app.MapUsuarioActualEndpoints();
 app.MapUsuarioEndpoints();
 app.MapWriteupEndpoints();
+app.MapFrontendFallback();
 
-app.Run();
+if (!await RuntimeLocalWindows.ValidarBasePersonalSiCorrespondeAsync(app))
+    return;
+
+RuntimeLocalWindows.RegistrarAperturaNavegador(app);
+
+await app.RunAsync();

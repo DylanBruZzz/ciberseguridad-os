@@ -744,6 +744,19 @@ Gate transversal sobre `fb92705 feat: establish analytics frontend v1`, iniciado
 - README raiz creado como descripcion publica del proyecto sin Email personal, GUIDs ni rutas de usuario.
 - Sin cambios de codigo, arquitectura, frontend visual, backend, migraciones ni paquetes.
 
+## Executable V1 — Windows Local Packaging
+
+- Base implementada: `9bae800 chore: prepare repository for public github`. Working tree inicialmente limpio; sin commit ni push.
+- Estrategia: ASP.NET Core sirve Angular production desde `src/Aprendizaje.Api/wwwroot` generado durante publish; API permanece same-origin bajo `/api`.
+- Script reproducible: `scripts/publish-windows.ps1` ejecuta build Angular, copia `frontend/dist/frontend/browser` a `wwwroot` generado y publica `win-x64` self-contained en `artifacts/CiberseguridadOS-win-x64`.
+- Publish validado: `CiberseguridadOS.exe`, `appsettings.json`, `appsettings.Personal.json`, runtime files self-contained, marcador `CiberseguridadOS.packaged` y `wwwroot` con assets Angular.
+- Runtime publicado validado desde la carpeta `artifacts`: environment `Personal`, URL `http://localhost:64021/dashboard`, SQL Server local `.\MSSQLSERVER01`, lectura real de `AprendizajePersonalDb`, Dashboard/API/rutas SPA/assets y deep link de Tema funcionando sin `npm start` ni `dotnet run`.
+- Fallback SPA seguro validado: rutas frontend devuelven `index.html`; `/api/ruta-inexistente` permanece 404 y no devuelve SPA.
+- Doble instancia: named Mutex evita segundo host; la segunda ejecucion termina sin pelear por el puerto. Apagado por Ctrl+C libera el host y permite reinicio posterior.
+- SQL failure UX: si el ejecutable empaquetado no puede conectar a la base local, muestra mensaje entendible sin stacktrace crudo y no ejecuta migrations, `EnsureCreated`, seed ni importador.
+- Tests: frontend `npm test` 255/255; backend `dotnet test Aprendizaje.slnx` 543/543 tras agregar tests puntuales de static files, SPA fallback, proteccion `/api` y entorno empaquetado.
+- Sin migraciones, sin paquetes nuevos, sin cambios de Dominio/Application/Infraestructura funcional ni contratos API.
+
 ## Pendientes Deliberados
 
 - tests completos de dominio;

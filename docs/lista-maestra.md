@@ -660,6 +660,7 @@
 - [x] Release Candidate V1 declarado sobre `2952de9`: Personal V1 integrado, 255/255 frontend tests, build limpio, backend baseline 535/535, packages y migrations intactos, release blockers ninguno.
 - [x] Release V1.0.0 declarado desde `v1.0.0-rc.1`: RC validado, Personal V1 integrado, 255/255 frontend tests, build limpio, backend baseline 535/535, sin nuevas features, packages ni migrations, release blockers ninguno.
 - [x] GitHub Safety / Repository Gate V1: auditoria tracked/untracked/ignored, secretos, datos personales, bases/backups, appsettings, historial, assets, `.gitignore` y README publico; sin push ni reescritura de historial.
+- [x] Executable V1 Windows: Angular production servido por ASP.NET Core same-origin, publish `win-x64` self-contained en `artifacts/CiberseguridadOS-win-x64`, environment Personal automatico en modo empaquetado, browser auto-open, fallback SPA protegido para `/api`, Mutex de instancia unica y script `scripts/publish-windows.ps1`.
 - [ ] Timer/Pomodoro, semantic/AI search, IA insights, predictive analytics, streak/goals, uploads, export/share y unlink RecursoTema permanecen diferidos junto con Light/Dock.
 
 ## 14. Importacion Roadmap original
@@ -729,4 +730,4 @@
 - [ ] Politica de autenticacion/autorizacion.
 - [ ] Auth visible/multiusuario diferida hasta exposicion remota o necesidad real.
 - [ ] Estrategia de observabilidad.
-- [ ] Operacion local/publish de frontend y backend.
+- [x] Operacion local/publish de frontend y backend.

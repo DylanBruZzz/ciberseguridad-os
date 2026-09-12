@@ -147,6 +147,15 @@ Soft delete es selectivo y solo aplica a Aggregate Roots que implementan IElimin
 - Study, Resources, Evidence y Portfolio quedan como rutas preparadas; su funcionalidad se implementara por bloques V1 posteriores.
 - El diseno visual definitivo no queda congelado por la foundation.
 
+## Distribucion Local Windows V1
+
+- La distribucion local V1 se implementa como publish de ASP.NET Core `win-x64` self-contained, no como Electron, Tauri, installer ni cambio de runtime frontend.
+- ASP.NET Core sirve Angular production desde `wwwroot` generado durante publish. El frontend conserva `API_BASE_URL = /api`, por lo que no requiere CORS en uso publicado.
+- El entorno `Personal` se selecciona automaticamente solo cuando existe el marcador de ejecucion empaquetada y el usuario no definio `ASPNETCORE_ENVIRONMENT` ni `DOTNET_ENVIRONMENT`.
+- La base de datos sigue siendo SQL Server local. No se migra a SQLite, no se ejecutan migrations automaticas, `EnsureCreated`, seed ni importador al arrancar.
+- `appsettings.Personal.json` se incluye en publish como archivo legible/editable. No debe contener secretos ni rutas de usuario.
+- Single-file, trimming y ReadyToRun quedan desactivados en V1 para preservar diagnostico, compatibilidad con EF Core/ASP.NET Core/SqlClient y archivos estaticos editables.
+
 ## Portafolio V1 Read Side
 
 - Portafolio V1 es una proyeccion de lectura sobre Evidence existente; no es Aggregate Root, no tiene tabla propia y no duplica datos.

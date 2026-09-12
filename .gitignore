@@ -4,6 +4,8 @@
 **/dist/
 **/.angular/
 **/node_modules/
+artifacts/
+src/Aprendizaje.Api/wwwroot/
 
 # Visual Studio
 .vs/

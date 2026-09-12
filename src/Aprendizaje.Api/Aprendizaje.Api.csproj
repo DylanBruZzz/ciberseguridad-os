@@ -2,9 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>CiberseguridadOS</AssemblyName>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Aprendizaje.Api</RootNamespace>
+    <BuildFrontendOnPublish Condition="'$(BuildFrontendOnPublish)' == ''">true</BuildFrontendOnPublish>
+    <FrontendProjectDir>$(MSBuildProjectDirectory)\..\..\frontend\</FrontendProjectDir>
+    <FrontendDistBrowserDir>$(FrontendProjectDir)dist\frontend\browser\</FrontendDistBrowserDir>
+    <GeneratedWebRootDir>$(MSBuildProjectDirectory)\wwwroot\</GeneratedWebRootDir>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,5 +23,48 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
+
+  <Target Name="BuildAngularFrontendForPublish"
+          BeforeTargets="ComputeFilesToPublish"
+          Condition="'$(BuildFrontendOnPublish)' == 'true'">
+    <Message Importance="high" Text="Building Angular production assets for Ciberseguridad OS." />
+
+    <Exec Command="npm ci"
+          WorkingDirectory="$(FrontendProjectDir)"
+          Condition="Exists('$(FrontendProjectDir)package-lock.json') And !Exists('$(FrontendProjectDir)node_modules')" />
+    <Exec Command="npm install"
+          WorkingDirectory="$(FrontendProjectDir)"
+          Condition="!Exists('$(FrontendProjectDir)package-lock.json') And !Exists('$(FrontendProjectDir)node_modules')" />
+    <Exec Command="npm run build" WorkingDirectory="$(FrontendProjectDir)" />
+
+    <Error Condition="!Exists('$(FrontendDistBrowserDir)index.html')"
+           Text="Angular production output was not found at $(FrontendDistBrowserDir)." />
+
+    <RemoveDir Directories="$(GeneratedWebRootDir)" Condition="Exists('$(GeneratedWebRootDir)')" />
+    <MakeDir Directories="$(GeneratedWebRootDir)" />
+
+    <ItemGroup>
+      <_AngularDistFiles Include="$(FrontendDistBrowserDir)**\*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(_AngularDistFiles)"
+          DestinationFiles="@(_AngularDistFiles->'$(GeneratedWebRootDir)%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <ItemGroup>
+      <ResolvedFileToPublish Include="$(GeneratedWebRootDir)**\*">
+        <RelativePath>wwwroot\%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="IncludePackagedMarkerForPublish" BeforeTargets="ComputeFilesToPublish">
+    <ItemGroup>
+      <ResolvedFileToPublish Include="$(MSBuildProjectDirectory)\packaging\CiberseguridadOS.packaged">
+        <RelativePath>CiberseguridadOS.packaged</RelativePath>
+        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
 
 </Project>

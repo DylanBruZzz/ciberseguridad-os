@@ -73,11 +73,36 @@ URL local:
 
 [http://localhost:4200/dashboard](http://localhost:4200/dashboard)
 
+## Ejecutable Local Windows
+
+El proyecto puede publicarse como una carpeta ejecutable local para Windows:
+
+```powershell
+cd <repo>
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\publish-windows.ps1
+```
+
+El resultado queda en:
+
+```text
+artifacts\CiberseguridadOS-win-x64
+```
+
+Para ejecutar la aplicacion publicada:
+
+```powershell
+.\artifacts\CiberseguridadOS-win-x64\CiberseguridadOS.exe
+```
+
+El ejecutable publicado inicia ASP.NET Core en modo `Personal`, sirve Angular production desde `wwwroot`, expone la API en same-origin bajo `/api` y abre `http://localhost:64021/dashboard`. No requiere `npm start` ni `dotnet run` para uso publicado.
+
+Prerequisito de datos: SQL Server local debe estar iniciado y la instancia `.\MSSQLSERVER01` debe tener disponible `AprendizajePersonalDb`. `appsettings.Personal.json` queda incluido en la carpeta publicada y puede editarse si cambia la conexion local. Esto no es un installer; es una carpeta portable de publish `win-x64` self-contained.
+
 ## Testing
 
 Frontend: 255 tests.
 
-Backend: 535 tests baseline.
+Backend: 543 tests baseline.
 
 ## Uso de IA
 

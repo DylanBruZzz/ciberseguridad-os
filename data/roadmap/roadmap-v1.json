@@ -52,15 +52,15 @@
       ],
       "temas": [
         { "sourceKey": "tema-f01-modelo-osi-tcpip", "nombre": "Modelo OSI / TCP-IP", "tipoConocimiento": "Conceptual", "objetivos": [] },
+        { "sourceKey": "tema-f01-routing-switching", "nombre": "Routing & Switching", "tipoConocimiento": "Conceptual", "objetivos": [] },
         { "sourceKey": "tema-f01-subnetting-cidr", "nombre": "Subnetting / CIDR", "tipoConocimiento": "Procedimental", "objetivos": [] },
         { "sourceKey": "tema-f01-dns-dhcp-https", "nombre": "DNS, DHCP, HTTP/S", "tipoConocimiento": "Conceptual", "objetivos": [] },
-        { "sourceKey": "tema-f01-bash-scripting", "nombre": "Bash scripting", "tipoConocimiento": "Procedimental", "objetivos": [] },
-        { "sourceKey": "tema-f01-permisos-linux", "nombre": "Permisos Linux", "tipoConocimiento": "Procedimental", "objetivos": [] },
-        { "sourceKey": "tema-f01-virtualizacion", "nombre": "Virtualización", "tipoConocimiento": "Herramienta", "objetivos": [] },
-        { "sourceKey": "tema-f01-wireshark-basics", "nombre": "Wireshark basics", "tipoConocimiento": "Herramienta", "objetivos": [] },
         { "sourceKey": "tema-f01-ssh-ftp-smb", "nombre": "SSH, FTP, SMB", "tipoConocimiento": "Conceptual", "objetivos": [] },
-        { "sourceKey": "tema-f01-routing-switching", "nombre": "Routing & Switching", "tipoConocimiento": "Conceptual", "objetivos": [] },
-        { "sourceKey": "tema-f01-firewall-basico", "nombre": "Firewall básico", "tipoConocimiento": "Conceptual", "objetivos": [] }
+        { "sourceKey": "tema-f01-permisos-linux", "nombre": "Permisos Linux", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f01-bash-scripting", "nombre": "Bash scripting", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f01-virtualizacion", "nombre": "Virtualización", "tipoConocimiento": "Herramienta", "objetivos": [] },
+        { "sourceKey": "tema-f01-firewall-basico", "nombre": "Firewall básico", "tipoConocimiento": "Conceptual", "objetivos": [] },
+        { "sourceKey": "tema-f01-wireshark-basics", "nombre": "Wireshark basics", "tipoConocimiento": "Herramienta", "objetivos": [] }
       ],
       "metadataDocumental": {
         "tags": ["Principiante", "Networking", "Linux"],
@@ -86,16 +86,16 @@
       ],
       "criteriosAvance": [],
       "temas": [
+        { "sourceKey": "tema-f02-gestion-usuarios", "nombre": "Gestión de usuarios", "tipoConocimiento": "Procedimental", "objetivos": [] },
         { "sourceKey": "tema-f02-active-directory", "nombre": "Active Directory", "tipoConocimiento": "Conceptual", "objetivos": [] },
         { "sourceKey": "tema-f02-group-policy-gpo", "nombre": "Group Policy (GPO)", "tipoConocimiento": "Procedimental", "objetivos": [] },
         { "sourceKey": "tema-f02-powershell-scripting", "nombre": "PowerShell scripting", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f02-cron-jobs", "nombre": "Cron jobs", "tipoConocimiento": "Procedimental", "objetivos": [] },
         { "sourceKey": "tema-f02-python-seguridad", "nombre": "Python para seguridad", "tipoConocimiento": "Procedimental", "objetivos": [] },
         { "sourceKey": "tema-f02-event-viewer-syslog", "nombre": "Event Viewer / Syslog", "tipoConocimiento": "Herramienta", "objetivos": [] },
         { "sourceKey": "tema-f02-hardening-ssoo", "nombre": "Hardening SSOO", "tipoConocimiento": "Procedimental", "objetivos": [] },
-        { "sourceKey": "tema-f02-cron-jobs", "nombre": "Cron jobs", "tipoConocimiento": "Procedimental", "objetivos": [] },
         { "sourceKey": "tema-f02-vmware-workstation", "nombre": "VMware Workstation", "tipoConocimiento": "Herramienta", "objetivos": [] },
-        { "sourceKey": "tema-f02-kali-linux-intro", "nombre": "Kali Linux intro", "tipoConocimiento": "Herramienta", "objetivos": [] },
-        { "sourceKey": "tema-f02-gestion-usuarios", "nombre": "Gestión de usuarios", "tipoConocimiento": "Procedimental", "objetivos": [] }
+        { "sourceKey": "tema-f02-kali-linux-intro", "nombre": "Kali Linux intro", "tipoConocimiento": "Herramienta", "objetivos": [] }
       ],
       "metadataDocumental": {
         "tags": ["Windows Server", "Python", "Active Directory"],
@@ -121,15 +121,15 @@
       ],
       "criteriosAvance": [],
       "temas": [
-        { "sourceKey": "tema-f03-mitre-attack-framework", "nombre": "MITRE ATT&CK Framework", "tipoConocimiento": "Conceptual", "objetivos": [] },
         { "sourceKey": "tema-f03-cyber-kill-chain", "nombre": "Cyber Kill Chain", "tipoConocimiento": "Conceptual", "objetivos": [] },
-        { "sourceKey": "tema-f03-splunk-wazuh", "nombre": "Splunk / Wazuh", "tipoConocimiento": "Herramienta", "objetivos": [] },
-        { "sourceKey": "tema-f03-ids-ips-snort-suricata", "nombre": "IDS/IPS (Snort/Suricata)", "tipoConocimiento": "Herramienta", "objetivos": [] },
+        { "sourceKey": "tema-f03-mitre-attack-framework", "nombre": "MITRE ATT&CK Framework", "tipoConocimiento": "Conceptual", "objetivos": [] },
         { "sourceKey": "tema-f03-threat-intelligence", "nombre": "Threat Intelligence", "tipoConocimiento": "Conceptual", "objetivos": [] },
+        { "sourceKey": "tema-f03-osint-basico", "nombre": "OSINT básico", "tipoConocimiento": "Procedimental", "objetivos": [] },
         { "sourceKey": "tema-f03-criptografia-simetrica-asimetrica", "nombre": "Criptografía simétrica/asimétrica", "tipoConocimiento": "Conceptual", "objetivos": [] },
         { "sourceKey": "tema-f03-pki-certificados-tls", "nombre": "PKI y certificados TLS", "tipoConocimiento": "Conceptual", "objetivos": [] },
-        { "sourceKey": "tema-f03-osint-basico", "nombre": "OSINT básico", "tipoConocimiento": "Procedimental", "objetivos": [] },
         { "sourceKey": "tema-f03-analisis-logs", "nombre": "Análisis de logs", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f03-splunk-wazuh", "nombre": "Splunk / Wazuh", "tipoConocimiento": "Herramienta", "objetivos": [] },
+        { "sourceKey": "tema-f03-ids-ips-snort-suricata", "nombre": "IDS/IPS (Snort/Suricata)", "tipoConocimiento": "Herramienta", "objetivos": [] },
         { "sourceKey": "tema-f03-nessus-openvas", "nombre": "Nessus / OpenVAS", "tipoConocimiento": "Herramienta", "objetivos": [] }
       ],
       "metadataDocumental": {
@@ -157,15 +157,15 @@
       "criteriosAvance": [],
       "temas": [
         { "sourceKey": "tema-f04-nmap-nessus-avanzado", "nombre": "Nmap / Nessus avanzado", "tipoConocimiento": "Herramienta", "objetivos": [] },
-        { "sourceKey": "tema-f04-metasploit-framework", "nombre": "Metasploit Framework", "tipoConocimiento": "Herramienta", "objetivos": [] },
-        { "sourceKey": "tema-f04-burp-suite-pro", "nombre": "Burp Suite Pro", "tipoConocimiento": "Herramienta", "objetivos": [] },
-        { "sourceKey": "tema-f04-sqli-xss-ssrf", "nombre": "SQLi / XSS / SSRF", "tipoConocimiento": "Procedimental", "objetivos": [] },
         { "sourceKey": "tema-f04-owasp-top-10", "nombre": "OWASP Top 10", "tipoConocimiento": "Conceptual", "objetivos": [] },
+        { "sourceKey": "tema-f04-sqli-xss-ssrf", "nombre": "SQLi / XSS / SSRF", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f04-burp-suite-pro", "nombre": "Burp Suite Pro", "tipoConocimiento": "Herramienta", "objetivos": [] },
+        { "sourceKey": "tema-f04-metasploit-framework", "nombre": "Metasploit Framework", "tipoConocimiento": "Herramienta", "objetivos": [] },
         { "sourceKey": "tema-f04-buffer-overflow-basico", "nombre": "Buffer Overflow básico", "tipoConocimiento": "Procedimental", "objetivos": [] },
         { "sourceKey": "tema-f04-ad-attacks", "nombre": "AD Attacks", "tipoConocimiento": "Procedimental", "objetivos": [] },
         { "sourceKey": "tema-f04-bloodhound-mimikatz", "nombre": "BloodHound / Mimikatz", "tipoConocimiento": "Herramienta", "objetivos": [] },
-        { "sourceKey": "tema-f04-c2-frameworks", "nombre": "C2 Frameworks (Cobalt Strike/Havoc)", "tipoConocimiento": "Herramienta", "objetivos": [] },
         { "sourceKey": "tema-f04-pivoting-tunneling", "nombre": "Pivoting & Tunneling", "tipoConocimiento": "Procedimental", "objetivos": [] },
+        { "sourceKey": "tema-f04-c2-frameworks", "nombre": "C2 Frameworks (Cobalt Strike/Havoc)", "tipoConocimiento": "Herramienta", "objetivos": [] },
         { "sourceKey": "tema-f04-escritura-reportes", "nombre": "Escritura de reportes", "tipoConocimiento": "Procedimental", "objetivos": [] }
       ],
       "metadataDocumental": {

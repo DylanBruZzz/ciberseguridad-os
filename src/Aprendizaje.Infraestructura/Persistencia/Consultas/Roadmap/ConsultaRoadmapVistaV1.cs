@@ -127,8 +127,13 @@ public sealed class ConsultaRoadmapVistaV1 : IConsultaRoadmapVistaV1
         Fase fase,
         IReadOnlyCollection<TemaRoadmapVistaV1Dto> temas)
     {
-        var totalTemas = temas.Count;
-        var temasEvaluables = temas
+        var temasOrdenados = temas
+            .OrderBy(t => RoadmapTemaOrdenV1.ObtenerOrden(fase.Orden, fase.Nombre, t.Nombre))
+            .ThenBy(t => t.Nombre)
+            .ThenBy(t => t.Id)
+            .ToArray();
+        var totalTemas = temasOrdenados.Length;
+        var temasEvaluables = temasOrdenados
             .Where(t => !EsNodoOrganizativoSinCriterios(t, temas))
             .ToArray();
         var temasDominados = temasEvaluables.Count(EsTemaCompletadoEstructuralmente);
@@ -152,7 +157,7 @@ public sealed class ConsultaRoadmapVistaV1 : IConsultaRoadmapVistaV1
             temasDominados,
             progresoPorcentaje,
             estaCompletada,
-            temas);
+            temasOrdenados);
     }
 
     private static Guid? CalcularFaseActualId(IReadOnlyCollection<FaseIntermedia> fases)

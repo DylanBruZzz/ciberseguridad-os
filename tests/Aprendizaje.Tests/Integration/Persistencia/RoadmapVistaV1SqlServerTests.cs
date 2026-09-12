@@ -368,6 +368,70 @@ public sealed class RoadmapVistaV1SqlServerTests
     }
 
     [Fact]
+    public async Task RoadmapVista_FasesUnoACuatro_OrdenaTemasPorSecuenciaPedagogicaV1()
+    {
+        await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
+        var usuario = Usuario.Registrar("Usuario orden pedagogico", EmailUnico());
+        var faseUno = Fase.Crear(usuario.Id, "Fundamentos de Informática y Redes", 1);
+        var faseCuatro = Fase.Crear(usuario.Id, "Red Team · Ethical Hacking · Pentesting", 4);
+        var faseCinco = Fase.Crear(usuario.Id, "Fase fuera de ordering V1", 5);
+        var temasFaseUno = new[]
+        {
+            CrearTemaSinCriterios(usuario.Id, faseUno.Id, "Wireshark basics"),
+            CrearTemaSinCriterios(usuario.Id, faseUno.Id, "Bash scripting"),
+            CrearTemaSinCriterios(usuario.Id, faseUno.Id, "Modelo OSI / TCP-IP"),
+            CrearTemaSinCriterios(usuario.Id, faseUno.Id, "Routing & Switching"),
+        };
+        var temasFaseCuatro = new[]
+        {
+            CrearTemaSinCriterios(usuario.Id, faseCuatro.Id, "Burp Suite Pro"),
+            CrearTemaSinCriterios(usuario.Id, faseCuatro.Id, "SQLi / XSS / SSRF"),
+            CrearTemaSinCriterios(usuario.Id, faseCuatro.Id, "Nmap / Nessus avanzado"),
+            CrearTemaSinCriterios(usuario.Id, faseCuatro.Id, "OWASP Top 10"),
+        };
+        var temasFaseCinco = new[]
+        {
+            CrearTemaSinCriterios(usuario.Id, faseCinco.Id, "Z tema"),
+            CrearTemaSinCriterios(usuario.Id, faseCinco.Id, "A tema"),
+        };
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            contexto.Usuarios.Add(usuario);
+            contexto.Fases.AddRange(faseUno, faseCuatro, faseCinco);
+            contexto.Temas.AddRange(temasFaseUno.Concat(temasFaseCuatro).Concat(temasFaseCinco));
+            await contexto.GuardarCambiosAsync(CancellationToken);
+        }
+
+        await using (var contexto = ambiente.CrearNuevoContexto())
+        {
+            var consulta = new ConsultaRoadmapVistaV1(contexto);
+
+            var vista = await consulta.ObtenerAsync(usuario.Id, AhoraUtc, CancellationToken);
+
+            Assert.Equal(
+                [
+                    "Modelo OSI / TCP-IP",
+                    "Routing & Switching",
+                    "Bash scripting",
+                    "Wireshark basics",
+                ],
+                vista.Fases.Single(f => f.Id == faseUno.Id).Temas.Select(t => t.Nombre));
+            Assert.Equal(
+                [
+                    "Nmap / Nessus avanzado",
+                    "OWASP Top 10",
+                    "SQLi / XSS / SSRF",
+                    "Burp Suite Pro",
+                ],
+                vista.Fases.Single(f => f.Id == faseCuatro.Id).Temas.Select(t => t.Nombre));
+            Assert.Equal(
+                ["A tema", "Z tema"],
+                vista.Fases.Single(f => f.Id == faseCinco.Id).Temas.Select(t => t.Nombre));
+        }
+    }
+
+    [Fact]
     public async Task RoadmapVista_ConsultaUsaNumeroConstanteDeComandos()
     {
         await using var ambiente = await AmbientePersistenciaSqlServer.CrearAsync(CancellationToken);
@@ -421,6 +485,14 @@ public sealed class RoadmapVistaV1SqlServerTests
         tema.AsignarFase(faseId);
         tema.DefinirCriteriosRelevantes([TipoCriterio.Teoria, TipoCriterio.Practica]);
         tema.MarcarCriterio(TipoCriterio.Teoria);
+
+        return tema;
+    }
+
+    private static Tema CrearTemaSinCriterios(Guid usuarioId, Guid faseId, string nombre)
+    {
+        var tema = Tema.Crear(usuarioId, nombre, TipoConocimiento.Conceptual);
+        tema.AsignarFase(faseId);
 
         return tema;
     }

@@ -98,6 +98,30 @@ El ejecutable publicado inicia ASP.NET Core en modo `Personal`, sirve Angular pr
 
 Prerequisito de datos: SQL Server local debe estar iniciado y la instancia `.\MSSQLSERVER01` debe tener disponible `AprendizajePersonalDb`. `appsettings.Personal.json` queda incluido en la carpeta publicada y puede editarse si cambia la conexion local. Esto no es un installer; es una carpeta portable de publish `win-x64` self-contained.
 
+## Backup de AprendizajePersonalDb
+
+Backup manual recomendado:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\backup-personal-db.ps1
+```
+
+El script usa Windows Authentication contra `.\MSSQLSERVER01`, descubre la carpeta nativa de backups de SQL Server, crea un backup full `COPY_ONLY` con `CHECKSUM` y ejecuta `RESTORE VERIFYONLY` con checksum. No hace restore y no toca datos de negocio.
+
+Tambien permite parametros opcionales:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\backup-personal-db.ps1 -ServerInstance ".\MSSQLSERVER01" -Database "AprendizajePersonalDb" -BackupDirectory "D:\Backups"
+```
+
+Politica operativa:
+
+- Obligatorio antes de migrations, cambios de schema o population estructural importante.
+- Recomendado semanal o quincenal durante uso frecuente, mensual con uso ligero y al cerrar hitos importantes.
+- Conservar varios backups recientes, backups pre-migration y snapshots de hitos.
+- Mantener al menos una copia privada fuera del disco principal, por ejemplo en disco externo, almacenamiento privado cifrado o nube privada personal.
+- No subir archivos `.bak` a GitHub; contienen datos Personal.
+
 ## Testing
 
 Frontend: 255 tests.

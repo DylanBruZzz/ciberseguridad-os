@@ -31,12 +31,14 @@ const workspaceBase: TemaWorkspaceV1 = {
       {
         id: '01a046d5-9bf3-7cec-aa05-10c93459fa18',
         tipo: 'Teoria',
+        descripcion: 'Explicar las capas del modelo OSI y su relacion con TCP/IP.',
         cumplido: true,
         fechaCumplidoUtc: '2026-09-01T00:00:00Z',
       },
       {
         id: '01a046d5-9bf3-7cec-aa05-10c93459fa19',
         tipo: 'Practica',
+        descripcion: 'Identificar protocolos relevantes en una captura de red.',
         cumplido: false,
         fechaCumplidoUtc: null,
       },
@@ -169,7 +171,7 @@ describe('TopicWorkspacePage', () => {
     fixture.detectChanges();
     expect(obtenerWorkspace).toHaveBeenLastCalledWith(faseId);
     expect(fixture.nativeElement.querySelector('h1').textContent).toContain('Bash');
-    expect(fixture.nativeElement.querySelector('textarea').value).toBe('Apuntes Bash');
+    expect(fixture.nativeElement.querySelector('.notes-editor textarea').value).toBe('Apuntes Bash');
     expect(anterior.observed).toBe(false);
     parametros.next(convertToParamMap({ temaId: 'invalido' }));
     fixture.detectChanges();
@@ -209,6 +211,8 @@ describe('TopicWorkspacePage', () => {
     expect(text).toContain('Diferenciar TCP y UDP');
     expect(text).toContain('Teoria');
     expect(text).toContain('Practica');
+    expect(text).toContain('Explicar las capas del modelo OSI');
+    expect(text).toContain('Identificar protocolos relevantes');
     expect(text).toContain('Cumplido');
     expect(text).toContain('Pendiente');
   });
@@ -310,7 +314,7 @@ describe('TopicWorkspacePage', () => {
     fixture = TestBed.createComponent(TopicWorkspacePage);
     fixture.detectChanges();
 
-    const textarea = fixture.nativeElement.querySelector('textarea') as HTMLTextAreaElement;
+    const textarea = fixture.nativeElement.querySelector('.notes-editor textarea') as HTMLTextAreaElement;
     expect(textarea.value).toBe('Capas, encapsulacion y troubleshooting.');
 
     textarea.value = 'Nuevo apunte';
@@ -331,7 +335,7 @@ describe('TopicWorkspacePage', () => {
     fixture = TestBed.createComponent(TopicWorkspacePage);
     fixture.detectChanges();
 
-    const textarea = fixture.nativeElement.querySelector('textarea') as HTMLTextAreaElement;
+    const textarea = fixture.nativeElement.querySelector('.notes-editor textarea') as HTMLTextAreaElement;
     textarea.value = 'Nuevo apunte';
     textarea.dispatchEvent(new Event('input'));
     fixture.detectChanges();
@@ -353,7 +357,7 @@ describe('TopicWorkspacePage', () => {
     fixture = TestBed.createComponent(TopicWorkspacePage);
     fixture.detectChanges();
 
-    const textarea = fixture.nativeElement.querySelector('textarea') as HTMLTextAreaElement;
+    const textarea = fixture.nativeElement.querySelector('.notes-editor textarea') as HTMLTextAreaElement;
     textarea.value = 'Nuevo apunte';
     textarea.dispatchEvent(new Event('input'));
     fixture.detectChanges();
@@ -454,8 +458,8 @@ describe('TopicWorkspacePage', () => {
         criteriosCumplidos: 0,
         progresoPorcentaje: 0,
         criterios: [
-          { id: 'criterio-1', tipo: 'Teoria', cumplido: false, fechaCumplidoUtc: null },
-          { id: 'criterio-2', tipo: 'Practica', cumplido: false, fechaCumplidoUtc: null },
+          { id: 'criterio-1', tipo: 'Teoria', descripcion: 'Explicar OSI.', cumplido: false, fechaCumplidoUtc: null },
+          { id: 'criterio-2', tipo: 'Practica', descripcion: 'Diagnosticar red.', cumplido: false, fechaCumplidoUtc: null },
         ],
       },
     };
@@ -472,13 +476,46 @@ describe('TopicWorkspacePage', () => {
     checks[0].click();
     checks[1].click();
     fixture.detectChanges();
+    const descripciones = fixture.nativeElement.querySelectorAll('.criteria-editor textarea') as NodeListOf<HTMLTextAreaElement>;
+    descripciones[0].value = '  Explicar OSI.  ';
+    descripciones[0].dispatchEvent(new Event('input'));
+    descripciones[1].value = 'Diagnosticar red.';
+    descripciones[1].dispatchEvent(new Event('input'));
+    fixture.detectChanges();
     fixture.nativeElement.querySelector('.criteria-editor button').click();
     fixture.detectChanges();
 
-    expect(definirCriterios).toHaveBeenCalledWith(temaId, ['Teoria', 'Practica']);
+    expect(definirCriterios).toHaveBeenCalledWith(temaId, [
+      { tipo: 'Teoria', descripcion: 'Explicar OSI.' },
+      { tipo: 'Practica', descripcion: 'Diagnosticar red.' },
+    ]);
     expect(obtenerWorkspace).toHaveBeenCalledTimes(2);
     expect(fixture.nativeElement.textContent).toContain('Teoria');
+    expect(fixture.nativeElement.textContent).toContain('Explicar OSI.');
     expect(fixture.nativeElement.textContent).toContain('0%');
+  });
+
+  it('no permite definir criterios seleccionados sin descripcion', async () => {
+    const definirCriterios = vi.fn(() => of(undefined));
+    await configure({
+      obtenerWorkspace: () => of({
+        ...workspaceBase,
+        tema: { ...workspaceBase.tema, criterios: [], criteriosTotal: 0, criteriosCumplidos: 0, progresoPorcentaje: 0 },
+      }),
+      definirCriterios,
+    });
+
+    fixture = TestBed.createComponent(TopicWorkspacePage);
+    fixture.detectChanges();
+    const checks = fixture.nativeElement.querySelectorAll('.criteria-editor input') as NodeListOf<HTMLInputElement>;
+    checks[0].click();
+    checks[1].click();
+    fixture.detectChanges();
+
+    const boton = fixture.nativeElement.querySelector('.criteria-editor button') as HTMLButtonElement;
+    expect(boton.disabled).toBe(true);
+    boton.click();
+    expect(definirCriterios).not.toHaveBeenCalled();
   });
 
   it('marca y desmarca criterios usando el backend y no recalcula progreso localmente', async () => {
@@ -544,6 +581,12 @@ describe('TopicWorkspacePage', () => {
     const checks = fixture.nativeElement.querySelectorAll('.criteria-editor input') as NodeListOf<HTMLInputElement>;
     checks[0].click();
     checks[1].click();
+    fixture.detectChanges();
+    const descripciones = fixture.nativeElement.querySelectorAll('.criteria-editor textarea') as NodeListOf<HTMLTextAreaElement>;
+    descripciones[0].value = 'Explicar teoria.';
+    descripciones[0].dispatchEvent(new Event('input'));
+    descripciones[1].value = 'Aplicar practica.';
+    descripciones[1].dispatchEvent(new Event('input'));
     fixture.detectChanges();
     fixture.nativeElement.querySelector('.criteria-editor button').click();
     fixture.detectChanges();

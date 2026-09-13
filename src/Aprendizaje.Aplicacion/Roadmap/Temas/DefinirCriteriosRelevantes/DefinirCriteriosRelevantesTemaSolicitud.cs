@@ -4,4 +4,8 @@ namespace Aprendizaje.Aplicacion.Roadmap.Temas.DefinirCriteriosRelevantes;
 
 public sealed record DefinirCriteriosRelevantesTemaSolicitud(
     Guid TemaId,
-    IReadOnlyCollection<TipoCriterio> Criterios);
+    IReadOnlyCollection<DefinicionCriterioTemaSolicitud> Criterios);
+
+public sealed record DefinicionCriterioTemaSolicitud(
+    TipoCriterio Tipo,
+    string Descripcion);

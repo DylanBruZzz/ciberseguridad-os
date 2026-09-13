@@ -5,9 +5,9 @@ import { API_BASE_URL } from '../../../core/api.config';
 import { toApiError } from '../../../core/api-error';
 import {
   CertificacionCatalogo,
+  DefinicionCriterioTema,
   HerramientaCatalogo,
   TemaWorkspaceV1,
-  TipoCriterioTema,
 } from './tema-workspace.models';
 
 @Injectable({ providedIn: 'root' })
@@ -46,7 +46,7 @@ export class TemaWorkspaceService {
     );
   }
 
-  public definirCriterios(temaId: string, criterios: TipoCriterioTema[]): Observable<void> {
+  public definirCriterios(temaId: string, criterios: DefinicionCriterioTema[]): Observable<void> {
     return this.http
       .put<void>(`${this.apiBaseUrl}/temas/${temaId}/criterios`, { criterios })
       .pipe(

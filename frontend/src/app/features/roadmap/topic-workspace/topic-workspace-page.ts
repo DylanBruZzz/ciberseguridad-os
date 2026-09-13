@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   CertificacionCatalogo,
+  DefinicionCriterioTema,
   HerramientaCatalogo,
   TemaWorkspaceCriterio,
   TemaWorkspaceEvidenceResumen,
@@ -47,6 +48,7 @@ export class TopicWorkspacePage implements OnInit {
   protected readonly estadoHerramientas = signal<EstadoHerramientas>('idle');
   protected readonly errorHerramientas = signal<string | null>(null);
   protected readonly criteriosSeleccionados = signal<TipoCriterioTema[]>([]);
+  protected readonly descripcionesCriterios = signal<Record<TipoCriterioTema, string>>(this.crearDescripcionesVacias());
   protected readonly estadoCriterios = signal<EstadoCriterios>('idle');
   protected readonly errorCriterios = signal<string | null>(null);
   protected readonly certificacionesDisponibles = signal<CertificacionCatalogo[]>([]);
@@ -104,6 +106,7 @@ export class TopicWorkspacePage implements OnInit {
       this.estadoHerramientas.set('idle');
       this.errorHerramientas.set(null);
       this.criteriosSeleccionados.set([]);
+      this.descripcionesCriterios.set(this.crearDescripcionesVacias());
       this.estadoCriterios.set('idle');
       this.errorCriterios.set(null);
       this.filtroCertificacion.set('');
@@ -217,8 +220,34 @@ export class TopicWorkspacePage implements OnInit {
     this.errorCriterios.set(null);
   }
 
+  protected onDescripcionCriterioInput(tipo: TipoCriterioTema, event: Event): void {
+    const target = event.target;
+
+    if (!(target instanceof HTMLTextAreaElement)) {
+      return;
+    }
+
+    this.descripcionesCriterios.update((actuales) => ({
+      ...actuales,
+      [tipo]: target.value,
+    }));
+    this.estadoCriterios.set('idle');
+    this.errorCriterios.set(null);
+  }
+
   protected criterioEstaSeleccionado(tipo: TipoCriterioTema): boolean {
     return this.criteriosSeleccionados().includes(tipo);
+  }
+
+  protected descripcionCriterio(tipo: TipoCriterioTema): string {
+    return this.descripcionesCriterios()[tipo] ?? '';
+  }
+
+  protected criteriosListosParaGuardar(): boolean {
+    const seleccionados = this.criteriosSeleccionados();
+
+    return seleccionados.length >= 2
+      && seleccionados.every((tipo) => this.descripcionCriterio(tipo).trim().length > 0);
   }
 
   protected definirCriterios(): void {
@@ -232,7 +261,12 @@ export class TopicWorkspacePage implements OnInit {
     this.estadoCriterios.set('guardando');
     this.errorCriterios.set(null);
 
-    this.workspaceService.definirCriterios(temaId, this.criteriosSeleccionados()).subscribe({
+    const criterios = this.criteriosSeleccionados().map<DefinicionCriterioTema>((tipo) => ({
+      tipo,
+      descripcion: this.descripcionCriterio(tipo).trim(),
+    }));
+
+    this.workspaceService.definirCriterios(temaId, criterios).subscribe({
       next: () => this.recargarWorkspaceTrasAccion(cambioTema, () => this.estadoCriterios.set('idle')),
       error: (error: Error) => {
         if (cambioTema !== this.cambioTema) return;
@@ -514,6 +548,14 @@ export class TopicWorkspacePage implements OnInit {
         .map((criterio) => criterio.tipo)
         .filter((tipo): tipo is TipoCriterioTema => this.esTipoCriterioTema(tipo)),
     );
+    this.descripcionesCriterios.set({
+      ...this.crearDescripcionesVacias(),
+      ...Object.fromEntries(
+        workspace.tema.criterios
+          .filter((criterio) => this.esTipoCriterioTema(criterio.tipo))
+          .map((criterio) => [criterio.tipo, criterio.descripcion ?? '']),
+      ),
+    });
 
     if (sincronizarApuntes) {
       this.borradorApuntes.set(workspace.apuntes.contenido);
@@ -564,6 +606,16 @@ export class TopicWorkspacePage implements OnInit {
 
   private esTipoCriterioTema(tipo: string): tipo is TipoCriterioTema {
     return (this.tiposCriterio as readonly string[]).includes(tipo);
+  }
+
+  private crearDescripcionesVacias(): Record<TipoCriterioTema, string> {
+    return {
+      Teoria: '',
+      Practica: '',
+      Explicacion: '',
+      Ejercicios: '',
+      Laboratorio: '',
+    };
   }
 
   private textoConteo(total: number, singular: string, plural: string): string | null {

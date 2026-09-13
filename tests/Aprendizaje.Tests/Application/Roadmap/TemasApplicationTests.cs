@@ -396,7 +396,7 @@ public sealed class TemasApplicationTests
 
         var resultado = await casoUso.EjecutarAsync(new DefinirCriteriosRelevantesTemaSolicitud(
             Guid.CreateVersion7(),
-            [TipoCriterio.Teoria, TipoCriterio.Practica]), CancellationToken);
+            [Criterio(TipoCriterio.Teoria), Criterio(TipoCriterio.Practica)]), CancellationToken);
 
         Assert.Equal(DefinirCriteriosRelevantesTemaEstado.TemaNoEncontrado, resultado.Estado);
         Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
@@ -413,10 +413,11 @@ public sealed class TemasApplicationTests
 
         var resultado = await casoUso.EjecutarAsync(new DefinirCriteriosRelevantesTemaSolicitud(
             tema.Id,
-            [TipoCriterio.Teoria, TipoCriterio.Practica]), CancellationToken);
+            [Criterio(TipoCriterio.Teoria, "  Explicar OSI  "), Criterio(TipoCriterio.Practica, "Diagnosticar conectividad")]), CancellationToken);
 
         Assert.Equal(DefinirCriteriosRelevantesTemaEstado.Actualizado, resultado.Estado);
         Assert.Equal(2, tema.Criterios.Count);
+        Assert.Equal("Explicar OSI", tema.Criterios.Single(c => c.Tipo == TipoCriterio.Teoria).Descripcion);
         Assert.Equal(1, unitOfWork.GuardarCambiosLlamadas);
     }
 
@@ -432,7 +433,7 @@ public sealed class TemasApplicationTests
 
         var resultado = await casoUso.EjecutarAsync(new DefinirCriteriosRelevantesTemaSolicitud(
             tema.Id,
-            [TipoCriterio.Explicacion, TipoCriterio.Ejercicios]), CancellationToken);
+            [Criterio(TipoCriterio.Explicacion), Criterio(TipoCriterio.Ejercicios)]), CancellationToken);
 
         Assert.Equal(DefinirCriteriosRelevantesTemaEstado.ProgresoRegistrado, resultado.Estado);
         Assert.Equal(0, unitOfWork.GuardarCambiosLlamadas);
@@ -517,8 +518,14 @@ public sealed class TemasApplicationTests
     private static Tema CrearTemaConCriterios()
     {
         var tema = CrearTema();
-        tema.DefinirCriteriosRelevantes([TipoCriterio.Teoria, TipoCriterio.Practica]);
+        tema.DefinirCriteriosRelevantes([CriterioDominio(TipoCriterio.Teoria), CriterioDominio(TipoCriterio.Practica)]);
 
         return tema;
     }
+
+    private static DefinicionCriterioTemaSolicitud Criterio(TipoCriterio tipo, string? descripcion = null) =>
+        new(tipo, descripcion ?? $"Descripcion {tipo}");
+
+    private static DefinicionCriterioTema CriterioDominio(TipoCriterio tipo, string? descripcion = null) =>
+        new(tipo, descripcion ?? $"Descripcion {tipo}");
 }

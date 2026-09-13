@@ -69,19 +69,19 @@ public sealed class RoadmapVistaV1SqlServerTests
         temaParcial.ActualizarDificultadPercibida(NivelPercepcion.Crear(4));
         temaParcial.ActualizarConfianza(NivelPercepcion.Crear(2));
         temaParcial.ConfigurarIntervaloRepaso(IntervaloRepaso.Crear(15));
-        temaParcial.DefinirCriteriosRelevantes([TipoCriterio.Teoria, TipoCriterio.Practica]);
+        temaParcial.DefinirCriteriosRelevantes([Criterio(TipoCriterio.Teoria), Criterio(TipoCriterio.Practica)]);
         temaParcial.MarcarCriterio(TipoCriterio.Teoria);
 
         var temaDominado = Tema.Crear(usuario.Id, "C - Dominado", TipoConocimiento.Conceptual);
         temaDominado.AsignarFase(faseDos.Id);
-        temaDominado.DefinirCriteriosRelevantes([TipoCriterio.Teoria, TipoCriterio.Explicacion]);
+        temaDominado.DefinirCriteriosRelevantes([Criterio(TipoCriterio.Teoria), Criterio(TipoCriterio.Explicacion)]);
         temaDominado.MarcarCriterio(TipoCriterio.Teoria);
         temaDominado.MarcarCriterio(TipoCriterio.Explicacion);
 
         var temaEnRepaso = Tema.Crear(usuario.Id, "D - Repaso", TipoConocimiento.Herramienta);
         temaEnRepaso.AsignarFase(faseDos.Id);
         temaEnRepaso.ConfigurarIntervaloRepaso(IntervaloRepaso.Crear(10));
-        temaEnRepaso.DefinirCriteriosRelevantes([TipoCriterio.Teoria, TipoCriterio.Laboratorio]);
+        temaEnRepaso.DefinirCriteriosRelevantes([Criterio(TipoCriterio.Teoria), Criterio(TipoCriterio.Laboratorio)]);
         temaEnRepaso.MarcarCriterio(TipoCriterio.Teoria);
         temaEnRepaso.MarcarCriterio(TipoCriterio.Laboratorio);
 
@@ -472,7 +472,7 @@ public sealed class RoadmapVistaV1SqlServerTests
     {
         var tema = Tema.Crear(usuarioId, nombre, TipoConocimiento.Conceptual);
         tema.AsignarFase(faseId);
-        tema.DefinirCriteriosRelevantes([TipoCriterio.Teoria, TipoCriterio.Practica]);
+        tema.DefinirCriteriosRelevantes([Criterio(TipoCriterio.Teoria), Criterio(TipoCriterio.Practica)]);
         tema.MarcarCriterio(TipoCriterio.Teoria);
         tema.MarcarCriterio(TipoCriterio.Practica);
 
@@ -483,7 +483,7 @@ public sealed class RoadmapVistaV1SqlServerTests
     {
         var tema = Tema.Crear(usuarioId, nombre, TipoConocimiento.Conceptual);
         tema.AsignarFase(faseId);
-        tema.DefinirCriteriosRelevantes([TipoCriterio.Teoria, TipoCriterio.Practica]);
+        tema.DefinirCriteriosRelevantes([Criterio(TipoCriterio.Teoria), Criterio(TipoCriterio.Practica)]);
         tema.MarcarCriterio(TipoCriterio.Teoria);
 
         return tema;
@@ -534,6 +534,9 @@ public sealed class RoadmapVistaV1SqlServerTests
     }
 
     private static string EmailUnico() => $"roadmap-vista-{Guid.CreateVersion7():N}@local.test";
+
+    private static DefinicionCriterioTema Criterio(TipoCriterio tipo) =>
+        new(tipo, $"Descripcion {tipo}");
 
     private static CancellationToken CancellationToken => TestContext.Current.CancellationToken;
 }

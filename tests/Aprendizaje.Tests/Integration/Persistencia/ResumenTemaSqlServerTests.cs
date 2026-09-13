@@ -34,7 +34,11 @@ public sealed class ResumenTemaSqlServerTests
         temaA.IniciarEstudio(fechaInicio);
         temaA.FinalizarEstudio(fechaFin);
         temaA.ConfigurarIntervaloRepaso(IntervaloRepaso.Crear(21));
-        temaA.DefinirCriteriosRelevantes([TipoCriterio.Teoria, TipoCriterio.Practica, TipoCriterio.Laboratorio]);
+        temaA.DefinirCriteriosRelevantes([
+            Criterio(TipoCriterio.Teoria),
+            Criterio(TipoCriterio.Practica),
+            Criterio(TipoCriterio.Laboratorio)
+        ]);
         temaA.MarcarCriterio(TipoCriterio.Teoria);
         temaA.MarcarCriterio(TipoCriterio.Practica);
 
@@ -224,6 +228,9 @@ public sealed class ResumenTemaSqlServerTests
     }
 
     private static string EmailUnico() => $"analytics-tema-{Guid.CreateVersion7():N}@local.test";
+
+    private static DefinicionCriterioTema Criterio(TipoCriterio tipo) =>
+        new(tipo, $"Descripcion {tipo}");
 
     private static CancellationToken CancellationToken => TestContext.Current.CancellationToken;
 }

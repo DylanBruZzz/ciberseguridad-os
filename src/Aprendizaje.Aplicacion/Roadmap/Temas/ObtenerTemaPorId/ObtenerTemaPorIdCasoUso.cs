@@ -35,7 +35,7 @@ public sealed class ObtenerTemaPorIdCasoUso
             tema.Confianza?.Valor,
             tema.IntervaloRepaso?.Dias,
             tema.Criterios
-                .Select(c => new CriterioTemaDetalle(c.Tipo, c.Cumplido, c.FechaCumplido))
+                .Select(c => new CriterioTemaDetalle(c.Tipo, c.Descripcion, c.Cumplido, c.FechaCumplido))
                 .ToArray());
 
         return ObtenerTemaPorIdResultado.EncontradoCon(detalle);

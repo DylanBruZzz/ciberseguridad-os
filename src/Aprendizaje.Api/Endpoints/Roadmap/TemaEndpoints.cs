@@ -571,7 +571,7 @@ public static class TemaEndpoints
     private sealed record GuardarApuntesTemaHttpRequest(string? Contenido);
 
     private sealed record DefinirCriteriosRelevantesTemaHttpRequest(
-        IReadOnlyCollection<TipoCriterio>? Criterios);
+        IReadOnlyCollection<DefinicionCriterioTemaSolicitud>? Criterios);
 
     private sealed record AsignarTemaAFaseHttpRequest(Guid FaseId);
 

@@ -25,6 +25,9 @@ public sealed class CriterioTemaConfiguration : IEntityTypeConfiguration<Criteri
             .HasMaxLength(20)
             .HasConversion<string>(); // enum como string, convención 9
 
+        builder.Property(c => c.Descripcion)
+            .HasMaxLength(CriterioTema.DescripcionMaxLength);
+
         builder.Property(c => c.Cumplido)
             .IsRequired()
             .HasDefaultValue(false);

@@ -80,11 +80,12 @@ public sealed class TemaTests
     {
         var tema = CrearTema();
 
-        tema.DefinirCriteriosRelevantes([TipoCriterio.Teoria, TipoCriterio.Practica]);
+        tema.DefinirCriteriosRelevantes([Criterio(TipoCriterio.Teoria, "  Explicar el modelo OSI  "), Criterio(TipoCriterio.Practica, "Aplicar el modelo en diagnostico")]);
 
         Assert.Equal(2, tema.Criterios.Count);
         Assert.Contains(tema.Criterios, criterio => criterio.Tipo == TipoCriterio.Teoria);
         Assert.Contains(tema.Criterios, criterio => criterio.Tipo == TipoCriterio.Practica);
+        Assert.Contains(tema.Criterios, criterio => criterio.Descripcion == "Explicar el modelo OSI");
         Assert.All(tema.Criterios, criterio =>
         {
             Assert.False(criterio.Cumplido);
@@ -98,11 +99,11 @@ public sealed class TemaTests
         var tema = CrearTema();
 
         tema.DefinirCriteriosRelevantes([
-            TipoCriterio.Teoria,
-            TipoCriterio.Practica,
-            TipoCriterio.Explicacion,
-            TipoCriterio.Ejercicios,
-            TipoCriterio.Laboratorio
+            Criterio(TipoCriterio.Teoria),
+            Criterio(TipoCriterio.Practica),
+            Criterio(TipoCriterio.Explicacion),
+            Criterio(TipoCriterio.Ejercicios),
+            Criterio(TipoCriterio.Laboratorio)
         ]);
 
         Assert.Equal(5, tema.Criterios.Count);
@@ -114,13 +115,14 @@ public sealed class TemaTests
         var tema = CrearTema();
 
         tema.DefinirCriteriosRelevantes([
-            TipoCriterio.Teoria,
-            TipoCriterio.Teoria,
-            TipoCriterio.Practica,
-            TipoCriterio.Practica
+            Criterio(TipoCriterio.Teoria, "Primera descripcion"),
+            Criterio(TipoCriterio.Teoria, "Descripcion duplicada ignorada"),
+            Criterio(TipoCriterio.Practica),
+            Criterio(TipoCriterio.Practica)
         ]);
 
         Assert.Equal([TipoCriterio.Teoria, TipoCriterio.Practica], tema.Criterios.Select(c => c.Tipo));
+        Assert.Equal("Primera descripcion", ObtenerCriterio(tema, TipoCriterio.Teoria).Descripcion);
     }
 
     [Fact]
@@ -129,7 +131,28 @@ public sealed class TemaTests
         var tema = CrearTema();
 
         Assert.Throws<ArgumentException>(() =>
-            tema.DefinirCriteriosRelevantes([TipoCriterio.Teoria, TipoCriterio.Teoria]));
+            tema.DefinirCriteriosRelevantes([Criterio(TipoCriterio.Teoria), Criterio(TipoCriterio.Teoria)]));
+    }
+
+    [Fact]
+    public void DefinirCriteriosRelevantes_DebeRechazarDescripcionVacia()
+    {
+        var tema = CrearTema();
+
+        Assert.Throws<ArgumentException>(() =>
+            tema.DefinirCriteriosRelevantes([Criterio(TipoCriterio.Teoria, " "), Criterio(TipoCriterio.Practica)]));
+    }
+
+    [Fact]
+    public void DefinirCriteriosRelevantes_DebeRechazarDescripcionDemasiadoLarga()
+    {
+        var tema = CrearTema();
+
+        Assert.Throws<ArgumentException>(() =>
+            tema.DefinirCriteriosRelevantes([
+                Criterio(TipoCriterio.Teoria, new string('a', CriterioTema.DescripcionMaxLength + 1)),
+                Criterio(TipoCriterio.Practica)
+            ]));
     }
 
     [Fact]
@@ -142,6 +165,7 @@ public sealed class TemaTests
 
         var criterio = ObtenerCriterio(tema, TipoCriterio.Teoria);
         Assert.True(criterio.Cumplido);
+        Assert.Equal("Descripcion Teoria", criterio.Descripcion);
         Assert.NotNull(criterio.FechaCumplido);
         Assert.True(criterio.FechaCumplido >= antes);
         Assert.False(ObtenerCriterio(tema, TipoCriterio.Practica).Cumplido);
@@ -177,6 +201,7 @@ public sealed class TemaTests
 
         var criterio = ObtenerCriterio(tema, TipoCriterio.Teoria);
         Assert.False(criterio.Cumplido);
+        Assert.Equal("Descripcion Teoria", criterio.Descripcion);
         Assert.Null(criterio.FechaCumplido);
     }
 
@@ -193,7 +218,7 @@ public sealed class TemaTests
     {
         var tema = CrearTemaConCriterios();
 
-        tema.DefinirCriteriosRelevantes([TipoCriterio.Explicacion, TipoCriterio.Ejercicios]);
+        tema.DefinirCriteriosRelevantes([Criterio(TipoCriterio.Explicacion), Criterio(TipoCriterio.Ejercicios)]);
 
         Assert.Equal([TipoCriterio.Explicacion, TipoCriterio.Ejercicios], tema.Criterios.Select(c => c.Tipo));
     }
@@ -205,7 +230,7 @@ public sealed class TemaTests
         tema.MarcarCriterio(TipoCriterio.Teoria);
 
         Assert.Throws<InvalidOperationException>(() =>
-            tema.DefinirCriteriosRelevantes([TipoCriterio.Explicacion, TipoCriterio.Ejercicios]));
+            tema.DefinirCriteriosRelevantes([Criterio(TipoCriterio.Explicacion), Criterio(TipoCriterio.Ejercicios)]));
     }
 
     [Fact]
@@ -358,10 +383,13 @@ public sealed class TemaTests
     private static Tema CrearTemaConCriterios()
     {
         var tema = CrearTema();
-        tema.DefinirCriteriosRelevantes([TipoCriterio.Teoria, TipoCriterio.Practica]);
+        tema.DefinirCriteriosRelevantes([Criterio(TipoCriterio.Teoria), Criterio(TipoCriterio.Practica)]);
 
         return tema;
     }
+
+    private static DefinicionCriterioTema Criterio(TipoCriterio tipo, string? descripcion = null) =>
+        new(tipo, descripcion ?? $"Descripcion {tipo}");
 
     private static CriterioTema ObtenerCriterio(Tema tema, TipoCriterio tipo) =>
         tema.Criterios.Single(criterio => criterio.Tipo == tipo);

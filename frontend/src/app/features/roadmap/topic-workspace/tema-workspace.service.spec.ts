@@ -134,15 +134,23 @@ describe('TemaWorkspaceService', () => {
     req.flush(null, { status: 204, statusText: 'No Content' });
   });
 
-  it('define criterios con el contrato de conjunto existente', () => {
-    service.definirCriterios(workspace.tema.id, ['Teoria', 'Practica']).subscribe((resultado) => {
+  it('define criterios con tipo y descripcion', () => {
+    service.definirCriterios(workspace.tema.id, [
+      { tipo: 'Teoria', descripcion: 'Explicar el modelo OSI.' },
+      { tipo: 'Practica', descripcion: 'Diagnosticar conectividad.' },
+    ]).subscribe((resultado) => {
       expect(resultado).toBeUndefined();
     });
 
     const req = http.expectOne(`/api/temas/${workspace.tema.id}/criterios`);
     expect(req.request.method).toBe('PUT');
     expect(req.request.params.has('usuarioId')).toBeFalsy();
-    expect(req.request.body).toEqual({ criterios: ['Teoria', 'Practica'] });
+    expect(req.request.body).toEqual({
+      criterios: [
+        { tipo: 'Teoria', descripcion: 'Explicar el modelo OSI.' },
+        { tipo: 'Practica', descripcion: 'Diagnosticar conectividad.' },
+      ],
+    });
     req.flush(null, { status: 204, statusText: 'No Content' });
   });
 

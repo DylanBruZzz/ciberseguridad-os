@@ -31,6 +31,7 @@ export interface TemaWorkspaceTema {
 export interface TemaWorkspaceCriterio {
   id: string;
   tipo: string;
+  descripcion: string | null;
   cumplido: boolean;
   fechaCumplidoUtc: string | null;
 }
@@ -81,6 +82,11 @@ export const tiposCriterioTema = [
 ] as const;
 
 export type TipoCriterioTema = (typeof tiposCriterioTema)[number];
+
+export interface DefinicionCriterioTema {
+  tipo: TipoCriterioTema;
+  descripcion: string;
+}
 
 export interface TemaWorkspaceSesion {
   id: string;

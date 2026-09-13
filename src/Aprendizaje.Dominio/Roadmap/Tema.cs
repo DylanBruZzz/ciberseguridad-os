@@ -140,22 +140,28 @@ public sealed class Tema : AggregateRoot, IEliminableLogicamente
     /// Solo se permite mientras ningún criterio tenga progreso registrado, para no descartar
     /// silenciosamente avance ya hecho.
     /// </summary>
-    public void DefinirCriteriosRelevantes(IReadOnlyCollection<TipoCriterio> tipos)
+    public void DefinirCriteriosRelevantes(IReadOnlyCollection<DefinicionCriterioTema> criterios)
     {
         if (_criterios.Any(c => c.Cumplido))
             throw new InvalidOperationException(
                 "No se pueden redefinir los criterios relevantes mientras exista progreso registrado.");
 
-        var distintos = tipos.Distinct().ToList();
+        var distintos = criterios
+            .GroupBy(c => c.Tipo)
+            .Select(g => g.First())
+            .ToList();
 
         if (distintos.Count is < MinimoCriteriosRelevantes or > MaximoCriteriosRelevantes)
             throw new ArgumentException(
                 $"Un Tema debe tener entre {MinimoCriteriosRelevantes} y {MaximoCriteriosRelevantes} criterios relevantes.",
-                nameof(tipos));
+                nameof(criterios));
 
         _criterios.Clear();
-        _criterios.AddRange(distintos.Select(tipo => new CriterioTema(Id, tipo)));
+        _criterios.AddRange(distintos.Select(criterio => new CriterioTema(Id, criterio.Tipo, criterio.Descripcion)));
     }
+
+    public void ActualizarDescripcionCriterio(TipoCriterio tipo, string descripcion) =>
+        ObtenerCriterioRelevante(tipo).ActualizarDescripcion(descripcion);
 
     /// <summary>
     /// Marca un criterio como cumplido. Operación idempotente: si ya estaba cumplido, no hace

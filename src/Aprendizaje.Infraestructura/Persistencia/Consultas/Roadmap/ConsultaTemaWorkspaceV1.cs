@@ -123,7 +123,7 @@ public sealed class ConsultaTemaWorkspaceV1 : IConsultaTemaWorkspaceV1
         var criterios = tema.Criterios
             .OrderBy(c => c.Tipo)
             .ThenBy(c => c.Id)
-            .Select(c => new TemaWorkspaceCriterioDto(c.Id, c.Tipo, c.Cumplido, c.FechaCumplido))
+            .Select(c => new TemaWorkspaceCriterioDto(c.Id, c.Tipo, c.Descripcion, c.Cumplido, c.FechaCumplido))
             .ToArray();
 
         var temaDto = new TemaWorkspaceTemaDto(

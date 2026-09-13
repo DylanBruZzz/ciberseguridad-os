@@ -106,6 +106,9 @@
                 <li [class.done]="criterio.cumplido">
                   <span class="criterion-status">{{ criterio.cumplido ? 'Cumplido' : 'Pendiente' }}</span>
                   <span class="criterion-type">{{ criterio.tipo }}</span>
+                  @if (criterio.descripcion) {
+                    <span class="criterion-date">{{ criterio.descripcion }}</span>
+                  }
                   <span class="criterion-date">{{ criterio.cumplido ? fechaHora(criterio.fechaCumplidoUtc) : 'Sin fecha de cumplimiento' }}</span>
                   <button
                     type="button"
@@ -123,19 +126,30 @@
 
           <div class="criteria-editor" aria-label="Definir criterios del tema">
             @for (tipo of tiposCriterio; track tipo) {
-              <label>
-                <input
-                  type="checkbox"
-                  [checked]="criterioEstaSeleccionado(tipo)"
-                  [disabled]="estadoCriterios() === 'guardando'"
-                  (change)="onCriterioSeleccionChange(tipo, $event)"
-                />
-                <span>{{ tipo }}</span>
-              </label>
+              <div class="criteria-editor-row">
+                <label>
+                  <input
+                    type="checkbox"
+                    [checked]="criterioEstaSeleccionado(tipo)"
+                    [disabled]="estadoCriterios() === 'guardando'"
+                    (change)="onCriterioSeleccionChange(tipo, $event)"
+                  />
+                  <span>{{ tipo }}</span>
+                </label>
+                @if (criterioEstaSeleccionado(tipo)) {
+                  <textarea
+                    rows="2"
+                    [value]="descripcionCriterio(tipo)"
+                    [disabled]="estadoCriterios() === 'guardando'"
+                    (input)="onDescripcionCriterioInput(tipo, $event)"
+                    placeholder="Objetivo observable para este criterio"
+                  ></textarea>
+                }
+              </div>
             }
             <button
               type="button"
-              [disabled]="criteriosSeleccionados().length < 2 || estadoCriterios() === 'guardando'"
+              [disabled]="!criteriosListosParaGuardar() || estadoCriterios() === 'guardando'"
               (click)="definirCriterios()"
             >
               {{ estadoCriterios() === 'guardando' ? 'Actualizando...' : 'Definir criterios' }}

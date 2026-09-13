@@ -34,6 +34,7 @@ public sealed record TemaWorkspaceTemaDto(
 public sealed record TemaWorkspaceCriterioDto(
     Guid Id,
     TipoCriterio Tipo,
+    string? Descripcion,
     bool Cumplido,
     DateTime? FechaCumplidoUtc);
 

@@ -1,4 +1,5 @@
 using Aprendizaje.Aplicacion.Comun;
+using Aprendizaje.Dominio.Roadmap;
 using Aprendizaje.Dominio.Roadmap.Repositorios;
 
 namespace Aprendizaje.Aplicacion.Roadmap.Temas.DefinirCriteriosRelevantes;
@@ -31,7 +32,10 @@ public sealed class DefinirCriteriosRelevantesTemaCasoUso
 
         try
         {
-            tema.DefinirCriteriosRelevantes(solicitud.Criterios);
+            tema.DefinirCriteriosRelevantes(
+                solicitud.Criterios
+                    .Select(c => new DefinicionCriterioTema(c.Tipo, c.Descripcion))
+                    .ToArray());
         }
         catch (InvalidOperationException)
         {

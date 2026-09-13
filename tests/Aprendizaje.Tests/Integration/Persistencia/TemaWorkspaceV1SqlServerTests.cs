@@ -94,6 +94,8 @@ public sealed class TemaWorkspaceV1SqlServerTests
             Assert.Equal(2, workspace.Tema.CriteriosCumplidos);
             Assert.Equal(100, workspace.Tema.ProgresoPorcentaje);
             Assert.Equal(["Entender TCP", "Diagnosticar conectividad"], workspace.Tema.Objetivos);
+            Assert.Contains(workspace.Tema.Criterios, c => c.Descripcion == "Explicar el modelo TCP/IP y su uso en diagnostico.");
+            Assert.Contains(workspace.Tema.Criterios, c => c.Descripcion == "Diagnosticar conectividad basica con comandos de red.");
             Assert.All(workspace.Tema.Criterios, c => Assert.True(c.Cumplido));
             Assert.All(workspace.Tema.Criterios, c => Assert.NotNull(c.FechaCumplidoUtc));
             Assert.NotNull(workspace.Fase);
@@ -270,7 +272,10 @@ public sealed class TemaWorkspaceV1SqlServerTests
     {
         var tema = Tema.Crear(usuarioId, nombre, TipoConocimiento.Conceptual);
         tema.AsignarFase(faseId);
-        tema.DefinirCriteriosRelevantes([TipoCriterio.Teoria, TipoCriterio.Practica]);
+        tema.DefinirCriteriosRelevantes([
+            Criterio(TipoCriterio.Teoria, "Explicar el modelo TCP/IP y su uso en diagnostico."),
+            Criterio(TipoCriterio.Practica, "Diagnosticar conectividad basica con comandos de red.")
+        ]);
         tema.MarcarCriterio(TipoCriterio.Teoria);
         tema.MarcarCriterio(TipoCriterio.Practica);
 
@@ -350,6 +355,9 @@ public sealed class TemaWorkspaceV1SqlServerTests
 
     private static void EstablecerObjetivosParaPrueba(Tema tema) =>
         tema.EstablecerObjetivos(["Entender TCP", "Diagnosticar conectividad"]);
+
+    private static DefinicionCriterioTema Criterio(TipoCriterio tipo, string descripcion) =>
+        new(tipo, descripcion);
 
     private static string EmailUnico() => $"tema-workspace-{Guid.CreateVersion7():N}@local.test";
 

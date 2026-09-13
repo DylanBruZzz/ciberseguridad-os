@@ -94,70 +94,94 @@
         <section class="content-block">
           <div class="section-heading">
             <div>
-              <h2>Criterios de dominio</h2>
-              <p>Gestion</p>
+              <h2>{{ modoEdicionCriterios() ? 'Editar criterios' : 'Criterios de dominio' }}</h2>
             </div>
             <span>{{ actual.tema.criteriosCumplidos }} de {{ actual.tema.criteriosTotal }}</span>
           </div>
 
-          @if (actual.tema.criterios.length > 0) {
-            <ul class="criteria-list">
-              @for (criterio of actual.tema.criterios; track trackByCriterio($index, criterio)) {
-                <li [class.done]="criterio.cumplido">
-                  <span class="criterion-status">{{ criterio.cumplido ? 'Cumplido' : 'Pendiente' }}</span>
-                  <span class="criterion-type">{{ criterio.tipo }}</span>
-                  @if (criterio.descripcion) {
-                    <span class="criterion-date">{{ criterio.descripcion }}</span>
-                  }
-                  <span class="criterion-date">{{ criterio.cumplido ? fechaHora(criterio.fechaCumplidoUtc) : 'Sin fecha de cumplimiento' }}</span>
-                  <button
-                    type="button"
-                    [disabled]="estadoCriterios() === 'guardando'"
-                    (click)="cambiarCumplimientoCriterio(criterio)"
-                  >
-                    {{ criterio.cumplido ? 'Desmarcar' : 'Marcar' }}
-                  </button>
-                </li>
-              }
-            </ul>
-          } @else {
-            <p class="muted">Aún no hay criterios definidos para este tema.</p>
-          }
-
-          <div class="criteria-editor" aria-label="Definir criterios del tema">
-            @for (tipo of tiposCriterio; track tipo) {
-              <div class="criteria-editor-row">
-                <label>
-                  <input
-                    type="checkbox"
-                    [checked]="criterioEstaSeleccionado(tipo)"
-                    [disabled]="estadoCriterios() === 'guardando'"
-                    (change)="onCriterioSeleccionChange(tipo, $event)"
-                  />
-                  <span>{{ tipo }}</span>
-                </label>
-                @if (criterioEstaSeleccionado(tipo)) {
-                  <textarea
-                    rows="2"
-                    [value]="descripcionCriterio(tipo)"
-                    [disabled]="estadoCriterios() === 'guardando'"
-                    (input)="onDescripcionCriterioInput(tipo, $event)"
-                    placeholder="Objetivo observable para este criterio"
-                  ></textarea>
+          @if (!modoEdicionCriterios()) {
+            @if (actual.tema.criterios.length > 0) {
+              <ul class="criteria-list">
+                @for (criterio of actual.tema.criterios; track trackByCriterio($index, criterio)) {
+                  <li [class.done]="criterio.cumplido">
+                    <span class="criterion-status">{{ criterio.cumplido ? 'Cumplido' : 'Pendiente' }}</span>
+                    <span class="criterion-type">{{ criterio.tipo }}</span>
+                    @if (criterio.descripcion) {
+                      <span class="criterion-date">{{ criterio.descripcion }}</span>
+                    }
+                    <span class="criterion-date">{{ criterio.cumplido ? fechaHora(criterio.fechaCumplidoUtc) : 'Sin fecha de cumplimiento' }}</span>
+                    <button
+                      type="button"
+                      [disabled]="estadoCriterios() === 'guardando'"
+                      (click)="cambiarCumplimientoCriterio(criterio)"
+                    >
+                      {{ criterio.cumplido ? 'Desmarcar' : 'Marcar' }}
+                    </button>
+                  </li>
                 }
+              </ul>
+              <div class="notes-actions">
+                <button type="button" [disabled]="estadoCriterios() === 'guardando'" (click)="entrarModoEdicionCriterios()">Editar criterios</button>
+              </div>
+            } @else {
+              <p class="muted">Aún no hay criterios definidos para este tema.</p>
+              <div class="notes-actions">
+                <button type="button" [disabled]="estadoCriterios() === 'guardando'" (click)="entrarModoEdicionCriterios()">Definir criterios</button>
               </div>
             }
-            <button
-              type="button"
-              [disabled]="!criteriosListosParaGuardar() || estadoCriterios() === 'guardando'"
-              (click)="definirCriterios()"
-            >
-              {{ estadoCriterios() === 'guardando' ? 'Actualizando...' : 'Definir criterios' }}
-            </button>
             @if (errorCriterios()) {
-              <p class="error-text" role="alert">{{ errorCriterios() }}</p>
+              <p class="error-text" role="alert" aria-live="polite">{{ errorCriterios() }}</p>
             }
-          </div>
+          } @else {
+            <div class="criteria-editor" aria-label="Editar criterios del tema">
+              @for (tipo of tiposCriterio; track tipo) {
+                <div class="criteria-editor-row">
+                  <label class="criteria-toggle" [attr.for]="criterioCheckboxId(tipo)">
+                    <input
+                      [id]="criterioCheckboxId(tipo)"
+                      type="checkbox"
+                      [checked]="criterioEstaSeleccionado(tipo)"
+                      [disabled]="estadoCriterios() === 'guardando'"
+                      (change)="onCriterioSeleccionChange(tipo, $event)"
+                    />
+                    <span>{{ tipo }}</span>
+                    <small>Este criterio forma parte del Tema</small>
+                  </label>
+                  @if (criterioEstaSeleccionado(tipo)) {
+                    <label class="criteria-description-field" [attr.for]="criterioTextareaId(tipo)">
+                      <span>Descripción</span>
+                      <textarea
+                        [id]="criterioTextareaId(tipo)"
+                        rows="4"
+                        [value]="descripcionCriterio(tipo)"
+                        [disabled]="estadoCriterios() === 'guardando'"
+                        [attr.aria-invalid]="descripcionCriterioInvalida(tipo)"
+                        [attr.maxlength]="descripcionCriterioMaxLength + 1"
+                        (input)="onDescripcionCriterioInput(tipo, $event)"
+                        placeholder="Objetivo observable para este criterio"
+                      ></textarea>
+                    </label>
+                    @if (descripcionCriterio(tipo).trim().length > descripcionCriterioMaxLength) {
+                      <p class="error-text" aria-live="polite">La descripción no puede superar 500 caracteres.</p>
+                    }
+                  }
+                </div>
+              }
+              <div class="notes-actions">
+                <button type="button" [disabled]="estadoCriterios() === 'guardando'" (click)="cancelarEdicionCriterios()">Cancelar</button>
+                <button
+                  type="button"
+                  [disabled]="!criteriosListosParaGuardar() || estadoCriterios() === 'guardando'"
+                  (click)="definirCriterios()"
+                >
+                  {{ estadoCriterios() === 'guardando' ? 'Guardando...' : 'Guardar cambios' }}
+                </button>
+              </div>
+              @if (errorCriterios()) {
+                <p class="error-text" role="alert" aria-live="polite">{{ errorCriterios() }}</p>
+              }
+            </div>
+          }
         </section>
 
         <section class="content-block notes-block">

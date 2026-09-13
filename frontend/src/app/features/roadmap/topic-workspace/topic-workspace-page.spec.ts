@@ -217,6 +217,19 @@ describe('TopicWorkspacePage', () => {
     expect(text).toContain('Pendiente');
   });
 
+  it('muestra criterios en view mode sin textareas de criterios', async () => {
+    await configure({ obtenerWorkspace: () => of(workspaceBase), listarHerramientas: () => of([]) });
+
+    fixture = TestBed.createComponent(TopicWorkspacePage);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Criterios de dominio');
+    expect(fixture.nativeElement.textContent).toContain('Editar criterios');
+    expect(fixture.nativeElement.querySelector('.criteria-list')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.criteria-editor')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.criteria-editor textarea')).toBeNull();
+  });
+
   it('muestra EnRepaso con progreso 100 sin tratarlo como reinicio', async () => {
     await configure({ obtenerWorkspace: () => of(workspaceBase), listarHerramientas: () => of([]) });
 
@@ -301,11 +314,13 @@ describe('TopicWorkspacePage', () => {
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('Este tema todavia no tiene objetivos definidos.');
     expect(text).toContain('Aún no hay criterios definidos para este tema.');
+    expect(text).toContain('Definir criterios');
     expect(text).toContain('Dificultad no definida');
     expect(text).toContain('Confianza no definida');
     expect(text).toContain('0 recursos vinculados');
     expect(text).toContain('Sin evidence vinculada');
     expect(text).toContain('Sin certificaciones relacionadas.');
+    expect(fixture.nativeElement.querySelector('.criteria-editor')).toBeNull();
   });
 
   it('muestra apuntes existentes y estado dirty al editar', async () => {
@@ -340,7 +355,7 @@ describe('TopicWorkspacePage', () => {
     textarea.dispatchEvent(new Event('input'));
     fixture.detectChanges();
 
-    fixture.nativeElement.querySelector('.notes-actions button').click();
+    fixture.nativeElement.querySelector('.notes-block .notes-actions button').click();
     fixture.detectChanges();
 
     expect(guardarApuntes).toHaveBeenCalledWith(temaId, 'Nuevo apunte');
@@ -362,7 +377,7 @@ describe('TopicWorkspacePage', () => {
     textarea.dispatchEvent(new Event('input'));
     fixture.detectChanges();
 
-    fixture.nativeElement.querySelector('.notes-actions button').click();
+    fixture.nativeElement.querySelector('.notes-block .notes-actions button').click();
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('No pudimos guardar los apuntes.');
@@ -472,6 +487,8 @@ describe('TopicWorkspacePage', () => {
 
     fixture = TestBed.createComponent(TopicWorkspacePage);
     fixture.detectChanges();
+    fixture.nativeElement.querySelector('.content-block:nth-of-type(2) .notes-actions button').click();
+    fixture.detectChanges();
     const checks = fixture.nativeElement.querySelectorAll('.criteria-editor input') as NodeListOf<HTMLInputElement>;
     checks[0].click();
     checks[1].click();
@@ -482,7 +499,8 @@ describe('TopicWorkspacePage', () => {
     descripciones[1].value = 'Diagnosticar red.';
     descripciones[1].dispatchEvent(new Event('input'));
     fixture.detectChanges();
-    fixture.nativeElement.querySelector('.criteria-editor button').click();
+    const botonesEditor = fixture.nativeElement.querySelectorAll('.criteria-editor button') as NodeListOf<HTMLButtonElement>;
+    botonesEditor[1].click();
     fixture.detectChanges();
 
     expect(definirCriterios).toHaveBeenCalledWith(temaId, [
@@ -493,6 +511,7 @@ describe('TopicWorkspacePage', () => {
     expect(fixture.nativeElement.textContent).toContain('Teoria');
     expect(fixture.nativeElement.textContent).toContain('Explicar OSI.');
     expect(fixture.nativeElement.textContent).toContain('0%');
+    expect(fixture.nativeElement.querySelector('.criteria-editor')).toBeNull();
   });
 
   it('no permite definir criterios seleccionados sin descripcion', async () => {
@@ -507,14 +526,63 @@ describe('TopicWorkspacePage', () => {
 
     fixture = TestBed.createComponent(TopicWorkspacePage);
     fixture.detectChanges();
+    fixture.nativeElement.querySelector('.content-block:nth-of-type(2) .notes-actions button').click();
+    fixture.detectChanges();
     const checks = fixture.nativeElement.querySelectorAll('.criteria-editor input') as NodeListOf<HTMLInputElement>;
     checks[0].click();
     checks[1].click();
     fixture.detectChanges();
 
-    const boton = fixture.nativeElement.querySelector('.criteria-editor button') as HTMLButtonElement;
-    expect(boton.disabled).toBe(true);
-    boton.click();
+    const botones = fixture.nativeElement.querySelectorAll('.criteria-editor button') as NodeListOf<HTMLButtonElement>;
+    expect(botones[1].disabled).toBe(true);
+    botones[1].click();
+    expect(definirCriterios).not.toHaveBeenCalled();
+  });
+
+  it('entra a edit mode desde view mode y Cancelar descarta cambios locales', async () => {
+    const definirCriterios = vi.fn(() => of(undefined));
+    await configure({ obtenerWorkspace: () => of(workspaceBase), definirCriterios, listarHerramientas: () => of([]) });
+
+    fixture = TestBed.createComponent(TopicWorkspacePage);
+    fixture.detectChanges();
+
+    fixture.nativeElement.querySelector('.content-block:nth-of-type(2) .notes-actions button').click();
+    fixture.detectChanges();
+
+    const textarea = fixture.nativeElement.querySelector('.criteria-editor textarea') as HTMLTextAreaElement;
+    expect(textarea.value).toBe('Explicar las capas del modelo OSI y su relacion con TCP/IP.');
+    textarea.value = 'Cambio local sin guardar';
+    textarea.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    const botones = fixture.nativeElement.querySelectorAll('.criteria-editor button') as NodeListOf<HTMLButtonElement>;
+    botones[0].click();
+    fixture.detectChanges();
+
+    expect(definirCriterios).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.querySelector('.criteria-editor')).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Explicar las capas del modelo OSI y su relacion con TCP/IP.');
+    expect(fixture.nativeElement.textContent).not.toContain('Cambio local sin guardar');
+  });
+
+  it('no permite guardar descripcion mayor a 500 caracteres', async () => {
+    const definirCriterios = vi.fn(() => of(undefined));
+    await configure({ obtenerWorkspace: () => of(workspaceBase), definirCriterios, listarHerramientas: () => of([]) });
+
+    fixture = TestBed.createComponent(TopicWorkspacePage);
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('.content-block:nth-of-type(2) .notes-actions button').click();
+    fixture.detectChanges();
+
+    const textarea = fixture.nativeElement.querySelector('.criteria-editor textarea') as HTMLTextAreaElement;
+    textarea.value = 'x'.repeat(501);
+    textarea.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    const botones = fixture.nativeElement.querySelectorAll('.criteria-editor button') as NodeListOf<HTMLButtonElement>;
+    expect(botones[1].disabled).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('La descripción no puede superar 500 caracteres.');
+    botones[1].click();
     expect(definirCriterios).not.toHaveBeenCalled();
   });
 
@@ -578,6 +646,8 @@ describe('TopicWorkspacePage', () => {
 
     fixture = TestBed.createComponent(TopicWorkspacePage);
     fixture.detectChanges();
+    fixture.nativeElement.querySelector('.content-block:nth-of-type(2) .notes-actions button').click();
+    fixture.detectChanges();
     const checks = fixture.nativeElement.querySelectorAll('.criteria-editor input') as NodeListOf<HTMLInputElement>;
     checks[0].click();
     checks[1].click();
@@ -588,11 +658,13 @@ describe('TopicWorkspacePage', () => {
     descripciones[1].value = 'Aplicar practica.';
     descripciones[1].dispatchEvent(new Event('input'));
     fixture.detectChanges();
-    fixture.nativeElement.querySelector('.criteria-editor button').click();
+    const botones = fixture.nativeElement.querySelectorAll('.criteria-editor button') as NodeListOf<HTMLButtonElement>;
+    botones[1].click();
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('No pudimos definir los criterios.');
-    expect(fixture.nativeElement.textContent).toContain('Aún no hay criterios definidos para este tema.');
+    expect(fixture.nativeElement.querySelector('.criteria-editor')).not.toBeNull();
+    expect((fixture.nativeElement.querySelector('.criteria-editor textarea') as HTMLTextAreaElement).value).toBe('Explicar teoria.');
   });
 
   it('agrega herramienta y actualiza la lista al confirmar API', async () => {

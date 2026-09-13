@@ -29,6 +29,7 @@ type EstadoCertificaciones = 'idle' | 'guardando' | 'error';
 export class TopicWorkspacePage implements OnInit {
   protected readonly etiquetaEstadoTema = etiquetaEstadoTema;
   protected readonly tiposCriterio = tiposCriterioTema;
+  protected readonly descripcionCriterioMaxLength = 500;
   private readonly destroyRef = inject(DestroyRef);
   private solicitudWorkspace?: Subscription;
   private cambioTema = 0;
@@ -49,6 +50,7 @@ export class TopicWorkspacePage implements OnInit {
   protected readonly errorHerramientas = signal<string | null>(null);
   protected readonly criteriosSeleccionados = signal<TipoCriterioTema[]>([]);
   protected readonly descripcionesCriterios = signal<Record<TipoCriterioTema, string>>(this.crearDescripcionesVacias());
+  protected readonly modoEdicionCriterios = signal(false);
   protected readonly estadoCriterios = signal<EstadoCriterios>('idle');
   protected readonly errorCriterios = signal<string | null>(null);
   protected readonly certificacionesDisponibles = signal<CertificacionCatalogo[]>([]);
@@ -107,6 +109,7 @@ export class TopicWorkspacePage implements OnInit {
       this.errorHerramientas.set(null);
       this.criteriosSeleccionados.set([]);
       this.descripcionesCriterios.set(this.crearDescripcionesVacias());
+      this.modoEdicionCriterios.set(false);
       this.estadoCriterios.set('idle');
       this.errorCriterios.set(null);
       this.filtroCertificacion.set('');
@@ -247,13 +250,53 @@ export class TopicWorkspacePage implements OnInit {
     const seleccionados = this.criteriosSeleccionados();
 
     return seleccionados.length >= 2
-      && seleccionados.every((tipo) => this.descripcionCriterio(tipo).trim().length > 0);
+      && seleccionados.every((tipo) => {
+        const descripcion = this.descripcionCriterio(tipo).trim();
+
+        return descripcion.length > 0 && descripcion.length <= this.descripcionCriterioMaxLength;
+      });
+  }
+
+  protected entrarModoEdicionCriterios(): void {
+    this.restaurarBorradorCriteriosDesdeWorkspace();
+    this.modoEdicionCriterios.set(true);
+    this.estadoCriterios.set('idle');
+    this.errorCriterios.set(null);
+  }
+
+  protected cancelarEdicionCriterios(): void {
+    if (this.estadoCriterios() === 'guardando') {
+      return;
+    }
+
+    this.restaurarBorradorCriteriosDesdeWorkspace();
+    this.modoEdicionCriterios.set(false);
+    this.estadoCriterios.set('idle');
+    this.errorCriterios.set(null);
+  }
+
+  protected descripcionCriterioInvalida(tipo: TipoCriterioTema): boolean {
+    if (!this.criterioEstaSeleccionado(tipo)) {
+      return false;
+    }
+
+    const longitud = this.descripcionCriterio(tipo).trim().length;
+
+    return longitud === 0 || longitud > this.descripcionCriterioMaxLength;
+  }
+
+  protected criterioCheckboxId(tipo: TipoCriterioTema): string {
+    return `criterio-${tipo}-seleccion`;
+  }
+
+  protected criterioTextareaId(tipo: TipoCriterioTema): string {
+    return `criterio-${tipo}-descripcion`;
   }
 
   protected definirCriterios(): void {
     const temaId = this.temaId();
 
-    if (!temaId || this.estadoCriterios() === 'guardando') {
+    if (!temaId || this.estadoCriterios() === 'guardando' || !this.criteriosListosParaGuardar()) {
       return;
     }
 
@@ -267,7 +310,10 @@ export class TopicWorkspacePage implements OnInit {
     }));
 
     this.workspaceService.definirCriterios(temaId, criterios).subscribe({
-      next: () => this.recargarWorkspaceTrasAccion(cambioTema, () => this.estadoCriterios.set('idle')),
+      next: () => this.recargarWorkspaceTrasAccion(cambioTema, () => {
+        this.modoEdicionCriterios.set(false);
+        this.estadoCriterios.set('idle');
+      }),
       error: (error: Error) => {
         if (cambioTema !== this.cambioTema) return;
         this.errorCriterios.set(error.message);
@@ -543,19 +589,9 @@ export class TopicWorkspacePage implements OnInit {
 
   private aplicarWorkspace(workspace: TemaWorkspaceV1, sincronizarApuntes: boolean): void {
     this.workspace.set(workspace);
-    this.criteriosSeleccionados.set(
-      workspace.tema.criterios
-        .map((criterio) => criterio.tipo)
-        .filter((tipo): tipo is TipoCriterioTema => this.esTipoCriterioTema(tipo)),
-    );
-    this.descripcionesCriterios.set({
-      ...this.crearDescripcionesVacias(),
-      ...Object.fromEntries(
-        workspace.tema.criterios
-          .filter((criterio) => this.esTipoCriterioTema(criterio.tipo))
-          .map((criterio) => [criterio.tipo, criterio.descripcion ?? '']),
-      ),
-    });
+    if (!this.modoEdicionCriterios()) {
+      this.restaurarBorradorCriteriosDesdeWorkspace(workspace);
+    }
 
     if (sincronizarApuntes) {
       this.borradorApuntes.set(workspace.apuntes.contenido);
@@ -606,6 +642,24 @@ export class TopicWorkspacePage implements OnInit {
 
   private esTipoCriterioTema(tipo: string): tipo is TipoCriterioTema {
     return (this.tiposCriterio as readonly string[]).includes(tipo);
+  }
+
+  private restaurarBorradorCriteriosDesdeWorkspace(workspace = this.workspace()): void {
+    const criterios = workspace?.tema.criterios ?? [];
+
+    this.criteriosSeleccionados.set(
+      criterios
+        .map((criterio) => criterio.tipo)
+        .filter((tipo): tipo is TipoCriterioTema => this.esTipoCriterioTema(tipo)) ?? [],
+    );
+    this.descripcionesCriterios.set({
+      ...this.crearDescripcionesVacias(),
+      ...Object.fromEntries(
+        criterios
+          .filter((criterio) => this.esTipoCriterioTema(criterio.tipo))
+          .map((criterio) => [criterio.tipo, criterio.descripcion ?? '']),
+      ),
+    });
   }
 
   private crearDescripcionesVacias(): Record<TipoCriterioTema, string> {
